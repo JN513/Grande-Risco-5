@@ -13,13 +13,12 @@ module Grande_Risco5 #(
     // Data BUS
     output wire data_memory_read,
     output wire data_memory_write,
-    output wire [1:0] data_option,
     input  wire [31:0] read_data,
     output wire [31:0] data_address,
     output wire [31:0] write_data
 );
 
-localparam NOP              = 32'h00000013;
+localparam NOP              = 32'h00000000;
 localparam LW_OPCODE        = 7'b0000011;
 localparam SW_OPCODE        = 7'b0100011;
 localparam JAL_OPCODE       = 7'b1101111;
@@ -29,19 +28,26 @@ localparam JALR_OPCODE      = 7'b1100111;
 localparam AUIPC_OPCODE     = 7'b0010111;
 localparam BRANCH_OPCODE    = 7'b1100011;
 localparam IMMEDIATE_OPCODE = 7'b0010011;
+localparam RTYPE_OPCODE     = 7'b0110011;
 
-reg Zero_EXMEMB;
+reg Zero_EXMEMB, mem_to_reg, reg_write, memory_write;
 
 // PC, IDEX Rs1 value, IDEX Rs2 value, Value to Memory, Value to write back register
-reg [31:0] PC, IDEXA, IDEXB, EXMEMB, EXMEMALUOut,
-    MEMWBValue, IFIDPC, IDEXPC, IMMEDIATE_REG,
+reg [31:0] PC, IDEXA, IDEXB,
+    IFIDPC, IDEXPC, IMMEDIATE_REG,
     BRANCH_ADDRESS;
 
-wire zero, is_immediate, reg_write, stall, takebranch;
-wire [1:0] aluop, alu_src_a, alu_src_b;
+reg [31:0] EXMEM_mem_data_value, EXMEMB, EXMEMALUOut;
+
+reg [31:0] MEMWB_mem_read_data, MEMWBALUOut;
+
+reg [1:0] aluop;
+
+wire zero, is_immediate, stall, takebranch;
+wire [1:0] op_rs1, op_rs2;
 wire [3:0] aluop_out;
 wire [31:0] alu_input_a, alu_input_b, alu_out, immediate, 
-    register_data_1_out, register_data_2_out;
+    register_data_1_out, register_data_2_out, MEMWBValue;
 
 
 // Pipeline instruction register
@@ -70,14 +76,20 @@ initial begin
 end
 
 always @(posedge clk ) begin
+    memory_write <= 1'b0;
+    reg_write <= 1'b0;
+    mem_to_reg <= 1'b0;
+
     if(reset == 1'b1) begin
         PC <= BOOT_ADDRESS;
         IFIDIR <= NOP; 
         IDEXIR <= NOP; 
         EXMEMIR <= NOP; 
         MEMWBIR <= NOP;
+        memory_write <= 1'b0;
+        reg_write <= 1'b0;
     end else begin
-        // Instruction Fetch - first stage
+        // Instruction Fetch - first stage / IFID
         if(takebranch == 1'b1) begin
             IFIDIR <= NOP;
             PC <= BRANCH_ADDRESS; // imediato
@@ -87,19 +99,60 @@ always @(posedge clk ) begin
         end
 
 
-        // Instruction Decode - second stage
+        // Instruction Decode - second stage / IDEX
+        if(IFIDop == BRANCH_OPCODE)
+            aluop <= 2'b01;
+        else if(IFIDop == IMMEDIATE_OPCODE || 
+                IFIDop == CSR_OPCODE || 
+                IFIDop == LUI_OPCODE || 
+                IFIDop == AUIPC_OPCODE)
+            aluop <= 2'b10;
+        else
+            aluop <= 2'b00;
 
-        IDEXA <= register_data_1_out; 
-        IDEXB <= register_data_2_out;
-        IDEXIR <= IFIDIR;
+        if(0) begin
+            IDEXIR <= NOP;
+        end else begin
+            IDEXA <= register_data_1_out; 
+            IDEXB <= register_data_2_out;
+            IDEXIR <= IFIDIR;
+        end
 
 
-        // Instruction Execute - third stage
-        EXMEMIR <= IDEXIR;
+        // Instruction Execute - third stage / EXMEM
+        if(0) begin
+            EXMEMIR <= NOP;
+        end else begin
+            EXMEMIR <= IDEXIR;
 
-        // Memory access - four stage
+            EXMEM_mem_data_value <= alu_input_b;
+            EXMEMALUOut <= alu_out;
+
+            if(IDEXop == SW_OPCODE) begin // verifica se tem mem
+                memory_write <= 1'b1;
+            end
+        end
+
+        // Memory access - four stage / MEMWB
 
         MEMWBIR <= EXMEMIR;
+        MEMWB_mem_read_data <= read_data;
+        MEMWBALUOut <= EXMEMALUOut;
+
+        if ((EXMEMop == RTYPE_OPCODE || 
+            EXMEMop == IMMEDIATE_OPCODE || 
+            EXMEMop == AUIPC_OPCODE || 
+            EXMEMop == CSR_OPCODE || 
+            EXMEMop == LUI_OPCODE || 
+            EXMEMop == LW_OPCODE) && (EXMEMrd != 'd0)) 
+        begin
+            // verifica se tem wb
+            reg_write <= 1'b1;
+        end
+
+        if(EXMEMop == LW_OPCODE) begin 
+            mem_to_reg <= 1'b1;
+        end
 
         // wb stage - five stage
     end
@@ -154,13 +207,42 @@ Immediate_Generator Immediate_Generator(
     .immediate(immediate)
 );
 
+Forwarding_Unit Forwarding_Unit(
+    .immediate(is_immediate),
+    .pc_operation(IDEXop == AUIPC_OPCODE),
+    .rs1(IDEXrs1),
+    .rs2(IDEXrs2),
+    .ex_mem_stage_rd(EXMEMrd),
+    .mem_wb_stage_rd(MEMWBrd),
+    .op_rs1(op_rs1),
+    .op_rs2(op_rs2)
+);
+
+MUX ForwardAMUX(
+    .option(op_rs1),
+    .A(IDEXA),
+    .B(MEMWBValue),
+    .C(EXMEMALUOut),
+    .D(IDEXPC),
+    .S(alu_input_a)
+);
+
+MUX ForwardBMUX(
+    .option(op_rs2),
+    .A(IDEXB),
+    .B(MEMWBValue),
+    .C(EXMEMALUOut),
+    .D(IMMEDIATE_REG),
+    .S(alu_input_b)
+);
+/*
 MUX AluInputAMUX(
     .option(alu_src_a),
     .A(IDEXA),
     .B(),
     .C(IDEXPC),
     .D(32'd0),
-    .S(alu_input_a)
+    .S()
 );
 
 MUX AluInputBMUX(
@@ -169,12 +251,12 @@ MUX AluInputBMUX(
     .B(IMMEDIATE_REG),
     .C(),
     .D(),
-    .S(alu_input_b)
+    .S()
 );
-
+*/
 assign is_branch = (EXMEMop == BRANCH_OPCODE) ? 1'b1 : 1'b0;
 assign takebranch = (Zero_EXMEMB && is_branch);
-assign instruction_address = {2'b00, PC[31:2]};
+assign instruction_address = PC;
 assign IFIDop = IFIDIR[6:0];
 assign IFIDrs1 = IFIDIR[19:15];
 assign IFIDrs2 = IFIDIR[24:20];
@@ -185,5 +267,13 @@ assign EXMEMop = EXMEMIR[6:0];
 assign EXMEMrd = EXMEMIR[11:7];
 assign MEMWBop = MEMWBIR[6:0];
 assign MEMWBrd = MEMWBIR[11:7];
-    
+
+assign MEMWBValue = (mem_to_reg == 1'b1) ? MEMWB_mem_read_data : MEMWBALUOut;
+
+assign write_data = EXMEM_mem_data_value;
+assign data_address = EXMEMALUOut;
+assign data_memory_write = memory_write;
+
+assign is_immediate = (IDEXop == IMMEDIATE_OPCODE) ? 1'b1 : 1'b0;
+
 endmodule

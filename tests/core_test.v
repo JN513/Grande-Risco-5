@@ -8,13 +8,22 @@ wire data_read, data_write;
 
 always #1 clk = ~clk;
 
+reg instruction_response, data_memory_response;
+
+always @(posedge clk ) begin
+    data_memory_response <= 1'b1;
+    instruction_response <= 1'b1;
+end
+
 Grande_Risco5 Core(
     .clk(clk),
     .reset(reset),
 
+    .instruction_response(instruction_response),
     .instruction_address(instruction_address),
     .instruction_data(instruction_data),
 
+    .data_memory_response(data_memory_response),
     .data_address(data_address),
     .data_memory_read(data_read),
     .data_memory_write(data_write),
@@ -40,7 +49,7 @@ Memory #(
 ) data_memory(
     .clk(clk),
     .address(data_address),
-    .read_data(data_write_data),
+    .read_data(data_read_data),
     .memory_read(data_read),
     .memory_write(data_write),
     .write_data(data_write_data)
@@ -50,6 +59,7 @@ initial begin
     $dumpfile("build/core.vcd");
     $dumpvars;
 
+    instruction_response = 1'b0;
     clk = 1'b0;
     reset = 1'b1;
     #6

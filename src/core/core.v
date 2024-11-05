@@ -7,10 +7,12 @@ module Grande_Risco5 #(
 
     // Instruction BUS
 
+    input wire instruction_response,
     input wire [31:0] instruction_data,
     output wire [31:0] instruction_address,
 
     // Data BUS
+    input  wire data_memory_response,
     output wire data_memory_read,
     output wire data_memory_write,
     input  wire [31:0] read_data,
@@ -18,7 +20,7 @@ module Grande_Risco5 #(
     output wire [31:0] write_data
 );
 
-localparam NOP              = 32'h00000000;
+localparam NOP              = 32'h00000033; // add x0, x0, x0
 localparam LW_OPCODE        = 7'b0000011;
 localparam SW_OPCODE        = 7'b0100011;
 localparam JAL_OPCODE       = 7'b1101111;
@@ -30,7 +32,8 @@ localparam BRANCH_OPCODE    = 7'b1100011;
 localparam IMMEDIATE_OPCODE = 7'b0010011;
 localparam RTYPE_OPCODE     = 7'b0110011;
 
-reg Zero_EXMEMB, mem_to_reg, reg_write, memory_write;
+reg Zero_EXMEMB, mem_to_reg, reg_write, memory_write, memory_read, is_immediate,
+    execute_stall, memory_stall, flush;
 
 // PC, IDEX Rs1 value, IDEX Rs2 value, Value to Memory, Value to write back register
 reg [31:0] PC, IDEXA, IDEXB,
@@ -43,18 +46,20 @@ reg [31:0] MEMWB_mem_read_data, MEMWBALUOut;
 
 reg [1:0] aluop;
 
-wire zero, is_immediate, stall, takebranch;
+wire zero, stall, takebranch;
 wire [1:0] op_rs1, op_rs2;
 wire [3:0] aluop_out;
 wire [31:0] alu_input_a, alu_input_b, alu_out, immediate, 
     register_data_1_out, register_data_2_out, MEMWBValue;
+wire [31:0] forward_out_a, forward_out_b;
 
 
-// Pipeline instruction register
-// Instruction Fetch - Instruction Decode Register
-// Instruction Decode - Instruction Execute Register
-// Instruction Execute - Instruction Memory Access Register
-// Instruction Memory Access - Instruction Write back register
+// Pipeline States
+// Instruction Fetch
+// Instruction Decode
+// Instruction Execute
+// Instruction Memory Access
+// Instruction WB
 
 reg [31:0] IFIDIR, IDEXIR, EXMEMIR, MEMWBIR; // pipeline instruction registers
 
@@ -62,44 +67,37 @@ wire [4:0] IFIDrs1, IFIDrs2, IDEXrs1, IDEXrs2, EXMEMrd, MEMWBrd; // Access regis
 
 wire [6:0] IFIDop, IDEXop, EXMEMop, MEMWBop; // Access opcodes
 
-initial begin
-    PC = BOOT_ADDRESS;
-    IFIDIR = NOP; 
-    IDEXIR = NOP; 
-    EXMEMIR = NOP; 
-    MEMWBIR = NOP;
-
-    Zero_EXMEMB = 1'b0;
-    IFIDPC = BOOT_ADDRESS;
-    IDEXPC = BOOT_ADDRESS;
-    IMMEDIATE_REG = 32'h00000000;
-end
-
-always @(posedge clk ) begin
-    memory_write <= 1'b0;
-    reg_write <= 1'b0;
-    mem_to_reg <= 1'b0;
-
+always @(posedge clk ) begin // IF/ID
+    Zero_EXMEMB    <= zero;
     if(reset == 1'b1) begin
         PC <= BOOT_ADDRESS;
-        IFIDIR <= NOP; 
-        IDEXIR <= NOP; 
-        EXMEMIR <= NOP; 
-        MEMWBIR <= NOP;
-        memory_write <= 1'b0;
-        reg_write <= 1'b0;
+        IFIDIR <= NOP;
     end else begin
-        // Instruction Fetch - first stage / IFID
-        if(takebranch == 1'b1) begin
+        if(instruction_response == 1'b0 || flush == 1'b1) begin //instruction_response == 1'b0
             IFIDIR <= NOP;
-            PC <= BRANCH_ADDRESS; // imediato
         end else begin
-            IFIDIR <= instruction_data;
-            PC <= PC + 'd4;
+            if (memory_stall == 1'b0 && execute_stall == 1'b0) begin
+                if(takebranch == 1'b1) begin
+                    IFIDIR         <= NOP;
+                    PC             <= IMMEDIATE_REG + IDEXPC; // imediato
+                    IFIDPC         <= BOOT_ADDRESS;
+                end else begin
+                    IFIDIR         <= instruction_data;
+                    PC             <= PC + 'd4;
+                    IFIDPC         <= PC;
+                end
+            end
         end
+    end  
+end
 
+always @(posedge clk ) begin // ID/EX
+    IMMEDIATE_REG <= immediate;
+    execute_stall <= 1'b0;
 
-        // Instruction Decode - second stage / IDEX
+    if(reset == 1'b1 || flush == 1'b1) begin
+        IDEXIR <= NOP;
+    end else begin
         if(IFIDop == BRANCH_OPCODE)
             aluop <= 2'b01;
         else if(IFIDop == IMMEDIATE_OPCODE || 
@@ -110,34 +108,65 @@ always @(posedge clk ) begin
         else
             aluop <= 2'b00;
 
-        if(0) begin
-            IDEXIR <= NOP;
-        end else begin
+        if(memory_stall == 1'b0 && execute_stall == 1'b0) begin
             IDEXA <= register_data_1_out; 
             IDEXB <= register_data_2_out;
             IDEXIR <= IFIDIR;
+            IDEXPC <= IFIDPC;
         end
+    end
+end
 
+always @(posedge clk ) begin // EX/MEM
+    memory_write <= 1'b0;
+    memory_read  <= 1'b0;
+    memory_stall <= 1'b0;
+    flush        <= 1'b0;
 
-        // Instruction Execute - third stage / EXMEM
-        if(0) begin
+    if(reset == 1'b1) begin
+        EXMEMIR <= NOP; 
+    end else begin
+        if(execute_stall) begin
             EXMEMIR <= NOP;
         end else begin
-            EXMEMIR <= IDEXIR;
+            if(memory_stall == 1'b0) begin
+                EXMEMIR <= IDEXIR;
 
-            EXMEM_mem_data_value <= alu_input_b;
-            EXMEMALUOut <= alu_out;
+                EXMEM_mem_data_value <= forward_out_b;
+                EXMEMALUOut <= alu_out; 
 
-            if(IDEXop == SW_OPCODE) begin // verifica se tem mem
-                memory_write <= 1'b1;
+                if(IDEXop == LW_OPCODE) begin
+                    memory_read <= 1'b1;
+                    memory_stall <= ~data_memory_response;
+                end
+                if(IDEXop == SW_OPCODE) begin // verifica se tem mem
+                    memory_write <= 1'b1;
+                    memory_stall <= ~data_memory_response;
+                end 
+            end else begin
+                if(IDEXop == SW_OPCODE) begin // verifica se tem mem
+                    memory_stall <= ~data_memory_response;
+                end 
+                if(IDEXop == LW_OPCODE) begin
+                    memory_stall <= ~data_memory_response;
+                end 
             end
         end
+    end   
+end
 
-        // Memory access - four stage / MEMWB
+always @(posedge clk ) begin // MEM/WB
+    reg_write    <= 1'b0;
+    mem_to_reg   <= 1'b0;
 
+    if(reset == 1'b1 | memory_stall == 1'b1) begin
+        MEMWBIR <= NOP;
+    end else begin // memory_stall == 1'b1
         MEMWBIR <= EXMEMIR;
         MEMWB_mem_read_data <= read_data;
         MEMWBALUOut <= EXMEMALUOut;
+
+        // wb stage - five stage
 
         if ((EXMEMop == RTYPE_OPCODE || 
             EXMEMop == IMMEDIATE_OPCODE || 
@@ -153,30 +182,24 @@ always @(posedge clk ) begin
         if(EXMEMop == LW_OPCODE) begin 
             mem_to_reg <= 1'b1;
         end
-
-        // wb stage - five stage
-    end
+    end   
 end
 
-always @(posedge clk) begin
-    if(reset == 1'b1) begin
-        Zero_EXMEMB <= 1'b0;
-        IFIDPC <= BOOT_ADDRESS;
-        IDEXPC <= BOOT_ADDRESS;
-        IMMEDIATE_REG <= 32'h00000000;
-        BRANCH_ADDRESS <= BOOT_ADDRESS;
-    end else begin
-        Zero_EXMEMB <= zero;
-        IFIDPC <= PC;
-        IDEXPC <= IFIDPC;
-        IMMEDIATE_REG <= immediate;
-        BRANCH_ADDRESS <= IMMEDIATE_REG + IDEXPC;
-    end
+always @(*) begin
+    case (IDEXop)
+        IMMEDIATE_OPCODE: is_immediate = 1'b1; // Tipo I: instruções com imediato (e.g., ADDI, SLTI)
+        LW_OPCODE:        is_immediate = 1'b1; // Tipo I: Load Word, precisa de imediato para o offset
+        SW_OPCODE:        is_immediate = 1'b1; // Tipo S: Store Word, precisa de imediato para o offset
+        AUIPC_OPCODE:     is_immediate = 1'b1; // Tipo U: Adiciona o imediato ao PC
+        JALR_OPCODE:      is_immediate = 1'b1; // Tipo I: Jump And Link Register, usa imediato para o cálculo de endereço
+        LUI_OPCODE:       is_immediate = 1'b1; // Tipo U: Load Upper Immediate, carrega um imediato na parte superior do registrador
+        CSR_OPCODE:       is_immediate = 1'b1; // Tipo I: instruções CSR que usam imediato (e.g., CSRRWI)
+        default:          is_immediate = 1'b0; // Instruções que não usam imediato
+    endcase
 end
 
 Registers RegisterBank(
     .clk(clk),
-    .reset(reset),
     .regWrite(reg_write),
     .readRegister1(IFIDrs1),
     .readRegister2(IFIDrs2),
@@ -208,8 +231,6 @@ Immediate_Generator Immediate_Generator(
 );
 
 Forwarding_Unit Forwarding_Unit(
-    .immediate(is_immediate),
-    .pc_operation(IDEXop == AUIPC_OPCODE),
     .rs1(IDEXrs1),
     .rs2(IDEXrs2),
     .ex_mem_stage_rd(EXMEMrd),
@@ -218,22 +239,26 @@ Forwarding_Unit Forwarding_Unit(
     .op_rs2(op_rs2)
 );
 
+
 MUX ForwardAMUX(
     .option(op_rs1),
     .A(IDEXA),
     .B(MEMWBValue),
     .C(EXMEMALUOut),
-    .D(IDEXPC),
-    .S(alu_input_a)
+    //.D(IDEXPC),
+    .S(forward_out_a)
 );
+
+//.immediate(is_immediate),
+//.pc_operation(IDEXop == AUIPC_OPCODE),
 
 MUX ForwardBMUX(
     .option(op_rs2),
     .A(IDEXB),
     .B(MEMWBValue),
     .C(EXMEMALUOut),
-    .D(IMMEDIATE_REG),
-    .S(alu_input_b)
+    //.D(IMMEDIATE_REG),
+    .S(forward_out_b)
 );
 /*
 MUX AluInputAMUX(
@@ -267,13 +292,15 @@ assign EXMEMop = EXMEMIR[6:0];
 assign EXMEMrd = EXMEMIR[11:7];
 assign MEMWBop = MEMWBIR[6:0];
 assign MEMWBrd = MEMWBIR[11:7];
+assign data_memory_read = memory_read;
+assign data_memory_write = memory_write;
 
 assign MEMWBValue = (mem_to_reg == 1'b1) ? MEMWB_mem_read_data : MEMWBALUOut;
 
 assign write_data = EXMEM_mem_data_value;
 assign data_address = EXMEMALUOut;
-assign data_memory_write = memory_write;
 
-assign is_immediate = (IDEXop == IMMEDIATE_OPCODE) ? 1'b1 : 1'b0;
+assign alu_input_a = (IDEXop == AUIPC_OPCODE) ? IDEXPC : forward_out_a;
+assign alu_input_b = (is_immediate == 1'b1) ? IMMEDIATE_REG : forward_out_b;
 
 endmodule

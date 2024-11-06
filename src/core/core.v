@@ -67,20 +67,23 @@ wire [4:0] IFIDrs1, IFIDrs2, IDEXrs1, IDEXrs2, EXMEMrd, MEMWBrd; // Access regis
 
 wire [6:0] IFIDop, IDEXop, EXMEMop, MEMWBop; // Access opcodes
 
+reg [31:0] teste, teste2;
+
 always @(posedge clk ) begin // IF/ID
-    Zero_EXMEMB    <= zero;
+    Zero_EXMEMB <= zero;
+    teste <= IMMEDIATE_REG + IDEXPC;
     if(reset == 1'b1) begin
         PC <= BOOT_ADDRESS;
         IFIDIR <= NOP;
     end else begin
-        if((instruction_response == 1'b0 && memory_stall == 1'b0 ) 
-            || flush == 1'b1) begin //instruction_response == 1'b0
+        if((instruction_response == 1'b0 && memory_stall == 1'b0 )) begin //instruction_response == 1'b0
             IFIDIR <= NOP;
         end else begin
             if (memory_stall == 1'b0 && execute_stall == 1'b0) begin
                 if(takebranch == 1'b1) begin
+                    teste2         <= BRANCH_ADDRESS;
                     IFIDIR         <= NOP;
-                    PC             <= IMMEDIATE_REG + IDEXPC; // imediato
+                    PC             <= BRANCH_ADDRESS; // imediato
                     IFIDPC         <= BOOT_ADDRESS;
                 end else begin
                     IFIDIR         <= instruction_data;
@@ -127,8 +130,14 @@ always @(posedge clk ) begin // EX/MEM
     memory_read  <= 1'b0;
     flush        <= 1'b0;
 
-    if(reset == 1'b1) begin
-        EXMEMIR <= NOP; 
+    BRANCH_ADDRESS <= IDEXPC + IMMEDIATE_REG;
+
+    if(IFIDPC != (IDEXPC + IMMEDIATE_REG) && takebranch == 1'b1) begin
+        flush <= 1'b1;
+    end
+
+    if(reset == 1'b1 || flush == 1'b1) begin
+        EXMEMIR <= NOP;
     end else begin
         if(execute_stall == 1'b0 && memory_stall == 1'b0)
             IMMEDIATE_REG <= immediate;

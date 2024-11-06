@@ -79,7 +79,11 @@ always @(posedge clk ) begin // IF/ID
             IFIDIR <= NOP;
         end else begin
             if (memory_stall == 1'b0 && execute_stall == 1'b0) begin
-                if(takebranch == 1'b1) begin
+                if(is_inconditional_branch == 1'b1) begin
+                    IFIDIR         <= NOP;
+                    PC             <= JALX_PC; // imediato
+                    IFIDPC         <= BOOT_ADDRESS;
+                end else if(takebranch == 1'b1) begin
                     IFIDIR         <= NOP;
                     PC             <= BRANCH_ADDRESS; // imediato
                     IFIDPC         <= BOOT_ADDRESS;
@@ -131,12 +135,11 @@ reg [31:0] JALX_PC;
 always @(posedge clk ) begin // EX/MEM
     memory_write <= 1'b0;
     memory_read  <= 1'b0;
-    flush        <= 1'b0;
 
     BRANCH_ADDRESS <= IDEXPC + IMMEDIATE_REG;
-    JALX_PC <= (IDEXop == JAL_OPCODE) ? IDEXPC + IMMEDIATE_REG : forward_out_a + IMMEDIATE_REG;
+    JALX_PC <= (IFIDop == JAL_OPCODE) ? IFIDPC + IMMEDIATE_REG : forward_out_a + IMMEDIATE_REG;
 
-    if(reset == 1'b1 || flush == 1'b1) begin
+    if(reset == 1'b1 || branch_flush == 1'b1) begin
         EXMEMIR <= NOP;
     end else begin
         if(execute_stall == 1'b0 && memory_stall == 1'b0)
@@ -188,7 +191,9 @@ always @(posedge clk ) begin // MEM/WB
             EXMEMop == AUIPC_OPCODE || 
             EXMEMop == CSR_OPCODE || 
             EXMEMop == LUI_OPCODE || 
-            EXMEMop == LW_OPCODE) && (EXMEMrd != 'd0)) 
+            EXMEMop == LW_OPCODE ||
+            EXMEMop == JAL_OPCODE ||
+            EXMEMop == JALR_OPCODE ) && (EXMEMrd != 'd0)) 
         begin
             // verifica se tem wb
             reg_write <= 1'b1;
@@ -283,9 +288,6 @@ MUX ForwardAMUX(
     .S(forward_out_a)
 );
 
-//.immediate(is_immediate),
-//.pc_operation(IDEXop == AUIPC_OPCODE),
-
 MUX ForwardBMUX(
     .option(op_rs2),
     .A(IDEXB),
@@ -315,7 +317,5 @@ assign MEMWBValue = (mem_to_reg == 1'b1) ? MEMWB_mem_read_data : MEMWBALUOut;
 
 assign write_data = EXMEM_mem_data_value;
 assign data_address = EXMEMALUOut;
-
-//assign alu_input_b = (is_immediate == 1'b1) ? IMMEDIATE_REG : forward_out_b;
 
 endmodule

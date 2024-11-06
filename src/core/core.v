@@ -33,23 +33,23 @@ localparam IMMEDIATE_OPCODE = 7'b0010011;
 localparam RTYPE_OPCODE     = 7'b0110011;
 
 reg Zero_EXMEMB, mem_to_reg, reg_write, memory_write, memory_read, is_immediate,
-    execute_stall, memory_stall, flush;
+    flush;
 
 // PC, IDEX Rs1 value, IDEX Rs2 value, Value to Memory, Value to write back register
 reg [31:0] PC, IDEXA, IDEXB,
     IFIDPC, IDEXPC, IMMEDIATE_REG,
     BRANCH_ADDRESS;
 
-reg [31:0] EXMEM_mem_data_value, EXMEMB, EXMEMALUOut;
+reg [31:0] EXMEM_mem_data_value, EXMEMB, EXMEMALUOut, alu_input_a;
 
 reg [31:0] MEMWB_mem_read_data, MEMWBALUOut;
 
 reg [1:0] aluop;
 
-wire zero, stall, takebranch;
+wire zero, execute_stall, takebranch, memory_stall;
 wire [1:0] op_rs1, op_rs2;
 wire [3:0] aluop_out;
-wire [31:0] alu_input_a, alu_input_b, alu_out, immediate, 
+wire [31:0] alu_input_b, alu_out, immediate, 
     register_data_1_out, register_data_2_out, MEMWBValue;
 wire [31:0] forward_out_a, forward_out_b;
 
@@ -73,7 +73,8 @@ always @(posedge clk ) begin // IF/ID
         PC <= BOOT_ADDRESS;
         IFIDIR <= NOP;
     end else begin
-        if(instruction_response == 1'b0 || flush == 1'b1) begin //instruction_response == 1'b0
+        if((instruction_response == 1'b0 && memory_stall == 1'b0 ) 
+            || flush == 1'b1) begin //instruction_response == 1'b0
             IFIDIR <= NOP;
         end else begin
             if (memory_stall == 1'b0 && execute_stall == 1'b0) begin
@@ -92,8 +93,6 @@ always @(posedge clk ) begin // IF/ID
 end
 
 always @(posedge clk ) begin // ID/EX
-    IMMEDIATE_REG <= immediate;
-    execute_stall <= 1'b0;
 
     if(reset == 1'b1 || flush == 1'b1) begin
         IDEXIR <= NOP;
@@ -102,53 +101,60 @@ always @(posedge clk ) begin // ID/EX
             aluop <= 2'b01;
         else if(IFIDop == IMMEDIATE_OPCODE || 
                 IFIDop == CSR_OPCODE || 
-                IFIDop == LUI_OPCODE || 
-                IFIDop == AUIPC_OPCODE)
+                IFIDop == JALR_OPCODE || 
+                IFIDop == RTYPE_OPCODE)
             aluop <= 2'b10;
         else
             aluop <= 2'b00;
 
         if(memory_stall == 1'b0 && execute_stall == 1'b0) begin
-            IDEXA <= register_data_1_out; 
-            IDEXB <= register_data_2_out;
             IDEXIR <= IFIDIR;
             IDEXPC <= IFIDPC;
+            IDEXA <= register_data_1_out; 
+            IDEXB <= register_data_2_out;
+        end else begin
+            IDEXA <= forward_out_a;
+            IDEXB <= forward_out_b;
         end
     end
 end
 
+assign execute_stall = (op_rs1 == 2'b11 || op_rs2 == 2'b11);
+assign memory_stall = (EXMEMop == LW_OPCODE || EXMEMop == SW_OPCODE) ? ~data_memory_response : 1'b0;
+
 always @(posedge clk ) begin // EX/MEM
     memory_write <= 1'b0;
     memory_read  <= 1'b0;
-    memory_stall <= 1'b0;
     flush        <= 1'b0;
 
     if(reset == 1'b1) begin
         EXMEMIR <= NOP; 
     end else begin
-        if(execute_stall) begin
+        if(execute_stall == 1'b0 && memory_stall == 1'b0)
+            IMMEDIATE_REG <= immediate;
+        
+        if(execute_stall == 1'b1 && memory_stall == 1'b0) begin
             EXMEMIR <= NOP;
         end else begin
             if(memory_stall == 1'b0) begin
                 EXMEMIR <= IDEXIR;
 
-                EXMEM_mem_data_value <= forward_out_b;
                 EXMEMALUOut <= alu_out; 
 
                 if(IDEXop == LW_OPCODE) begin
                     memory_read <= 1'b1;
-                    memory_stall <= ~data_memory_response;
                 end
                 if(IDEXop == SW_OPCODE) begin // verifica se tem mem
                     memory_write <= 1'b1;
-                    memory_stall <= ~data_memory_response;
-                end 
+                end
+
+                EXMEM_mem_data_value <= forward_out_b; 
             end else begin
-                if(IDEXop == SW_OPCODE) begin // verifica se tem mem
-                    memory_stall <= ~data_memory_response;
-                end 
-                if(IDEXop == LW_OPCODE) begin
-                    memory_stall <= ~data_memory_response;
+                if(EXMEMop == LW_OPCODE) begin
+                    memory_read <= 1'b1;
+                end
+                if(EXMEMop == SW_OPCODE) begin // verifica se tem mem
+                    memory_write <= 1'b1;
                 end 
             end
         end
@@ -159,7 +165,7 @@ always @(posedge clk ) begin // MEM/WB
     reg_write    <= 1'b0;
     mem_to_reg   <= 1'b0;
 
-    if(reset == 1'b1 | memory_stall == 1'b1) begin
+    if(reset == 1'b1 || memory_stall == 1'b1) begin
         MEMWBIR <= NOP;
     end else begin // memory_stall == 1'b1
         MEMWBIR <= EXMEMIR;
@@ -195,6 +201,12 @@ always @(*) begin
         LUI_OPCODE:       is_immediate = 1'b1; // Tipo U: Load Upper Immediate, carrega um imediato na parte superior do registrador
         CSR_OPCODE:       is_immediate = 1'b1; // Tipo I: instruções CSR que usam imediato (e.g., CSRRWI)
         default:          is_immediate = 1'b0; // Instruções que não usam imediato
+    endcase
+
+    case (IDEXop)
+        AUIPC_OPCODE: alu_input_a = IDEXPC; // AUIPC: PC
+        LUI_OPCODE:   alu_input_a = 32'h00000000; // LUI: 0
+        default: alu_input_a = forward_out_a; // Outros: Rs1
     endcase
 end
 
@@ -235,6 +247,7 @@ Forwarding_Unit Forwarding_Unit(
     .rs2(IDEXrs2),
     .ex_mem_stage_rd(EXMEMrd),
     .mem_wb_stage_rd(MEMWBrd),
+    .ex_mem_op(EXMEMop),
     .op_rs1(op_rs1),
     .op_rs2(op_rs2)
 );
@@ -260,25 +273,7 @@ MUX ForwardBMUX(
     //.D(IMMEDIATE_REG),
     .S(forward_out_b)
 );
-/*
-MUX AluInputAMUX(
-    .option(alu_src_a),
-    .A(IDEXA),
-    .B(),
-    .C(IDEXPC),
-    .D(32'd0),
-    .S()
-);
 
-MUX AluInputBMUX(
-    .option(alu_src_b),
-    .A(IDEXB),
-    .B(IMMEDIATE_REG),
-    .C(),
-    .D(),
-    .S()
-);
-*/
 assign is_branch = (EXMEMop == BRANCH_OPCODE) ? 1'b1 : 1'b0;
 assign takebranch = (Zero_EXMEMB && is_branch);
 assign instruction_address = PC;
@@ -300,7 +295,6 @@ assign MEMWBValue = (mem_to_reg == 1'b1) ? MEMWB_mem_read_data : MEMWBALUOut;
 assign write_data = EXMEM_mem_data_value;
 assign data_address = EXMEMALUOut;
 
-assign alu_input_a = (IDEXop == AUIPC_OPCODE) ? IDEXPC : forward_out_a;
 assign alu_input_b = (is_immediate == 1'b1) ? IMMEDIATE_REG : forward_out_b;
 
 endmodule

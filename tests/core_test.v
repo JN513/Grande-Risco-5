@@ -13,6 +13,10 @@ reg instruction_response, data_memory_response;
 always @(posedge clk ) begin
     data_memory_response <= 1'b1;
     instruction_response <= 1'b1;
+
+    if(data_read || data_write) begin
+        data_memory_response <= 1'b1;
+    end
 end
 
 Grande_Risco5 Core(

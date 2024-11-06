@@ -32,27 +32,28 @@ localparam BRANCH_OPCODE    = 7'b1100011;
 localparam IMMEDIATE_OPCODE = 7'b0010011;
 localparam RTYPE_OPCODE     = 7'b0110011;
 
-reg Zero_EXMEMB, mem_to_reg, reg_write, memory_write, memory_read, is_immediate,
-    flush;
+reg Zero_EXMEMB, mem_to_reg, reg_write, memory_write, memory_read, is_immediate;
 
 // PC, IDEX Rs1 value, IDEX Rs2 value, Value to Memory, Value to write back register
 reg [31:0] PC, IDEXA, IDEXB,
     IFIDPC, IDEXPC, IMMEDIATE_REG,
     BRANCH_ADDRESS;
 
-reg [31:0] EXMEM_mem_data_value, EXMEMB, EXMEMALUOut, alu_input_a;
+reg [31:0] EXMEM_mem_data_value, EXMEMB, EXMEMALUOut, alu_input_a, alu_input_b;
 
 reg [31:0] MEMWB_mem_read_data, MEMWBALUOut;
 
 reg [1:0] aluop;
 
-wire zero, execute_stall, takebranch, memory_stall;
+wire zero, execute_stall, takebranch, memory_stall, is_inconditional_branch, flush;
 wire [1:0] op_rs1, op_rs2;
 wire [3:0] aluop_out;
-wire [31:0] alu_input_b, alu_out, immediate, 
+wire [31:0] alu_out, immediate, 
     register_data_1_out, register_data_2_out, MEMWBValue;
 wire [31:0] forward_out_a, forward_out_b;
 
+
+assign flush = branch_flush | is_inconditional_branch;
 
 // Pipeline States
 // Instruction Fetch
@@ -67,11 +68,9 @@ wire [4:0] IFIDrs1, IFIDrs2, IDEXrs1, IDEXrs2, EXMEMrd, MEMWBrd; // Access regis
 
 wire [6:0] IFIDop, IDEXop, EXMEMop, MEMWBop; // Access opcodes
 
-reg [31:0] teste, teste2;
-
 always @(posedge clk ) begin // IF/ID
     Zero_EXMEMB <= zero;
-    teste <= IMMEDIATE_REG + IDEXPC;
+
     if(reset == 1'b1) begin
         PC <= BOOT_ADDRESS;
         IFIDIR <= NOP;
@@ -81,7 +80,6 @@ always @(posedge clk ) begin // IF/ID
         end else begin
             if (memory_stall == 1'b0 && execute_stall == 1'b0) begin
                 if(takebranch == 1'b1) begin
-                    teste2         <= BRANCH_ADDRESS;
                     IFIDIR         <= NOP;
                     PC             <= BRANCH_ADDRESS; // imediato
                     IFIDPC         <= BOOT_ADDRESS;
@@ -117,13 +115,18 @@ always @(posedge clk ) begin // ID/EX
             IDEXB <= register_data_2_out;
         end else begin
             IDEXA <= forward_out_a;
-            IDEXB <= forward_out_b;
+            IDEXB <= forward_out_b; // Verificar isso em mais casos tipo um stall antes disso sem forwarding
         end
     end
 end
 
 assign execute_stall = (op_rs1 == 2'b11 || op_rs2 == 2'b11);
 assign memory_stall = (EXMEMop == LW_OPCODE || EXMEMop == SW_OPCODE) ? ~data_memory_response : 1'b0;
+assign is_inconditional_branch = (IDEXop == JAL_OPCODE || IDEXop == JALR_OPCODE) ? 1'b1 : 1'b0;
+assign branch_flush = (IFIDPC != (IDEXPC + IMMEDIATE_REG) && takebranch == 1'b1) ? 1'b1 : 1'b0;
+assign flush = branch_flush | is_inconditional_branch;
+
+reg [31:0] JALX_PC;
 
 always @(posedge clk ) begin // EX/MEM
     memory_write <= 1'b0;
@@ -131,10 +134,7 @@ always @(posedge clk ) begin // EX/MEM
     flush        <= 1'b0;
 
     BRANCH_ADDRESS <= IDEXPC + IMMEDIATE_REG;
-
-    if(IFIDPC != (IDEXPC + IMMEDIATE_REG) && takebranch == 1'b1) begin
-        flush <= 1'b1;
-    end
+    JALX_PC <= (IDEXop == JAL_OPCODE) ? IDEXPC + IMMEDIATE_REG : forward_out_a + IMMEDIATE_REG;
 
     if(reset == 1'b1 || flush == 1'b1) begin
         EXMEMIR <= NOP;
@@ -206,16 +206,28 @@ always @(*) begin
         LW_OPCODE:        is_immediate = 1'b1; // Tipo I: Load Word, precisa de imediato para o offset
         SW_OPCODE:        is_immediate = 1'b1; // Tipo S: Store Word, precisa de imediato para o offset
         AUIPC_OPCODE:     is_immediate = 1'b1; // Tipo U: Adiciona o imediato ao PC
-        JALR_OPCODE:      is_immediate = 1'b1; // Tipo I: Jump And Link Register, usa imediato para o cálculo de endereço
         LUI_OPCODE:       is_immediate = 1'b1; // Tipo U: Load Upper Immediate, carrega um imediato na parte superior do registrador
-        CSR_OPCODE:       is_immediate = 1'b1; // Tipo I: instruções CSR que usam imediato (e.g., CSRRWI)
+        //CSR_OPCODE:       is_immediate = 1'b1; // Tipo I: instruções CSR que usam imediato (e.g., CSRRWI)
         default:          is_immediate = 1'b0; // Instruções que não usam imediato
     endcase
 
     case (IDEXop)
+        JAL_OPCODE:  alu_input_a = IDEXPC; // JAL: PC
+        JALR_OPCODE: alu_input_a = IDEXPC; // JALR: PC
         AUIPC_OPCODE: alu_input_a = IDEXPC; // AUIPC: PC
         LUI_OPCODE:   alu_input_a = 32'h00000000; // LUI: 0
         default: alu_input_a = forward_out_a; // Outros: Rs1
+    endcase
+
+    case (IDEXop)
+        JAL_OPCODE:  alu_input_b = 32'h00000004; // JAL: 4
+        JALR_OPCODE: alu_input_b = 32'h00000004; // JALR: Imediato
+        AUIPC_OPCODE: alu_input_b = IMMEDIATE_REG; // AUIPC: Imediato
+        LUI_OPCODE:   alu_input_b = IMMEDIATE_REG; // LUI: Imediato
+        SW_OPCODE:    alu_input_b = forward_out_b; // SW: Rs2
+        LW_OPCODE:    alu_input_b = forward_out_b; // LW: Rs2
+        IMMEDIATE_OPCODE: alu_input_b = IMMEDIATE_REG; // Tipo I: Rs2
+        default: alu_input_b = forward_out_b; // Outros: Rs1
     endcase
 end
 
@@ -304,6 +316,6 @@ assign MEMWBValue = (mem_to_reg == 1'b1) ? MEMWB_mem_read_data : MEMWBALUOut;
 assign write_data = EXMEM_mem_data_value;
 assign data_address = EXMEMALUOut;
 
-assign alu_input_b = (is_immediate == 1'b1) ? IMMEDIATE_REG : forward_out_b;
+//assign alu_input_b = (is_immediate == 1'b1) ? IMMEDIATE_REG : forward_out_b;
 
 endmodule

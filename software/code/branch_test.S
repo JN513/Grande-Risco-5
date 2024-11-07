@@ -7,10 +7,10 @@ _start:
 
     beq a1, a1, equal
 
-    nop
-    nop
-    nop
-    nop
+    nop # c
+    nop # 10
+    nop # 14
+    nop # 18
 
 equal:
-    li a5, 15
+    li a5, 15 # 1C

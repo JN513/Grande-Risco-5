@@ -1,14 +1,10 @@
 module top (
     input wire clk,
     input wire reset,
-    output wire [3:0]LED
+    output wire [7:0]led
 );
 
 wire reset_o;
-
-wire [7:0] led;
-
-assign LED = ~led[3:0];
 
 ResetBootSystem #(
     .CYCLES(20)
@@ -50,20 +46,19 @@ LEDs Leds(
 
 Memory #(
     .MEMORY_FILE("../../software/memory/addi.hex"),
-    .MEMORY_SIZE(4096)
+    .MEMORY_SIZE(1024)
 ) instruction_memory(
     .clk(clk),
     .address(instruction_address),
     .read_data(instruction_data),
     .memory_read(1'b1),
     .memory_write(1'b0),
-    .write_data(1'b0)
+    .write_data(0)
 );
-
 
 Memory #(
     .MEMORY_FILE(""),
-    .MEMORY_SIZE(4096)
+    .MEMORY_SIZE(1024)
 ) data_memory(
     .clk(clk),
     .address(data_address),

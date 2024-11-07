@@ -14,17 +14,17 @@ reg [31:0] registers[0:31];
 //assign readData1  = registers[readRegister1];
 //assign readData2  = registers[readRegister2];
 
-assign readData1 = (regWrite && (writeRegister == readRegister1) && (writeRegister != 5'd0))
+assign readData1 = (regWrite && (writeRegister == readRegister1) && (|writeRegister))
                    ? writeData
                    : registers[readRegister1];
 
-assign readData2 = (regWrite && (writeRegister == readRegister2) && (writeRegister != 5'd0))
+assign readData2 = (regWrite && (writeRegister == readRegister2) && (|writeRegister))
                    ? writeData
                    : registers[readRegister2];
 
 
 always @(posedge clk) begin
-    if (regWrite == 1'b1) begin
+    if (regWrite) begin
         registers[writeRegister] <= writeData;
     end
     

@@ -21,7 +21,7 @@ localparam XOR             = 4'b1000;
 localparam NOR             = 4'b1001;
 localparam EQUAL           = 4'b0011;
 
-assign ZR = ~( |ALU_out_S );
+assign ZR = ~( |ALU_out_S ) && operation[3:2] != 2'b01; // ZR = 1 se ALU_out_S == 0
 
 always @(*) begin
     case(operation)

@@ -31,17 +31,20 @@ localparam AUIPC_OPCODE     = 7'b0010111;
 localparam BRANCH_OPCODE    = 7'b1100011;
 localparam IMMEDIATE_OPCODE = 7'b0010011;
 localparam RTYPE_OPCODE     = 7'b0110011;
+localparam ATOMIC_OPCODE    = 7'b0101111;
 
 localparam JAL_MASK  = 7'b0010000;
 localparam JALR_MASK = 7'b0011000;
 
 reg Zero_EXMEMB, mem_to_reg, reg_write, memory_write, memory_read, is_immediate,
-    is_jal, branch_flush, is_branch, memory_operation, is_jalr;
+    is_jal, is_branch, memory_operation, is_jalr;
 
 // PC, IDEX Rs1 value, IDEX Rs2 value, Value to Memory, Value to write back register
 reg [31:0] PC, IDEXA, IDEXB,
-    IFIDPC, IDEXPC, IMMEDIATE_REG, IMMEDIATE_REG_BRANCH,
+    IFIDPC, IDEXPC, IMMEDIATE_REG,
     BRANCH_ADDRESS;
+
+wire branch_flush;
 
 reg [31:0] EXMEM_mem_data_value, EXMEMB, EXMEMALUOut, alu_input_a, alu_input_b;
 
@@ -51,7 +54,7 @@ reg [1:0] aluop;
 
 reg [3:0] aluop_out_reg;
 
-reg [31:0] JAL_PC, JALR_PC, EXEXPC, EXEXIR;
+reg [31:0] JAL_PC, JALR_PC;
 
 wire zero, execute_stall, takebranch, memory_stall, flush;
 wire [1:0] op_rs1, op_rs2;
@@ -66,26 +69,26 @@ assign flush = branch_flush | is_jal;
 // Pipeline States
 // Instruction Fetch
 // Instruction Decode
-// Instruction Execute parse
 // Instruction Execute
 // Instruction Memory Access
 // Instruction WB
 
 reg [31:0] IFIDIR, IDEXIR, EXMEMIR, MEMWBIR; // pipeline instruction registers
 
-wire [4:0] IFIDrs1, IFIDrs2, IDEXrs1, IDEXrs2, EXMEMrd, MEMWBrd, EXEXrd, IDEXrd; // Access register fields
+wire [4:0] IFIDrs1, IFIDrs2, IDEXrs1, IDEXrs2, EXMEMrd, MEMWBrd, IDEXrd; // Access register fields
 
-wire [6:0] IFIDop, IDEXop, EXMEMop, MEMWBop, EXEXop; // Access opcodes
+wire [6:0] IFIDop, IDEXop, EXMEMop, MEMWBop; // Access opcodes
+
+assign branch_flush = (PC != (IFIDPC + IMMEDIATE_REG) && takebranch);
 
 always @(posedge clk ) begin // IF/ID
     Zero_EXMEMB <= zero;
     is_jal <= (IFIDop == JAL_OPCODE) && (~execute_stall);
-    is_jalr <= (IDEXop == JALR_OPCODE) && (~execute_stall);
-    //is_jal <= (~|(IFIDop ^ JAL_OPCODE)) && (~execute_stall);
-    //is_jalr <= (~|(IDEXop ^ JAL_OPCODE)) && (~execute_stall);
-    branch_flush <= (PC != (IFIDPC + IMMEDIATE_REG) && takebranch);
+    is_jalr <= (IFIDop == JALR_OPCODE) && (~execute_stall);
+
     JAL_PC <= IFIDPC + immediate;
     JALR_PC <= forward_out_a + IMMEDIATE_REG;
+    //branch_flush <= (PC != (IFIDPC + IMMEDIATE_REG) && takebranch);
 
     if(reset) begin
         PC <= BOOT_ADDRESS;
@@ -99,7 +102,7 @@ always @(posedge clk ) begin // IF/ID
             IFIDIR         <= NOP;
             PC             <= JALR_PC; // imediato
             IFIDPC         <= BOOT_ADDRESS;
-        end else if(takebranch) begin
+        end else if(branch_flush) begin
             IFIDIR         <= NOP;
             PC             <= BRANCH_ADDRESS; // imediato
             IFIDPC         <= BOOT_ADDRESS;
@@ -116,10 +119,9 @@ always @(posedge clk ) begin // IF/ID
     end  
 end
 
-reg [31:0] alu_input_a1, alu_input_b2;
-
-
 always @(posedge clk ) begin // ID/EX
+    BRANCH_ADDRESS <= IFIDPC + immediate;
+    is_branch <= (IFIDop == BRANCH_OPCODE);
 
     if(reset || branch_flush || (is_jal && ~execute_stall)
         || (is_jalr && ~execute_stall)) begin
@@ -136,82 +138,60 @@ always @(posedge clk ) begin // ID/EX
             IDEXB <= forward_out_b; // Verificar isso em mais casos tipo um stall antes disso sem forwarding
         end
     end
-
-    if(~memory_stall && ~execute_stall) begin
-        case (IDEXop)
-            JAL_OPCODE:  alu_input_a <= IDEXPC; // JAL: PC
-            JALR_OPCODE: alu_input_a <= IDEXPC; // JALR: PC
-            AUIPC_OPCODE: alu_input_a <= IDEXPC; // AUIPC: PC
-            LUI_OPCODE:   alu_input_a <= 32'h00000000; // LUI: 0
-            default: alu_input_a <= forward_out_a; // Outros: Rs1
-        endcase
-
-        case (IDEXop)
-            JAL_OPCODE:  alu_input_b <= 32'h00000004; // JAL: 4
-            JALR_OPCODE: alu_input_b <= 32'h00000004; // JALR: Imediato
-            AUIPC_OPCODE: alu_input_b <= IMMEDIATE_REG; // AUIPC: Imediato
-            LUI_OPCODE:   alu_input_b <= IMMEDIATE_REG; // LUI: Imediato
-            SW_OPCODE:    alu_input_b <= IMMEDIATE_REG; // SW: Rs2
-            LW_OPCODE:    alu_input_b <= IMMEDIATE_REG; // LW: Rs2
-            IMMEDIATE_OPCODE: alu_input_b <= IMMEDIATE_REG; // Tipo I: Rs2
-            default: alu_input_b <= forward_out_b; // Outros: Rs1
-        endcase
-    end
 end
 
-wire forwarding_error;
-assign forwarding_error = (((IDEXrs1 == EXEXrd) || (IDEXrs2 == EXEXrd)) && (|EXEXrd));
-assign execute_stall = (&op_rs1 || (&op_rs2 && ~is_immediate) || forwarding_error);
+always @(*) begin
+    case (IDEXop)
+        JAL_OPCODE:  alu_input_a <= IDEXPC; // JAL: PC
+        JALR_OPCODE: alu_input_a <= IDEXPC; // JALR: PC
+        AUIPC_OPCODE: alu_input_a <= IDEXPC; // AUIPC: PC
+        LUI_OPCODE:   alu_input_a <= 32'h00000000; // LUI: 0
+        default: alu_input_a <= forward_out_a; // Outros: Rs1
+    endcase
+
+    case (IDEXop)
+        JAL_OPCODE:  alu_input_b <= 32'h00000004; // JAL: 4
+        JALR_OPCODE: alu_input_b <= 32'h00000004; // JALR: Imediato
+        AUIPC_OPCODE: alu_input_b <= IMMEDIATE_REG; // AUIPC: Imediato
+        LUI_OPCODE:   alu_input_b <= IMMEDIATE_REG; // LUI: Imediato
+        SW_OPCODE:    alu_input_b <= IMMEDIATE_REG; // SW: Rs2
+        LW_OPCODE:    alu_input_b <= IMMEDIATE_REG; // LW: Rs2
+        IMMEDIATE_OPCODE: alu_input_b <= IMMEDIATE_REG; // Tipo I: Rs2
+        default: alu_input_b <= forward_out_b; // Outros: Rs1
+    endcase
+end
+
+//wire forwarding_error;
+//assign forwarding_error = (((IDEXrs1 == EXEXrd) || (IDEXrs2 == EXEXrd)) && (|EXEXrd));
+assign execute_stall = (&op_rs1 || (&op_rs2 && ~is_immediate));
 assign memory_stall = (memory_operation) ? ~data_memory_response : 1'b0;
 
-reg [31:0] memory_write_data;
-
-always @(posedge clk ) begin // EX/EX
-    IMMEDIATE_REG_BRANCH <= IMMEDIATE_REG;
-    BRANCH_ADDRESS <= EXEXPC + IMMEDIATE_REG_BRANCH;
-    is_branch <= (EXEXop == BRANCH_OPCODE);
-
-    if(reset || branch_flush
-        || (is_jalr && ~execute_stall)) begin
-        EXEXIR <= NOP;
-    end else begin
-        if(execute_stall) begin
-            EXEXIR <= NOP;
-        end else if(~memory_stall) begin
-            EXEXIR <= IDEXIR;
-            EXEXPC <= IDEXPC;
-
-            memory_write_data <= forward_out_b;
-        end
-    end
-    
-end
 
 always @(posedge clk ) begin // EX/MEM
     memory_write <= 1'b0;
     memory_read  <= 1'b0;
 
-    memory_operation <= (EXEXop == LW_OPCODE || EXEXop == SW_OPCODE);
+    memory_operation <= (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
 
-    if(reset || branch_flush) begin
+    if(reset || (execute_stall & ~memory_stall)) begin
         EXMEMIR <= NOP;
     end else begin
         if(~execute_stall && ~memory_stall)
             IMMEDIATE_REG <= immediate;
         
         if(~memory_stall) begin
-            EXMEMIR <= EXEXIR;
+            EXMEMIR <= IDEXIR;
 
             EXMEMALUOut <= alu_out;
 
-            if(EXEXop == LW_OPCODE) begin
+            if(IDEXop == LW_OPCODE) begin
                 memory_read <= 1'b1;
             end
-            if(EXEXop == SW_OPCODE) begin // verifica se tem mem
+            if(IDEXop == SW_OPCODE) begin // verifica se tem mem
                 memory_write <= 1'b1;
             end
 
-            EXMEM_mem_data_value <= memory_write_data; 
+            EXMEM_mem_data_value <= forward_out_b; 
         end else begin
             if(EXMEMop == LW_OPCODE) begin
                 memory_read <= 1'b1;
@@ -243,7 +223,7 @@ always @(posedge clk ) begin // MEM/WB
             EXMEMop == LUI_OPCODE || 
             EXMEMop == LW_OPCODE ||
             EXMEMop == JAL_OPCODE ||
-            EXMEMop == JALR_OPCODE ) && ~(|EXMEMrd)) 
+            EXMEMop == JALR_OPCODE ) && (|EXMEMrd)) 
         begin
             // verifica se tem wb
             reg_write <= 1'b1;
@@ -268,7 +248,7 @@ always @(posedge clk ) begin
 end
 
 always @(*) begin
-    case (IDEXop)
+    case (IFIDop)
         BRANCH_OPCODE: aluop = 2'b01; // Branch: Subtrai Rs1 de Rs2
         IMMEDIATE_OPCODE: aluop = 2'b10; // Tipo I: Usa o imediato
         CSR_OPCODE: aluop = 2'b10; // Tipo I: Usa o imediato
@@ -292,8 +272,8 @@ Registers RegisterBank(
 ALU_Control ALU_Control(
     .is_immediate(is_immediate),
     .aluop_in(aluop),
-    .func7(IDEXIR[31:25]),
-    .func3(IDEXIR[14:12]),
+    .func7(IFIDIR[31:25]),
+    .func3(IFIDIR[14:12]),
     .aluop_out(aluop_out)
 );
 
@@ -320,6 +300,23 @@ Forwarding_Unit Forwarding_Unit(
     .op_rs2(op_rs2)
 );
 
+/*
+reg [1:0] op_rs1_reg, op_rs2_reg;
+
+always @(posedge clk ) begin
+    op_rs1_reg <= op_rs1;
+    op_rs2_reg <= op_rs2;
+end
+
+Forwarding_Unit Forwarding_Unit(
+    .rs1(IFIDrs1),
+    .rs2(IFIDrs2),
+    .ex_mem_stage_rd(IDEXrd),
+    .mem_wb_stage_rd(EXMEMrd),
+    .ex_mem_op(IDEXop),
+    .op_rs1(op_rs1),
+    .op_rs2(op_rs2)
+);*/
 
 MUX ForwardAMUX(
     .option(op_rs1),
@@ -337,7 +334,7 @@ MUX ForwardBMUX(
     .S(forward_out_b)
 );
 
-assign takebranch = (Zero_EXMEMB && is_branch);
+assign takebranch = (zero && is_branch);
 assign instruction_address = PC;
 assign IFIDop = IFIDIR[6:0];
 assign IFIDrs1 = IFIDIR[19:15];
@@ -346,8 +343,6 @@ assign IDEXop = IDEXIR[6:0];
 assign IDEXrd = IDEXIR[11:7];
 assign IDEXrs1 = IDEXIR[19:15];
 assign IDEXrs2 = IDEXIR[24:20];
-assign EXEXop  = EXEXIR[6:0];
-assign EXEXrd  = EXEXIR[11:7];
 assign EXMEMop = EXMEMIR[6:0];
 assign EXMEMrd = EXMEMIR[11:7];
 assign MEMWBop = MEMWBIR[6:0];

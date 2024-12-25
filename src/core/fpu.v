@@ -1,3 +1,5 @@
+`ifdef ENABLE_FPU
+
 module FPU (
     input wire clk,
     input wire rst,
@@ -8,3 +10,5 @@ module FPU (
 );
     
 endmodule
+
+`endif

@@ -137,8 +137,8 @@ always @(posedge clk ) begin // ID/EX
             previous_instruction_is_lw <= (IDEXop == LW_OPCODE);
             IDEXIR <= IFIDIR;
             IDEXPC <= IFIDPC;
-            IDEXA <= register_data_1_out; 
-            IDEXB <= register_data_2_out;
+            IDEXA  <= register_data_1_out; 
+            IDEXB  <= register_data_2_out;
             aluop_out_reg <= aluop_out;
         end else begin
             previous_instruction_is_lw <= (EXMEMop == LW_OPCODE);
@@ -151,7 +151,7 @@ end
 always @(*) begin
     case (IDEXop)
         JAL_OPCODE, JALR_OPCODE, AUIPC_OPCODE: alu_input_a <= IDEXPC; // AUIPC: PC
-        LUI_OPCODE:   alu_input_a <= 32'h00000000; // LUI: 0
+        LUI_OPCODE: alu_input_a <= 32'h00000000; // LUI: 0
         default: alu_input_a <= forward_out_a; // Outros: Rs1
     endcase
 

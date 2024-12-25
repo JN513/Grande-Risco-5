@@ -1,3 +1,5 @@
+`ifdef ENABLE_BMU
+
 module BMU ( // Bit manipulation unit for riscv B extension
     input wire clk,
     input wire [4:0] option,
@@ -36,9 +38,9 @@ localparam ZEXTH  = 5'b11010;
 
 always @(*) begin
     case (option)
-        ANDN: begin
+        ANDN:
             BMU_out_S = BMU_in_X & ~BMU_in_Y;
-        end
+            
 /*        CLZ: begin
             BMU_out_S = 0;
             for (int i = 31; i >= 0; i = i -1) begin
@@ -109,74 +111,61 @@ always @(*) begin
             end
         end
 
-        ORCB: begin // Bitwise OR-Combine, byte granule
+        ORCB: // Bitwise OR-Combine, byte granule
             BMU_out_S = {(|BMU_in_X[31:24]) ? 8'hFF : 8'h00, 
             (|BMU_in_X[23:16]) ? 8'hFF : 8'h00, 
             (|BMU_in_X[15:8])  ? 8'hFF : 8'h00, 
             (|BMU_in_X[7:0])   ? 8'hFF : 8'h00};
-        end
 
-        ORN: begin
+        ORN:
             BMU_out_S = BMU_in_X | ~BMU_in_Y;
-        end
 
-        REV8: begin
+        REV8:
             BMU_out_S = {BMU_in_X[7:0], BMU_in_X[15:8], BMU_in_X[23:16], BMU_in_X[31:24]};
-        end
 
-        ROL: begin
+        ROL:
             BMU_out_S = BMU_in_X << BMU_in_Y[4:0] | BMU_in_X >> (32 - BMU_in_Y[4:0]);
-        end
 
-        ROR: begin
+        ROR:
             BMU_out_S = BMU_in_X >> BMU_in_Y[4:0] | BMU_in_X << (32 - BMU_in_Y[4:0]);
-        end
 
-        BCLR: begin
+        BCLR:
             BMU_out_S = BMU_in_X & ~(1'b1 << BMU_in_Y[4:0]);
-        end
 
-        BEXT: begin
+        BEXT:
             BMU_out_S = BMU_in_X >> BMU_in_Y[4:0] & 'd1;
-        end
 
-        BINV: begin
+        BINV:
             BMU_out_S = BMU_in_X ^ (1'b1 << BMU_in_Y[4:0]);
-        end
 
-        BSET: begin
+        BSET:
             BMU_out_S = BMU_in_X | (1'b1 << BMU_in_Y[4:0]);
-        end
 
-        SEXTB: begin
+        SEXTB:
             BMU_out_S = {{24{BMU_in_X[7]}}, BMU_in_X[7:0]};
-        end
 
-        SEXTH: begin
+        SEXTH:
             BMU_out_S = {{16{BMU_in_X[15]}}, BMU_in_X[15:0]};
-        end
 
-        SH1ADD: begin
+        SH1ADD:
             BMU_out_S = BMU_in_X + (BMU_in_Y << 'd1);
-        end
 
-        SH2ADD: begin
+        SH2ADD:
             BMU_out_S = BMU_in_X + (BMU_in_Y << 'd2);
-        end
 
-        SH3ADD: begin
+        SH3ADD:
             BMU_out_S = BMU_in_X + (BMU_in_Y << 'd3);
-        end
 
-        XNOR: begin
+        XNOR:
             BMU_out_S = ~(BMU_in_X ^ BMU_in_Y);
-        end
 
-        ZEXTH: begin
+        ZEXTH:
             BMU_out_S = {16{1'b0}, BMU_in_X[15:0]};
-        end
-        default: 
+            
+        default: BMU_out_S = BMU_in_X;
     endcase
 end
     
 endmodule
+
+`endif

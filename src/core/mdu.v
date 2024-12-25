@@ -1,3 +1,4 @@
+`ifdef ENABLE_MDU
 module MDU (
     input wire clk,
     input wire reset,
@@ -20,13 +21,6 @@ localparam DIVU   = 3'b101; // rd = rs1 / rs2
 localparam REM    = 3'b110; // rd = rs1 % rs2
 localparam REMU   = 3'b111; // rd = rs1 % rs2
 
-// State machine states
-
-localparam IDLE   = 3'b000;
-localparam INIT   = 3'b001;
-localparam EXEC   = 3'b010;
-localparam FINISH = 3'b011;
-localparam DONE   = 3'b100;
 
 // Names of the registers
 //
@@ -48,12 +42,75 @@ localparam DONE   = 3'b100;
 
 // Internal registers
 
+
+
 reg mul_done;
+reg [31:0] MUL_RD;
+
+
+`ifdef FPGA
+
+localparam IDLE    = 2'b00;
+localparam OPERATE = 2'b01;
+localparam FINISH  = 2'b10;
+
+reg [1:0] state_mul;
+
+reg [31:0] Data_X, Data_Y, MUL_RD;
+reg [63:0] acumulador;
+
+always @(posedge clk) begin
+    mul_done <= 1'b0;
+
+    if(reset == 1'b1) begin
+        Data_X <= 0;
+        Data_Y <= 0;
+        MUL_RD <= 0;
+        state_mul <= IDLE;
+    end else begin
+        case (state_mul)
+            IDLE: begin
+                if(start & !operation[2]) begin
+                    state_mul <= OPERATE;
+                    if(operation[1]) begin
+                        Data_X <= (operation[0]) ? $unsigned(MDU_in_X) : $signed(MDU_in_X);
+                        Data_Y <= $unsigned(MDU_in_Y);
+                    end else begin
+                        Data_X <= $signed(MDU_in_X);
+                        Data_Y <= $signed(MDU_in_Y);
+                    end
+                end else begin
+                    state_mul <= IDLE;
+                end
+            end 
+            OPERATE: begin
+                acumulador <= $signed(Data_X)*$signed(Data_Y);
+                state_mul <= FINISH;
+            end
+
+            FINISH: begin
+                state_mul <= IDLE;
+                MUL_RD <= (|operation) ? acumulador[63:32] : acumulador[31:0];
+                mul_done <= 1'b1;
+            end
+            default: state_mul <= IDLE;
+        endcase
+    end
+end
+
+`else
+// State machine states
+
+localparam IDLE   = 3'b000;
+localparam INIT   = 3'b001;
+localparam EXEC   = 3'b010;
+localparam FINISH = 3'b011;
+localparam DONE   = 3'b100;
+
 reg [2:0] mul_state;
 reg [63:0] final_product, product_one, product_two, product_three, product_four;
 reg [63:0] multiplicand_1, multiplicand_2, multiplicand_3, multiplicand_4;
 reg [7:0] multiplier_1, multiplier_2, multiplier_3, multiplier_4;
-reg [31:0] quotient, MUL_RD;
 
 // State machine
 always @(posedge clk) begin
@@ -66,7 +123,7 @@ always @(posedge clk) begin
         case (mul_state)
             IDLE: begin
                 mul_state <= IDLE;
-                if( start == 1'b1 && ~operation[2]) begin
+                if( start == 1'b1 && !operation[2]) begin
                     mul_state <= INIT;
                 end
             end
@@ -132,6 +189,8 @@ always @(posedge clk) begin
     end
 end
 
+`endif
+
 localparam DIV_IDLE    = 2'b00;
 localparam DIV_OPERATE = 2'b01;
 localparam DIV_FINISH  = 2'b10;
@@ -195,3 +254,5 @@ assign done = mul_done | div_done;
 assign MDU_out = (operation[2] == 1'b0) ? MUL_RD : DIV_RD;
 
 endmodule
+
+`endif

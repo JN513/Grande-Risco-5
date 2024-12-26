@@ -5,7 +5,7 @@ module BMU ( // Bit manipulation unit for riscv B extension
     input wire [4:0] option,
     input wire [31:0] BMU_in_X,
     input wire [31:0] BMU_in_Y,
-    output wire [31:0] BMU_out_S
+    output reg [31:0] BMU_out_S
 );
 
 localparam ANDN   = 5'b00000;

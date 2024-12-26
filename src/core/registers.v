@@ -11,9 +11,6 @@ module Registers (
 
 reg [31:0] registers[0:31];
 
-//assign readData1  = registers[readRegister1];
-//assign readData2  = registers[readRegister2];
-
 assign readData1 = (regWrite && (writeRegister == readRegister1) && (|writeRegister))
                    ? writeData
                    : registers[readRegister1];

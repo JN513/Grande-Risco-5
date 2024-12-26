@@ -7,8 +7,8 @@ module Grande_Risco5 #(
 
     // Instruction BUS
 
-    input wire instruction_response,
-    input wire [31:0] instruction_data,
+    input  wire instruction_response,
+    input  wire [31:0] instruction_data,
     output wire [31:0] instruction_address,
 
     // Data BUS

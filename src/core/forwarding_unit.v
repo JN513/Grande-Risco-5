@@ -4,7 +4,6 @@ module Forwarding_Unit (
     input wire [4:0] rs2,
     input wire [4:0] ex_mem_stage_rd,
     input wire [4:0] mem_wb_stage_rd,
-    //input wire [6:0] ex_mem_op,
     output reg [1:0] op_rs1,
     output reg [1:0] op_rs2
 );

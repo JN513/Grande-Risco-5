@@ -30,7 +30,7 @@ module ICache #(
     reg [2:0] state;
     wire hit;
     wire is_unaligned;
-    reg miss_finished, unaligned_access, internal_read_request;
+    reg miss_finished, internal_read_request;
     reg [31:0] internal_addr, temp_data;
 
     integer i;

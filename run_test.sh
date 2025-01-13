@@ -12,8 +12,14 @@ fi
 
 cp verification_tests/memory/$nome_do_teste.hex verification_tests/memory/generic.hex
 
-iverilog -o build/core.o -s core_tb -I src/core src/core/alu_control.v src/core/alu.v src/core/core.v src/core/forwarding_unit.v src/core/immediate_generator.v src/core/mux.v src/core/registers.v tests/core_test.v src/peripheral/memory.v
-vvp build/core.o
+iverilog -o build/soc.o -s soc_tb -I src/core src/core/alu_control.v src/core/alu.v \
+    src/core/Grande_Risco5.v src/core/core.v src/core/forwarding_unit.v src/core/immediate_generator.v \
+    src/core/mux.v src/core/registers.v src/core/csr_unit.v src/core/fpu.v src/core/bmu.v \
+    src/core/i_cache.v src/core/d_cache.v src/core/branch_prediction.v src/core/mdu.v \
+    src/core/cache_request_multiplexer.v src/peripheral/memory.v tests/soc_test.v \
+    src/peripheral/leds.v src/peripheral/soc.v
+
+vvp build/soc.o
 
 rm verification_tests/memory/generic.hex
 

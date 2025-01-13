@@ -87,7 +87,7 @@ always @(*) begin
         MARCHID:   csr_data_out = 32'h00000000;
         MIMPID:    csr_data_out = 32'h00000000;
         MSTATUSH:  csr_data_out = 32'h00000000;
-        MISA:      csr_data_out = 32'b01_00000000000000000001000100100111; // RV32IMABC_Zicsr
+        MISA:      csr_data_out = 32'b01_000000000000000001000100100111; // RV32IMABC_Zicsr
 
         // Machine Trap Setup
         MSTATUS:   csr_data_out = MSTATUS_reg;

@@ -1,5 +1,5 @@
-module Grande_Risco5 #(
-    parameter BOOT_ADDRESS=32'h00000000
+module Core #(
+    parameter BOOT_ADDRESS = 32'h00000000
 ) (
     // Control signal
     input wire clk,
@@ -79,9 +79,9 @@ wire [4:0] IFIDrs1, IFIDrs2, IDEXrs1, IDEXrs2, EXMEMrd, MEMWBrd, IDEXrd; // Acce
 
 wire [6:0] IFIDop, IDEXop, EXMEMop, MEMWBop; // Access opcodes
 
-assign branch_flush = (is_different_branch_address & takebranch);
-
 reg is_different_branch_address;
+
+assign branch_flush = (is_different_branch_address & takebranch);
 
 always @(posedge clk ) begin // IF/ID
     Zero_EXMEMB <= zero;

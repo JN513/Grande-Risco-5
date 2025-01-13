@@ -36,7 +36,7 @@ module ICache #(
     integer i;
 
     initial begin
-        for(i = 0; i < (CACHE_SIZE/4) - 1; i++) begin
+        for(i = 0; i < (CACHE_SIZE/4) - 1; i = i + 1) begin
             cache_valid [i] = 1'b0;
         end
     end
@@ -115,7 +115,7 @@ module ICache #(
     end
 
     assign memory_addr         = (is_unaligned) ? internal_addr : addr;
-    assign memory_read_request = (hit) ? 32'h0 : (is_unaligned) ? 
+    assign memory_read_request = (hit) ? 1'b0 : (is_unaligned) ? 
         internal_read_request : read_request; // internal_read_request
 
     assign read_response = hit | miss_finished;

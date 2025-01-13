@@ -5,7 +5,6 @@ module DCache #(
     input wire reset,
 
     // Processor interface
-    input  wire valid_addr,
     input  wire read_request,
     input  wire write_request,
     input  wire [31:0] addr,
@@ -32,7 +31,7 @@ module DCache #(
     integer i;
 
     initial begin
-        for(i = 0; i < (CACHE_SIZE/4) - 1; i++) begin
+        for(i = 0; i < (CACHE_SIZE/4) - 1; i = i + 1'b1) begin
             cache_valid [i] = 1'b0;
         end
     end

@@ -6,17 +6,20 @@ wire [7:0] led;
 
 always #1 clk = ~clk;
 
-Risco_5_SOC #(
-    .CLOCK_FREQ(25000000),
-    .BIT_RATE(115200),
-    .MEMORY_SIZE(4096),
-    .MEMORY_FILE("software/memory/generic.hex")
-) SOC(
-    .clk(clk),
-    .reset(reset),
-    .leds(led),
-    .rx(rx),
-    .tx(tx)
+Grande_Risco_5_SOC #(
+    .CLOCK_FREQ       (25000000),
+    .BAUD_RATE        (115200),
+    .MEMORY_SIZE      (4096),
+    .MEMORY_FILE      ("verification_tests/memory/generic.hex"),
+    .GPIO_WIDHT       (6),
+    .UART_BUFFER_SIZE (16)
+) SOC (
+    .clk   (clk),
+    .reset (reset),
+    .leds  (led),
+    .rx    (),
+    .tx    (),
+    .gpios ()
 );
 
 initial begin

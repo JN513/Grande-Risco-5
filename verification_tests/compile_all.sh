@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 diretorio="code"
-march="rv32izicsr"
+march="rv32i_zicsr"
 
 # Verifica se o diretório existe
 if [ -d "$diretorio" ]; then
@@ -12,9 +12,9 @@ if [ -d "$diretorio" ]; then
             echo "Compilando $arquivo"  # Faça o que desejar com o arquivo
             nome_sem_extensao=$(basename "$arquivo" | sed 's/\.[^.]*$//')
 
-            riscv32-unknown-elf-as -march=$march $arquivo -o build/$nome_sem_extensao.o
-            riscv32-unknown-elf-ld build/$nome_sem_extensao.o -o build/$nome_sem_extensao.elf
-            riscv32-unknown-elf-objcopy -O binary build/$nome_sem_extensao.elf build/$nome_sem_extensao.bin
+            riscv32-elf-as -march=$march $arquivo -o build/$nome_sem_extensao.o
+            riscv32-elf-ld build/$nome_sem_extensao.o -o build/$nome_sem_extensao.elf
+            riscv32-elf-objcopy -O binary build/$nome_sem_extensao.elf build/$nome_sem_extensao.bin
             hexdump -v -e '1/4 "%08x" "\n"' build/$nome_sem_extensao.bin > memory/$nome_sem_extensao.hex
 
             echo "$arquivo compilado"  # Faça o que desejar com o arquivo

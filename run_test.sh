@@ -17,7 +17,7 @@ iverilog -o build/soc.o -s soc_tb -I src/core src/core/alu_control.v src/core/al
     src/core/mux.v src/core/registers.v src/core/csr_unit.v src/core/fpu.v src/core/bmu.v \
     src/core/i_cache.v src/core/d_cache.v src/core/branch_prediction.v src/core/mdu.v \
     src/core/cache_request_multiplexer.v src/peripheral/memory.v tests/soc_test.v \
-    src/peripheral/leds.v src/peripheral/soc.v
+    src/peripheral/leds.v src/peripheral/soc.v src/core/ir_decomp.v
 
 vvp build/soc.o
 

@@ -1,7 +1,9 @@
 #!/bin/zsh
 
 diretorio="code"
-march="rv32i_zicsr"
+march="rv32ic_zicsr"
+
+mkdir -p build
 
 # Verifica se o diretório existe
 if [ -d "$diretorio" ]; then

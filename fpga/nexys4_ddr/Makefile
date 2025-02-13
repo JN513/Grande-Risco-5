@@ -10,10 +10,13 @@ all: ./build/out.bit
 	$(VIVADO) -mode batch -nolog -nojournal -source run.tcl
 buildFolder:
 	mkdir -p build
+	mkdir -p reports
 
 clean:
 	rm -rf build
-	rm clockInfo.txt
+	rm -rf clockInfo.txt
+	rm -rf .Xil
+	rm -rf reports
 
 load:
 	openFPGALoader -b nexys_a7_100 ./build/out.bit

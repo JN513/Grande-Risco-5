@@ -1,0 +1,132 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date         : Thu Feb 13 11:39:33 2025
+| Host         : vader running 64-bit Arch Linux
+| Command      : report_control_sets -verbose -file reports/control_sets.rpt
+| Design       : top
+| Device       : xc7vx690t
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Control Set Information
+
+Table of Contents
+-----------------
+1. Summary
+2. Histogram
+3. Flip-Flop Distribution
+4. Detailed Control Set Information
+
+1. Summary
+----------
+
++----------------------------------------------------------+-------+
+|                          Status                          | Count |
++----------------------------------------------------------+-------+
+| Total control sets                                       |    54 |
+|    Minimum number of control sets                        |    54 |
+|    Addition due to synthesis replication                 |     0 |
+|    Addition due to physical synthesis replication        |     0 |
+| Unused register locations in slices containing registers |    33 |
++----------------------------------------------------------+-------+
+* Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
+** Run report_qor_suggestions for automated merging and remapping suggestions
+
+
+2. Histogram
+------------
+
++--------------------+-------+
+|       Fanout       | Count |
++--------------------+-------+
+| Total control sets |    54 |
+| >= 0 to < 4        |     1 |
+| >= 4 to < 6        |     0 |
+| >= 6 to < 8        |     2 |
+| >= 8 to < 10       |     0 |
+| >= 10 to < 12      |     0 |
+| >= 12 to < 14      |     1 |
+| >= 14 to < 16      |     0 |
+| >= 16              |    50 |
++--------------------+-------+
+* Control sets can be remapped at either synth_design or opt_design
+
+
+3. Flip-Flop Distribution
+-------------------------
+
++--------------+-----------------------+------------------------+-----------------+--------------+
+| Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
++--------------+-----------------------+------------------------+-----------------+--------------+
+| No           | No                    | No                     |             132 |           51 |
+| No           | No                    | Yes                    |               0 |            0 |
+| No           | Yes                   | No                     |              13 |            6 |
+| Yes          | No                    | No                     |            3108 |         1288 |
+| Yes          | No                    | Yes                    |               0 |            0 |
+| Yes          | Yes                   | No                     |             362 |          121 |
++--------------+-----------------------+------------------------+-----------------+--------------+
+
+
+4. Detailed Control Set Information
+-----------------------------------
+
++---------------+------------------------------------------------------+-------------------------------------------+------------------+----------------+--------------+
+|  Clock Signal |                     Enable Signal                    |              Set/Reset Signal             | Slice Load Count | Bel Load Count | Bels / Slice |
++---------------+------------------------------------------------------+-------------------------------------------+------------------+----------------+--------------+
+|  clk_ref_BUFG |                                                      |                                           |                1 |              1 |         1.00 |
+|  clk_o_BUFG   |                                                      | sys_rst_i_IBUF                            |                3 |              6 |         2.00 |
+|  clk_o_BUFG   |                                                      | SOC/core/Core/MEMWBIR[11]_i_1_n_0         |                3 |              7 |         2.33 |
+|  clk_o_BUFG   | SOC/core/Core/instruction_request2                   | SOC/core/Core/memory_write0               |                5 |             12 |         2.40 |
+|  clk_o_BUFG   | SOC/core/ICache/temp_data[15]_i_1_n_0                |                                           |                9 |             16 |         1.78 |
+|  clk_o_BUFG   | SOC/core/ICache/temp_data[31]_i_1_n_0                |                                           |                7 |             16 |         2.29 |
+|  clk_o_BUFG   | SOC/core/Core/IDEXIR[24]_i_2_n_0                     | SOC/core/Core/IDEXIR0                     |                7 |             22 |         3.14 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[30][31]_i_1_n_0 |                                           |               18 |             32 |         1.78 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[29][31]_i_1_n_0 |                                           |               14 |             32 |         2.29 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[18][31]_i_1_n_0 |                                           |                9 |             32 |         3.56 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[5][31]_i_1_n_0  |                                           |               12 |             32 |         2.67 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[13][31]_i_1_n_0 |                                           |               14 |             32 |         2.29 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[8][31]_i_1_n_0  |                                           |               17 |             32 |         1.88 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[28][31]_i_1_n_0 |                                           |               11 |             32 |         2.91 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[7][31]_i_1_n_0  |                                           |               24 |             32 |         1.33 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[6][31]_i_1_n_0  |                                           |               19 |             32 |         1.68 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[3][31]_i_1_n_0  |                                           |               16 |             32 |         2.00 |
+|  clk_o_BUFG   | SOC/core/Core/PC[31]_i_1_n_0                         | sys_rst_i_IBUF                            |               10 |             32 |         3.20 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[16][31]_i_1_n_0 |                                           |               18 |             32 |         1.78 |
+|  clk_o_BUFG   | SOC/core/M1/write_data_0                             | SOC/core/M1/write_data[31]_i_1_n_0        |                6 |             32 |         5.33 |
+|  clk_o_BUFG   | SOC/core/M1/i_cache_read_data[31]_i_2_n_0            | SOC/core/M1/i_cache_read_data[31]_i_1_n_0 |               12 |             32 |         2.67 |
+|  clk_o_BUFG   | SOC/core/M1/d_cache_read_data[31]_i_2_n_0            | SOC/core/M1/d_cache_read_data[31]_i_1_n_0 |                8 |             32 |         4.00 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[14][31]_i_1_n_0 |                                           |               13 |             32 |         2.46 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[15][31]_i_1_n_0 |                                           |               17 |             32 |         1.88 |
+|  clk_o_BUFG   | SOC/core/Core/IFIDPC[31]_i_2_n_0                     | SOC/core/Core/IFIDPC[31]_i_1_n_0          |                7 |             32 |         4.57 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[26][31]_i_1_n_0 |                                           |               10 |             32 |         3.20 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[20][31]_i_1_n_0 |                                           |               18 |             32 |         1.78 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[22][31]_i_1_n_0 |                                           |               21 |             32 |         1.52 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[24][31]_i_1_n_0 |                                           |               11 |             32 |         2.91 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[27][31]_i_1_n_0 |                                           |               10 |             32 |         3.20 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[10][31]_i_1_n_0 |                                           |               13 |             32 |         2.46 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[23][31]_i_1_n_0 |                                           |               21 |             32 |         1.52 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[25][31]_i_1_n_0 |                                           |               10 |             32 |         3.20 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[21][31]_i_1_n_0 |                                           |               11 |             32 |         2.91 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[19][31]_i_1_n_0 |                                           |               16 |             32 |         2.00 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[2][31]_i_1_n_0  |                                           |               11 |             32 |         2.91 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[1][31]_i_1_n_0  |                                           |               16 |             32 |         2.00 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[17][31]_i_1_n_0 |                                           |                7 |             32 |         4.57 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[31][31]_i_1_n_0 |                                           |               20 |             32 |         1.60 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[12][31]_i_1_n_0 |                                           |               13 |             32 |         2.46 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[11][31]_i_1_n_0 |                                           |               13 |             32 |         2.46 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[4][31]_i_1_n_0  |                                           |               16 |             32 |         2.00 |
+|  clk_o_BUFG   | SOC/core/Core/RegisterBank/registers[9][31]_i_1_n_0  |                                           |               20 |             32 |         1.60 |
+|  clk_o_BUFG   | SOC/core/Core/IDEXPC                                 |                                           |               14 |             36 |         2.57 |
+|  clk_o_BUFG   | SOC/core/Core/instruction_request1                   | SOC/core/Core/IFIDIR[31]_i_1_n_0          |               24 |             36 |         1.50 |
+|  clk_o_BUFG   | SOC/core/Core/E[0]                                   | sys_rst_i_IBUF                            |               11 |             40 |         3.64 |
+|  clk_o_BUFG   | SOC/core/ICache/internal_addr                        | sys_rst_i_IBUF                            |               15 |             40 |         2.67 |
+|  clk_o_BUFG   | SOC/core/Core/response_out                           | sys_rst_i_IBUF                            |               16 |             52 |         3.25 |
+|  clk_o_BUFG   | SOC/core/Core/memory_write_reg_0                     |                                           |               15 |             58 |         3.87 |
+|  clk_o_BUFG   | SOC/core/Core/IDEXA[31]_i_1_n_0                      |                                           |               40 |             64 |         1.60 |
+|  clk_o_BUFG   | SOC/core/Core/MEMWBALUOut[31]_i_1_n_0                |                                           |               18 |             64 |         3.56 |
+|  clk_o_BUFG   | SOC/core/Core/IMMEDIATE_REG[31]_i_1_n_0              |                                           |               48 |             96 |         2.00 |
+|  clk_o_BUFG   |                                                      |                                           |              306 |           1155 |         3.77 |
+|  clk_o_BUFG   | SOC/core/ICache/p_0_in                               |                                           |              693 |           1824 |         2.63 |
++---------------+------------------------------------------------------+-------------------------------------------+------------------+----------------+--------------+
+
+

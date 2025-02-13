@@ -19,7 +19,9 @@ Grande_Risco_5_SOC #(
     .MEMORY_SIZE      (4096),
     .MEMORY_FILE      ("../../verification_tests/memory/led_test.hex"),
     .GPIO_WIDHT       (6),
-    .UART_BUFFER_SIZE (16)
+    .UART_BUFFER_SIZE (16),
+    .I_CACHE_SIZE     (72),
+    .D_CACHE_SIZE     (72)
 ) SOC (
     .clk   (clk),
     .reset (reset_o),

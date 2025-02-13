@@ -1,75 +1,38 @@
 module top (
-    input wire clk,
-    input wire reset,
-    output wire [3:0]LED
+    input  wire clk,
+    input  wire CPU_RESETN,
+    input  wire rx,
+    output wire tx,
+    output wire [7:0]LED,
+    inout [7:0] JA
 );
 
-wire reset_o;
+reg clk_o;
 
-wire [7:0] led;
-
-assign LED = ~led[3:0];
-
-ResetBootSystem #(
-    .CYCLES(20)
-) ResetBootSystem(
-    .clk(clk),
-    .reset_o(reset_o)
+Grande_Risco_5_SOC #(
+    .CLOCK_FREQ       (50000000),
+    .BAUD_RATE        (115200),
+    .MEMORY_SIZE      (8192),
+    .MEMORY_FILE      ("../../verification_tests/memory/led_test.hex"),
+    .GPIO_WIDHT       (6),
+    .UART_BUFFER_SIZE (16),
+    .I_CACHE_SIZE     (64),
+    .D_CACHE_SIZE     (64)
+) SOC (
+    .clk   (clk_o),
+    .reset (~CPU_RESETN),
+    .leds  (LED),
+    .rx    (),
+    .tx    (),
+    .gpios ()
 );
 
-wire [31:0] instruction_address, instruction_data;
-wire [31:0] data_address, data_write_data, data_read_data;
-wire data_read, data_write;
+always @(posedge clk) begin
+    if(!CPU_RESETN) begin
+        clk_o <= 1'b0;
+    end else begin
+        clk_o <= ~clk_o;
+    end
+end
 
-Grande_Risco5 Core(
-    .clk(clk),
-    .reset(reset_o),
-
-    .instruction_response(1'b1),
-    .instruction_address(instruction_address),
-    .instruction_data(instruction_data),
-
-    .data_memory_response(1'b1),
-    .data_address(data_address),
-    .data_memory_read(data_read),
-    .data_memory_write(data_write),
-    .write_data(data_write_data),
-    .read_data(data_read_data)
-);
-
-LEDs Leds(
-    .clk(clk),
-    .reset(reset_o),
-    .read(data_read),
-    .write(data_write),
-    .write_data(data_write_data),
-    .read_data(),
-    .address(data_address),
-    .leds(led)
-);
-
-Memory #(
-    .MEMORY_FILE("../../software/memory/addi.hex"),
-    .MEMORY_SIZE(4096)
-) instruction_memory(
-    .clk(clk),
-    .address(instruction_address),
-    .read_data(instruction_data),
-    .memory_read(1'b1),
-    .memory_write(1'b0),
-    .write_data(1'b0)
-);
-
-
-Memory #(
-    .MEMORY_FILE(""),
-    .MEMORY_SIZE(4096)
-) data_memory(
-    .clk(clk),
-    .address(data_address),
-    .read_data(data_read_data),
-    .memory_read(data_read),
-    .memory_write(data_write),
-    .write_data(data_write_data)
-);
 endmodule

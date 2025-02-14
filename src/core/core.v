@@ -423,6 +423,10 @@ always @(posedge clk ) begin // EX/MEM
             EXMEM_mem_data_value <= forward_out_b; 
         end else begin
             memory_operation <= (EXMEMop == LW_OPCODE || EXMEMop == SW_OPCODE);
+
+            if(EXMEMop == LW_OPCODE) begin
+                memory_read <= 1'b1;
+            end
         end
     end   
 end

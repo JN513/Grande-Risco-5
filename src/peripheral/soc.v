@@ -34,7 +34,7 @@ Grande_Risco5 #(
     .D_CACHE_SIZE (D_CACHE_SIZE),
     .DATA_WIDTH   (DATA_WIDTH),
     .ADDR_WIDTH   (ADDR_WIDTH)
-) core(
+) Processor(
     .clk   (clk),
     .rst_n (rst_n),
     .halt  (halt),

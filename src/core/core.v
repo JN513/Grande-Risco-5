@@ -1,12 +1,16 @@
+`include "defines.vh"
+
 module Core #(
     parameter BOOT_ADDRESS = 32'h00000000
 ) (
     // Control signal
     input wire clk,
-    input wire reset,
+    input wire rst_n,
 
     // Instruction BUS
 
+    output  reg flush_bus,
+    output  reg instruction_request,
     input  wire instruction_response,
     input  wire [31:0] instruction_data,
     output wire [31:0] instruction_address,
@@ -56,6 +60,7 @@ reg [3:0] aluop_out_reg;
 
 reg [31:0] JAL_PC, JALR_PC;
 
+wire [2:0] IDEXfunc3;
 wire zero, execute_stall, takebranch, memory_stall, flush;
 wire [1:0] op_rs1, op_rs2;
 wire [3:0] aluop_out;
@@ -73,73 +78,149 @@ assign flush = branch_flush | is_jal;
 // Instruction Memory Access
 // Instruction WB
 
+reg IFID_is_compressed_instruction, IDEX_is_compressed_instruction;
 reg [31:0] IFIDIR, IDEXIR, EXMEMIR, MEMWBIR; // pipeline instruction registers
 
 wire [4:0] IFIDrs1, IFIDrs2, IDEXrs1, IDEXrs2, EXMEMrd, MEMWBrd, IDEXrd; // Access register fields
 
 wire [6:0] IFIDop, IDEXop, EXMEMop, MEMWBop; // Access opcodes
 
-reg is_different_branch_address;
+reg is_different_branch_address, pc_is_unaligned, finish_unaligned_pc;
 
 assign branch_flush = (is_different_branch_address & takebranch);
 
 always @(posedge clk ) begin // IF/ID
-    Zero_EXMEMB <= zero;
-    is_jal <= (IFIDop == JAL_OPCODE) && (~execute_stall);
-    is_jalr <= (IFIDop == JALR_OPCODE) && (~execute_stall);
+    instruction_request <= 1'b1;
+    flush_bus           <= 1'b0;
+    Zero_EXMEMB         <= zero;
 
-    JAL_PC <= IFIDPC + immediate;
+    is_jal  <= (IFIDop == JAL_OPCODE) && (~execute_stall);
+    is_jalr <= (IDEXop == JALR_OPCODE) && (~execute_stall);
+
+    JAL_PC  <= IFIDPC + immediate;
     JALR_PC <= forward_out_a + IMMEDIATE_REG;
-    //branch_flush <= (PC != (IFIDPC + IMMEDIATE_REG) && takebranch);
     is_different_branch_address <= PC != (IFIDPC + immediate);
+    IFID_is_compressed_instruction <= 1'b0;
 
-    if(reset) begin
-        PC <= BOOT_ADDRESS;
-        IFIDIR <= NOP;
+    if(!rst_n) begin
+        pc_is_unaligned     <= 1'b0;
+        PC                  <= BOOT_ADDRESS;
+        IFIDIR              <= NOP;
+        flush_bus           <= 1'b0;
+        finish_unaligned_pc <= 1'b0;
     end else begin
+        if(flush_bus) begin
+            instruction_request <= 1'b1;
+        end
+        
         if(is_jal) begin
-            IFIDIR         <= NOP;
-            PC             <= JAL_PC; // imediato
-            IFIDPC         <= BOOT_ADDRESS;
+            IFIDIR          <= NOP;
+            PC              <= JAL_PC; // imediato
+            IFIDPC          <= BOOT_ADDRESS;
+            pc_is_unaligned <= (JAL_PC[1] == 1'b1);
+            if(~instruction_response) begin
+                flush_bus <= 1'b1;
+            end
+
+            finish_unaligned_pc <= 1'b0;
         end else if (is_jalr) begin 
-            IFIDIR         <= NOP;
-            PC             <= JALR_PC; // imediato
-            IFIDPC         <= BOOT_ADDRESS;
+            IFIDIR          <= NOP;
+            PC              <= JALR_PC; // imediato
+            IFIDPC          <= BOOT_ADDRESS;
+            pc_is_unaligned <= (JALR_PC[1] == 1'b1);
+
+            if(!instruction_response) begin
+                flush_bus <= 1'b1;
+            end
+
+            finish_unaligned_pc <= 1'b0;
         end else if(branch_flush) begin
-            IFIDIR         <= NOP;
-            PC             <= BRANCH_ADDRESS; // imediato
-            IFIDPC         <= BOOT_ADDRESS;
+            IFIDIR          <= NOP;
+            PC              <= BRANCH_ADDRESS; // imediato
+            IFIDPC          <= BOOT_ADDRESS;
+            pc_is_unaligned <= (BRANCH_ADDRESS[1] == 1'b1);
+            if(!instruction_response) begin
+                flush_bus <= 1'b1;
+            end
+
+            finish_unaligned_pc <= 1'b0;
         end else begin
-            if((~instruction_response && ~memory_stall )) begin //instruction_response == 1'b0
+            if((!instruction_response && !memory_stall )) begin //instruction_response == 1'b0
                 IFIDIR <= NOP;
                 IFIDPC <= BOOT_ADDRESS;
-            end else if (~memory_stall && ~execute_stall) begin
-                IFIDIR <= instruction_data;
-                PC     <= PC + 'd4;
-                IFIDPC <= PC;
+            end else if (!memory_stall && !execute_stall && !flush_bus) begin
+                if(finish_unaligned_pc) begin
+                    finish_unaligned_pc <= 1'b0;
+                    IFIDIR <= decompressed_instruction_data_out;
+                    IFIDPC <= temp_pc;
+                end else if(pc_is_unaligned) begin
+                    temp_instruction <= {16'h0, instruction_data[31:16]};
+                    IFIDIR <= NOP;
+                    IFIDPC <= BOOT_ADDRESS;
+                    finish_unaligned_pc <= 1'b1;
+                    temp_pc <= PC;
+
+                    if(instruction_data[17:16] != 2'b11) begin
+                        PC <= PC + 'd2;
+                        pc_is_unaligned <= 1'b0;
+                    end else begin
+                        PC <= PC + 'd4;
+                        pc_is_unaligned <= 1'b1;
+                    end
+                end else begin
+                    IFIDIR                         <= decompressed_instruction_data_out;
+                    IFID_is_compressed_instruction <= is_compressed_instruction;
+                    if(is_compressed_instruction) begin
+                        PC <= PC + 'd2;
+                        pc_is_unaligned <= 1'b1;
+                    end else begin
+                        PC <= PC + 'd4;
+                        pc_is_unaligned <= 1'b0;
+                    end
+                    IFIDPC              <= PC;
+                end
             end
         end
     end  
 end
 
+reg [31:0] temp_instruction, temp_pc;
+wire [31:0] unaligned_instruction;
+
+assign unaligned_instruction = {instruction_data[15:0], temp_instruction[15:0]};
+
 reg previous_instruction_is_lw;
 
 always @(posedge clk ) begin // ID/EX
+`ifdef ENABLE_MDU
+    mdu_start <= 1'b0;
+`endif
     BRANCH_ADDRESS <= IFIDPC + immediate;
     is_branch <= (IFIDop == BRANCH_OPCODE);
+    IDEX_is_compressed_instruction <= IFID_is_compressed_instruction;
 
-    if(reset || branch_flush || (is_jal && ~execute_stall)
+    if(!rst_n || branch_flush || (is_jal && ~execute_stall)
         || (is_jalr && ~execute_stall)) begin
         IDEXIR <= NOP;
         previous_instruction_is_lw <= 1'b0;
+`ifdef ENABLE_MDU
+        mdu_operation <= 1'b0;
+`endif
     end else begin
-        if(~memory_stall && ~execute_stall) begin
+        if(!memory_stall && !execute_stall) begin
             previous_instruction_is_lw <= (IDEXop == LW_OPCODE);
             IDEXIR <= IFIDIR;
             IDEXPC <= IFIDPC;
             IDEXA  <= register_data_1_out; 
             IDEXB  <= register_data_2_out;
             aluop_out_reg <= aluop_out;
+            `ifdef ENABLE_MDU
+            if(IFIDop == RTYPE_OPCODE && func7_lsb ) begin
+                mdu_start <= 1'b1;
+                mdu_operation <= 1'b1;
+            end else
+                mdu_operation <= 1'b0;
+            `endif
         end else begin
             previous_instruction_is_lw <= (EXMEMop == LW_OPCODE);
             IDEXA <= forward_out_a;
@@ -156,7 +237,7 @@ always @(*) begin
     endcase
 
     case (IDEXop)
-        JAL_OPCODE, JALR_OPCODE:  alu_input_b <= 32'h00000004; // JAL: 4
+        JAL_OPCODE, JALR_OPCODE:  alu_input_b <= (IDEX_is_compressed_instruction) ? 32'h2 : 32'h4; // JAL: 4
         AUIPC_OPCODE, LUI_OPCODE, SW_OPCODE, IMMEDIATE_OPCODE, LW_OPCODE: 
         alu_input_b <= IMMEDIATE_REG;
         default: alu_input_b <= forward_out_b; // Outros: Rs1
@@ -165,7 +246,12 @@ end
 
 reg is_immediate_reg_not;
 
-assign execute_stall = (&op_rs1 || (&op_rs2 && is_immediate_reg_not));
+
+assign execute_stall = (&op_rs1 || (&op_rs2 && is_immediate_reg_not)
+`ifdef ENABLE_MDU
+    || (!mdu_done && mdu_operation)
+`endif
+);
 assign memory_stall = memory_operation & ~data_memory_response;
 
 
@@ -175,18 +261,23 @@ always @(posedge clk ) begin // EX/MEM
     memory_read  <= 1'b0;
 
 
-    if(reset || (execute_stall & ~memory_stall)) begin
+    if(!rst_n || (execute_stall & ~memory_stall)) begin
         EXMEMIR <= NOP;
     end else begin
-        if(~execute_stall && ~memory_stall)
+        if(!execute_stall && !memory_stall)
             IMMEDIATE_REG <= immediate;
         
-        if(~memory_stall) begin
+        if(!memory_stall) begin
             memory_operation <= (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
 
             EXMEMIR <= IDEXIR;
 
             EXMEMALUOut <= alu_out;
+
+            `ifdef ENABLE_MDU
+            EXMEMMDUOut <= MDU_out;
+            EXMEMMDUop <= mdu_operation;
+            `endif
 
             if(IDEXop == LW_OPCODE) begin
                 memory_read <= 1'b1;
@@ -212,12 +303,17 @@ always @(posedge clk ) begin // MEM/WB
     reg_write    <= 1'b0;
     mem_to_reg   <= 1'b0;
 
-    if(reset || memory_stall) begin
+    if(!rst_n || memory_stall) begin
         MEMWBIR <= NOP;
     end else begin // memory_stall
         MEMWBIR <= EXMEMIR;
         MEMWB_mem_read_data <= read_data;
+        
+        `ifdef ENABLE_MDU
+        MEMWBALUOut <= (EXMEMMDUop) ? EXMEMMDUOut : EXMEMALUOut;
+        `else
         MEMWBALUOut <= EXMEMALUOut;
+        `endif
 
         // wb stage - five stage
 
@@ -255,84 +351,118 @@ always @(*) begin
     endcase
 end
 
+wire [31:0] decompressed_instruction_data_out, decompressed_instruction_data_in;
+wire is_compressed_instruction, illegal_instruction;
+
+assign decompressed_instruction_data_in = (finish_unaligned_pc) ? unaligned_instruction : instruction_data;
+
+IR_Decompression IR_Decompression(
+    .compressed_instruction    (decompressed_instruction_data_in),
+    .is_compressed_instruction (is_compressed_instruction),
+    .decompressed_instruction  (decompressed_instruction_data_out),
+    .illegal_instruction       (illegal_instruction)
+);
+
 Registers RegisterBank(
-    .clk(clk),
-    .regWrite(reg_write),
-    .readRegister1(IFIDrs1),
-    .readRegister2(IFIDrs2),
-    .writeRegister(MEMWBrd),
-    .writeData(MEMWBValue),
-    .readData1(register_data_1_out),
-    .readData2(register_data_2_out)
+    .clk           (clk),
+    .regWrite      (reg_write),
+    .readRegister1 (IFIDrs1),
+    .readRegister2 (IFIDrs2),
+    .writeRegister (MEMWBrd),
+    .writeData     (MEMWBValue),
+    .readData1     (register_data_1_out),
+    .readData2     (register_data_2_out)
 );
 
 ALU_Control ALU_Control(
-    .is_immediate(is_immediate),
-    .aluop_in(aluop),
-    .func7(IFIDIR[31:25]),
-    .func3(IFIDIR[14:12]),
-    .aluop_out(aluop_out)
+    .is_immediate (is_immediate),
+    .aluop_in     (aluop),
+    .func7        (IFIDIR[31:25]),
+    .func3        (IFIDIR[14:12]),
+    .aluop_out    (aluop_out)
 );
 
 Alu Alu(
-    .operation(aluop_out_reg),
-    .ALU_in_X(alu_input_a),
-    .ALU_in_Y(alu_input_b),
-    .ALU_out_S(alu_out),
-    .ZR(zero)
+    .operation (aluop_out_reg),
+    .ALU_in_X  (alu_input_a),
+    .ALU_in_Y  (alu_input_b),
+    .ALU_out_S (alu_out),
+    .ZR        (zero)
 );
 
+`ifdef ENABLE_MDU
+
+reg mdu_start, mdu_operation, EXMEMMDUop;
+reg [31:0] EXMEMMDUOut;
+wire mdu_done, func7_lsb;
+wire [31:0] MDU_out;
+
+assign func7_lsb = IFIDIR[25];
+
+MDU Mdu(
+    .clk       (clk),
+    .rst_n     (rst_n),
+    .start     (mdu_start),
+    .operation (IDEXfunc3),
+    .MDU_in_X  (forward_out_a),
+    .MDU_in_Y  (forward_out_b),
+    .done      (mdu_done),
+    .MDU_out   (MDU_out)
+);
+
+`endif
+
 Immediate_Generator Immediate_Generator(
-    .instruction(IFIDIR),
-    .immediate(immediate)
+    .instruction (IFIDIR),
+    .immediate   (immediate)
 );
 
 Forwarding_Unit Forwarding_Unit(
-    .rs1(IDEXrs1),
-    .rs2(IDEXrs2),
-    .ex_mem_stage_rd(EXMEMrd),
-    .mem_wb_stage_rd(MEMWBrd),
-    .previous_instruction_is_lw(previous_instruction_is_lw),
-    //.ex_mem_op(EXMEMop),
-    .op_rs1(op_rs1),
-    .op_rs2(op_rs2)
+    .rs1                        (IDEXrs1),
+    .rs2                        (IDEXrs2),
+    .ex_mem_stage_rd            (EXMEMrd),
+    .mem_wb_stage_rd            (MEMWBrd),
+    .previous_instruction_is_lw (previous_instruction_is_lw),
+    .op_rs1                     (op_rs1),
+    .op_rs2                     (op_rs2)
 );
 
 MUX ForwardAMUX(
-    .option(op_rs1),
-    .A(IDEXA),
-    .B(MEMWBValue),
-    .C(EXMEMALUOut),
-    .S(forward_out_a)
+    .option (op_rs1),
+    .A      (IDEXA),
+    .B      (MEMWBValue),
+    .C      (EXMEMALUOut),
+    .S      (forward_out_a)
 );
 
 MUX ForwardBMUX(
-    .option(op_rs2),
-    .A(IDEXB),
-    .B(MEMWBValue),
-    .C(EXMEMALUOut),
-    .S(forward_out_b)
+    .option (op_rs2),
+    .A      (IDEXB),
+    .B      (MEMWBValue),
+    .C      (EXMEMALUOut),
+    .S      (forward_out_b)
 );
 
-assign takebranch = (zero && is_branch);
+assign takebranch          = (zero && is_branch);
 assign instruction_address = PC;
-assign IFIDop = IFIDIR[6:0];
-assign IFIDrs1 = IFIDIR[19:15];
-assign IFIDrs2 = IFIDIR[24:20];
-assign IDEXop = IDEXIR[6:0];
-assign IDEXrd = IDEXIR[11:7];
-assign IDEXrs1 = IDEXIR[19:15];
-assign IDEXrs2 = IDEXIR[24:20];
-assign EXMEMop = EXMEMIR[6:0];
-assign EXMEMrd = EXMEMIR[11:7];
-assign MEMWBop = MEMWBIR[6:0];
-assign MEMWBrd = MEMWBIR[11:7];
-assign data_memory_read = memory_read;
-assign data_memory_write = memory_write;
+assign IFIDop              = IFIDIR[6:0];
+assign IFIDrs1             = IFIDIR[19:15];
+assign IFIDrs2             = IFIDIR[24:20];
+assign IDEXop              = IDEXIR[6:0];
+assign IDEXrd              = IDEXIR[11:7];
+assign IDEXrs1             = IDEXIR[19:15];
+assign IDEXrs2             = IDEXIR[24:20];
+assign IDEXfunc3           = IDEXIR[14:12];
+assign EXMEMop             = EXMEMIR[6:0];
+assign EXMEMrd             = EXMEMIR[11:7];
+assign MEMWBop             = MEMWBIR[6:0];
+assign MEMWBrd             = MEMWBIR[11:7];
+assign data_memory_read    = memory_read;
+assign data_memory_write   = memory_write;
 
 assign MEMWBValue = (mem_to_reg) ? MEMWB_mem_read_data : MEMWBALUOut;
 
-assign write_data = EXMEM_mem_data_value;
+assign write_data   = EXMEM_mem_data_value;
 assign data_address = EXMEMALUOut;
 
 endmodule

@@ -7,7 +7,7 @@ module UART #(
     parameter BUFFER_SIZE = 8
 ) (
     input wire clk,
-    input wire reset,
+    input wire rst_n,
     input wire rx,
     output wire tx,
     input wire read,
@@ -45,7 +45,7 @@ always @(posedge clk ) begin
     rx_fifo_read <= 1'b0;
     rx_fifo_write <= 1'b0;
 
-    if(reset == 1'b1) begin
+    if(!rst_n) begin
         buffer_full <= 1'b0;
         uart_tx_data <= 8'h00;
         tx_fifo_write_data <= 8'h00;
@@ -98,7 +98,7 @@ FIFO #(
     .WIDTH(PAYLOAD_BITS)
 ) TX_FIFO (
     .clk(clk),
-    .reset(reset),
+    .rst_n(rst_n),
     .write(tx_fifo_write),
     .read(tx_fifo_read),
     .write_data(tx_fifo_write_data),
@@ -112,7 +112,7 @@ FIFO #(
     .WIDTH(PAYLOAD_BITS)
 ) RX_FIFO (
     .clk(clk),
-    .reset(reset),
+    .rst_n(rst_n),
     .write(rx_fifo_write),
     .read(rx_fifo_read),
     .write_data(rx_fifo_write_data),
@@ -128,7 +128,7 @@ uart_tool_rx #(
     .CLK_HZ  (CLOCK_FREQ  )
 ) i_uart_rx(
     .clk          (clk          ), // Top level system clock input.
-    .resetn       (~reset           ), // Asynchronous active low reset.
+    .resetn       (rst_n        ), // Asynchronous active low !rst_n.
     .uart_rxd     (rx    ), // UART Recieve pin.
     .uart_rx_en   (1'b1         ), // Recieve enable
     .uart_rx_break(uart_rx_break), // Did we get a BREAK message?
@@ -145,7 +145,7 @@ uart_tool_tx #(
     .CLK_HZ  (CLOCK_FREQ  )
 ) i_uart_tx(
     .clk          (clk          ),
-    .resetn       (~reset             ),
+    .resetn       (rst_n        ),
     .uart_txd     (tx    ), // serial_tx
     .uart_tx_en   (uart_tx_en   ),
     .uart_tx_busy (uart_tx_busy ),

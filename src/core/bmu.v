@@ -160,7 +160,7 @@ always @(*) begin
             BMU_out_S = ~(BMU_in_X ^ BMU_in_Y);
 
         ZEXTH:
-            BMU_out_S = {16{1'b0}, BMU_in_X[15:0]};
+            BMU_out_S = {16'h0, BMU_in_X[15:0]};
             
         default: BMU_out_S = BMU_in_X;
     endcase

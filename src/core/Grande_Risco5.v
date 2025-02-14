@@ -7,7 +7,7 @@ module Grande_Risco5 #(
 ) (
     // Control signal
     input wire clk,
-    input wire reset,
+    input wire rst_n,
     input wire halt,
 
     // Memory BUS
@@ -31,7 +31,7 @@ module Grande_Risco5 #(
     input wire interruption
 );
 
-wire instruction_response;
+wire instruction_response, flush_bus, instruction_request;
 wire [31:0] instruction_address, instruction_data;
 
 wire data_read_request, data_write_request, data_memory_response;
@@ -41,8 +41,10 @@ Core #(
     .BOOT_ADDRESS(BOOT_ADDRESS)
 ) Core(
     .clk   (clk),
-    .reset (reset),
+    .rst_n (rst_n),
 
+    .flush_bus            (flush_bus),
+    .instruction_request  (instruction_request),
     .instruction_response (instruction_response),
     .instruction_address  (instruction_address),
     .instruction_data     (instruction_data),
@@ -59,9 +61,10 @@ ICache #(
     .CACHE_SIZE(I_CACHE_SIZE)
 ) ICache(
     .clk   (clk),
-    .reset (reset),
+    .rst_n (rst_n),
 
-    .read_request  (1'b1),
+    .flush_bus     (flush_bus),
+    .read_request  (instruction_request),
     .addr          (instruction_address),
     .read_response (instruction_response),
     .read_data     (instruction_data),
@@ -76,7 +79,7 @@ DCache #(
     .CACHE_SIZE(D_CACHE_SIZE)
 ) DCache(
     .clk   (clk),
-    .reset (reset),
+    .rst_n (rst_n),
 
     .write_request (d_cache_write_request),
     .read_request  (d_cache_read_request),
@@ -131,7 +134,7 @@ Cache_request_Multiplexer #(
     .ADDR_WIDTH (ADDR_WIDTH)
 ) M1(
     .clk   (clk),
-    .reset (reset),
+    .rst_n (rst_n),
 
     .i_cache_address       (i_cache_memory_addr),
     .i_cache_read_data     (i_cache_memory_read_data),

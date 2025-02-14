@@ -12,7 +12,7 @@ module Grande_Risco_5_SOC #(
     parameter UART_BUFFER_SIZE = 16
 )(
     input  wire clk,
-    input  wire reset,
+    input  wire rst_n,
     input  wire halt,
 
     input  wire rx,
@@ -36,7 +36,7 @@ Grande_Risco5 #(
     .ADDR_WIDTH   (ADDR_WIDTH)
 ) core(
     .clk   (clk),
-    .reset (reset),
+    .rst_n (rst_n),
     .halt  (halt),
 
     .memory_response      (memory_response),
@@ -79,7 +79,7 @@ LEDs #(
     .DEVICE_FINAL_ADDRESS (32'h00001002)
 ) P1(
     .clk        (clk),
-    .reset      (reset),
+    .rst_n      (rst_n),
     .read       (peripheral_read_request),
     .write      (peripheral_write_request),
     .address    (peripheral_addr),

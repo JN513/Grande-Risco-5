@@ -2,7 +2,7 @@ module GPIOS #(
     parameter WIDHT = 20
 ) (
     input wire clk,
-    input wire reset,
+    input wire rst_n,
     input wire read,
     input wire write,
     input wire [31:0] address,
@@ -27,7 +27,7 @@ GPIO Gpios[WIDHT - 1:0](
 );
 
 always @(posedge clk) begin
-    if(reset) begin
+    if(!rst_n) begin
         gpio_direction <= 32'h00000000;
         gpio_value <= 32'h00000000;
     end else if(write) begin

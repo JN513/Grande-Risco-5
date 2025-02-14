@@ -3,7 +3,7 @@ module LEDs #(
     parameter DEVICE_FINAL_ADDRESS = 32'h00001002
 ) (
     input wire clk,
-    input wire reset,
+    input wire rst_n,
     input wire read,
     input wire write,
     input wire [31:0] address,
@@ -20,7 +20,7 @@ assign response = read || write;
 assign read_data = (read == 1'b1) ? data : 32'h00000000;
 
 always @(posedge clk ) begin
-    if(reset == 1'b1) begin
+    if(!rst_n) begin
         data <= 32'h0;
     end else if(write) begin
         data <= write_data;

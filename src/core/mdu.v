@@ -1,7 +1,9 @@
+`include "defines.vh"
+
 `ifdef ENABLE_MDU
 module MDU (
     input wire clk,
-    input wire reset,
+    input wire rst_n,
     input wire start,
     output wire done,
     input wire [2:0] operation,
@@ -56,13 +58,13 @@ localparam FINISH  = 2'b10;
 
 reg [1:0] state_mul;
 
-reg [31:0] Data_X, Data_Y, MUL_RD;
+reg [31:0] Data_X, Data_Y;
 reg [63:0] acumulador;
 
 always @(posedge clk) begin
     mul_done <= 1'b0;
 
-    if(reset == 1'b1) begin
+    if(!rst_n) begin
         Data_X <= 0;
         Data_Y <= 0;
         MUL_RD <= 0;
@@ -116,7 +118,7 @@ reg [7:0] multiplier_1, multiplier_2, multiplier_3, multiplier_4;
 always @(posedge clk) begin
     mul_done <= 1'b0;
 
-    if(reset == 1'b1) begin
+    if(!rst_n) begin
         mul_state <= IDLE;
         MUL_RD    <= 32'h0;
     end else begin
@@ -202,7 +204,7 @@ reg [63:0] divisor;
 
 always @(posedge clk) begin
     div_done <= 1'b0;
-    if(reset == 1'b1) begin
+    if(!rst_n) begin
         state_div <= IDLE;
         quociente <= 32'h00000000;
     end else begin

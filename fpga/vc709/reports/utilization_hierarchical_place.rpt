@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Thu Feb 13 11:39:33 2025
+| Date         : Thu Feb 13 23:11:55 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_utilization -hierarchical -file reports/utilization_hierarchical_place.rpt
 | Design       : top
@@ -22,21 +22,22 @@ Table of Contents
 +----------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
 |       Instance       |           Module          | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
 +----------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
-| top                  |                     (top) |       5849 |       4767 |    1082 |    0 | 3615 |      0 |      0 |          0 |
+| top                  |                     (top) |       3695 |       2559 |    1136 |    0 | 2148 |      0 |      0 |          4 |
 |   (top)              |                     (top) |          1 |          1 |       0 |    0 |    1 |      0 |      0 |          0 |
-|   SOC                |        Grande_Risco_5_SOC |       5848 |       4766 |    1082 |    0 | 3614 |      0 |      0 |          0 |
+|   SOC                |        Grande_Risco_5_SOC |       3694 |       2558 |    1136 |    0 | 2147 |      0 |      0 |          4 |
 |     Memory           |                    Memory |       1088 |         64 |    1024 |    0 |    0 |      0 |      0 |          0 |
-|     P1               |                      LEDs |          0 |          0 |       0 |    0 |   40 |      0 |      0 |          0 |
-|     core             |             Grande_Risco5 |       4760 |       4702 |      58 |    0 | 3574 |      0 |      0 |          0 |
-|       (core)         |             Grande_Risco5 |         32 |         32 |       0 |    0 |    0 |      0 |      0 |          0 |
-|       Core           |                      Core |       1631 |       1631 |       0 |    0 | 1468 |      0 |      0 |          0 |
-|         (Core)       |                      Core |        892 |        892 |       0 |    0 |  476 |      0 |      0 |          0 |
+|     P1               |                      LEDs |          7 |          7 |       0 |    0 |   32 |      0 |      0 |          0 |
+|     core             |             Grande_Risco5 |       2599 |       2487 |     112 |    0 | 2115 |      0 |      0 |          4 |
+|       (core)         |             Grande_Risco5 |          2 |          2 |       0 |    0 |    0 |      0 |      0 |          0 |
+|       Core           |                      Core |       2398 |       2398 |       0 |    0 | 1829 |      0 |      0 |          4 |
+|         (Core)       |                      Core |       1196 |       1196 |       0 |    0 |  571 |      0 |      0 |          0 |
 |         ForwardAMUX  |                       MUX |         34 |         34 |       0 |    0 |    0 |      0 |      0 |          0 |
 |         ForwardBMUX  |                     MUX_0 |         34 |         34 |       0 |    0 |    0 |      0 |      0 |          0 |
-|         RegisterBank |                 Registers |        671 |        671 |       0 |    0 |  992 |      0 |      0 |          0 |
-|       DCache         |                    DCache |         74 |         16 |      58 |    0 |   18 |      0 |      0 |          0 |
-|       ICache         |                    ICache |       3008 |       3008 |       0 |    0 | 1935 |      0 |      0 |          0 |
-|       M1             | Cache_request_Multiplexer |         17 |         17 |       0 |    0 |  153 |      0 |      0 |          0 |
+|         Mdu          |                       MDU |        527 |        527 |       0 |    0 |  266 |      0 |      0 |          4 |
+|         RegisterBank |                 Registers |        607 |        607 |       0 |    0 |  992 |      0 |      0 |          0 |
+|       DCache         |                    DCache |         86 |         30 |      56 |    0 |   66 |      0 |      0 |          0 |
+|       ICache         |                    ICache |        102 |         46 |      56 |    0 |   67 |      0 |      0 |          0 |
+|       M1             | Cache_request_Multiplexer |         14 |         14 |       0 |    0 |  153 |      0 |      0 |          0 |
 +----------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
 * Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
 

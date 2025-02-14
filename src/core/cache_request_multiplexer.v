@@ -3,7 +3,7 @@ module Cache_request_Multiplexer #(
     parameter ADDR_WIDTH = 32
 )(
     input wire clk,
-    input wire reset,
+    input wire rst_n,
 
     // Entradas das caches
     
@@ -42,7 +42,7 @@ always @(posedge clk ) begin
     i_cache_response <= 1'b0;
     d_cache_response <= 1'b0;
 
-    if(reset) begin
+    if(!rst_n) begin
         requested_memory_addr <= 32'h0;
         response_out          <= 1'b0;
         write_request         <= 1'b0;

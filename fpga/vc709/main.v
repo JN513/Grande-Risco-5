@@ -29,14 +29,14 @@ Grande_Risco_5_SOC #(
     .CLOCK_FREQ       (100000000),
     .BAUD_RATE        (115200),
     .MEMORY_SIZE      (8192),
-    .MEMORY_FILE      ("../../verification_tests/memory/led_test.hex"),
+    .MEMORY_FILE      ("../../verification_tests/memory/led_test2.hex"),
     .GPIO_WIDHT       (6),
     .UART_BUFFER_SIZE (16),
-    .I_CACHE_SIZE     (64),
-    .D_CACHE_SIZE     (64)
+    .I_CACHE_SIZE     (256),
+    .D_CACHE_SIZE     (256)
 ) SOC (
     .clk   (clk_o),
-    .reset (sys_rst_i),
+    .rst_n (!sys_rst_i),
     .leds  (led),
     .rx    (),
     .tx    (),

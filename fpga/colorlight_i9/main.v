@@ -9,8 +9,8 @@ wire reset_o;
 ResetBootSystem #(
     .CYCLES(20)
 ) ResetBootSystem(
-    .clk     (clk),
-    .reset_o (reset_o)
+    .clk      (clk),
+    .resetn_o (reset_o)
 );
 
 Grande_Risco_5_SOC #(

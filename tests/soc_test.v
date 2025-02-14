@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module soc_tb();
 
 reg clk, reset;
@@ -12,10 +13,12 @@ Grande_Risco_5_SOC #(
     .MEMORY_SIZE      (4096),
     .MEMORY_FILE      ("verification_tests/memory/generic.hex"),
     .GPIO_WIDHT       (6),
-    .UART_BUFFER_SIZE (16)
+    .UART_BUFFER_SIZE (16),
+    .I_CACHE_SIZE     (64),
+    .D_CACHE_SIZE     (64)
 ) SOC (
     .clk   (clk),
-    .reset (reset),
+    .rst_n (reset),
     .leds  (led),
     .rx    (),
     .tx    (),
@@ -25,11 +28,13 @@ Grande_Risco_5_SOC #(
 initial begin
     $dumpfile("build/soc.vcd");
     $dumpvars;
+    // Monitor leds signal
+    $monitor("leds = %h", led);
 
     clk = 1'b0;
-    reset = 1'b1;
-    #6
     reset = 1'b0;
+    #6
+    reset = 1'b1;
     //#560
 
     #1200

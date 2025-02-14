@@ -1,6 +1,6 @@
 module CSR_Unit (
     input wire clk,
-    input wire reset,
+    input wire rst_n,
 
     // CSR read/write signals
     input wire write_enable,
@@ -105,7 +105,7 @@ end
 
 // Counters incrementation
 always @(posedge clk ) begin
-    if(reset) begin
+    if(!rst_n) begin
         MCYCLE_reg   <= 64'h0000000000000000;
         MINSTRET_reg <= 64'h0000000000000000;
     end else begin
@@ -120,7 +120,7 @@ end
 always @(posedge clk ) begin
     write_done <= 1'b0;
     
-    if(reset) begin
+    if(!rst_n) begin
         MSTATUS_reg  <= 32'h00000000;
         MIE_reg      <= 32'h00000000;
         MTVEC_reg    <= 32'h00000000;

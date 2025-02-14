@@ -21,7 +21,7 @@ loop:
     j loop
 
 delay:
-    li t0, 100000
+    li t0, 1000000
     li t1, 0
 delay_loop:
     addi t1, t1, 1

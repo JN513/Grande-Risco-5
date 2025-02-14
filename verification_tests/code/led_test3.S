@@ -25,4 +25,5 @@ _start:
     nop
     nop
 
+    li a3, 0x9ABC
     sw a2, 0(a1)

@@ -8,6 +8,9 @@ module BMU ( // Bit manipulation unit for riscv B extension
     output reg [31:0] BMU_out_S
 );
 
+localparam OP = 7'b0110011;
+localparam OPIMM = 7'b0010011;
+
 localparam ANDN   = 5'b00000;
 localparam CLMUL  = 5'b00001; // run in other unit
 localparam CLMULH = 5'b00010; // run in other unit
@@ -41,7 +44,7 @@ always @(*) begin
         ANDN:
             BMU_out_S = BMU_in_X & ~BMU_in_Y;
             
-/*        CLZ: begin
+/*       CLZ: begin
             BMU_out_S = 0;
             for (int i = 31; i >= 0; i = i -1) begin
                 if (BMU_out_X[i] == 1'b0) begin

@@ -103,8 +103,8 @@ DCache #(
 wire d_cache_read_request, d_cache_write_request, d_cache_response;
 wire [31:0] d_cache_read_data;
 
-assign d_cache_read_request  = (~data_address[31]) ? data_read_request  : 1'b0;
-assign d_cache_write_request = (data_address[31])  ? data_write_request : 1'b0;
+assign d_cache_read_request  = (!data_address[31]) ? data_read_request  : 1'b0;
+assign d_cache_write_request = (!data_address[31])  ? data_write_request : 1'b0;
 
 assign peripheral_read_request  = (data_address[31]) ? data_read_request  : 1'b0;
 assign peripheral_write_request = (data_address[31]) ? data_write_request : 1'b0;

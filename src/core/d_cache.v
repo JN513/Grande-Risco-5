@@ -52,13 +52,13 @@ module DCache #(
                 cache_valid   [addr[ADDRES_END_BIT:2]] <= 1'b1;
                 cache_tag     [addr[ADDRES_END_BIT:2]] <= addr[31:ADDRES_END_BIT + 1];
                 cache_data    [addr[ADDRES_END_BIT:2]] <= memory_read_data;
-                miss_finished             <= 1'b1;
+                miss_finished                          <= 1'b1;
             end
             if(write_request) begin
                 cache_valid [addr[ADDRES_END_BIT:2]] <= 1'b1;
                 cache_data  [addr[ADDRES_END_BIT:2]] <= write_data;
                 cache_tag   [addr[ADDRES_END_BIT:2]] <= addr[31:ADDRES_END_BIT + 1];
-                write_through          <= 1'b1;
+                write_through                        <= 1'b1;
             end
             if(write_through && memory_response) begin
                 miss_finished <= 1'b1;
@@ -67,10 +67,10 @@ module DCache #(
         end
     end
 
-    assign memory_addr          = (hit) ? 32'h0 : addr;
+    assign memory_addr          = addr;
     assign memory_read_request  = (hit) ? 1'b0  : read_request;
-    assign memory_write_data    = (hit) ? 32'h0 : write_data;
-    assign memory_write_request = (hit) ? 1'b0  : write_request;
+    assign memory_write_data    = write_data;
+    assign memory_write_request = write_through;
 
     assign response   = hit | miss_finished;
     assign read_data  = cache_data[addr[ADDRES_END_BIT:2]];

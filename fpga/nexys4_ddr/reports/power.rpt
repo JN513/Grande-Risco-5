@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date             : Thu Feb 13 22:47:02 2025
+| Date             : Mon Feb 17 01:56:35 2025
 | Host             : vader running 64-bit Arch Linux
 | Command          : report_power -file reports/power.rpt
 | Design           : top
@@ -30,10 +30,10 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 0.150        |
+| Total On-Chip Power (W)  | 0.156        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 0.052        |
+| Dynamic (W)              | 0.059        |
 | Device Static (W)        | 0.097        |
 | Effective TJA (C/W)      | 4.6          |
 | Max Ambient (C)          | 84.3         |
@@ -53,19 +53,19 @@ Table of Contents
 | On-Chip                  | Power (W) | Used     | Available | Utilization (%) |
 +--------------------------+-----------+----------+-----------+-----------------+
 | Clocks                   |    <0.001 |        3 |       --- |             --- |
-| Slice Logic              |     0.018 |     7209 |       --- |             --- |
-|   LUT as Logic           |     0.017 |     2468 |     63400 |            3.89 |
-|   CARRY4                 |    <0.001 |      127 |     15850 |            0.80 |
-|   Register               |    <0.001 |     2112 |    126800 |            1.67 |
+| Slice Logic              |     0.022 |     7843 |       --- |             --- |
+|   LUT as Logic           |     0.020 |     2841 |     63400 |            4.48 |
+|   CARRY4                 |    <0.001 |      135 |     15850 |            0.85 |
 |   LUT as Distributed RAM |    <0.001 |     1138 |     19000 |            5.99 |
-|   F7/F8 Muxes            |    <0.001 |     1067 |     63400 |            1.68 |
+|   Register               |    <0.001 |     2255 |    126800 |            1.78 |
+|   F7/F8 Muxes            |    <0.001 |     1083 |     63400 |            1.71 |
 |   BUFG                   |    <0.001 |        1 |        32 |            3.13 |
 |   Others                 |     0.000 |       15 |       --- |             --- |
-| Signals                  |     0.027 |     4571 |       --- |             --- |
+| Signals                  |     0.030 |     5068 |       --- |             --- |
 | DSPs                     |     0.004 |        4 |       240 |            1.67 |
 | I/O                      |     0.003 |       19 |       210 |            9.05 |
 | Static Power             |     0.097 |          |           |                 |
-| Total                    |     0.150 |          |           |                 |
+| Total                    |     0.156 |          |           |                 |
 +--------------------------+-----------+----------+-----------+-----------------+
 
 
@@ -75,7 +75,7 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) | Powerup (A) | Budget (A)  | Margin (A) |
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
-| Vccint    |       1.000 |     0.065 |       0.050 |      0.015 |       NA    | Unspecified | NA         |
+| Vccint    |       1.000 |     0.071 |       0.056 |      0.015 |       NA    | Unspecified | NA         |
 | Vccaux    |       1.800 |     0.018 |       0.000 |      0.018 |       NA    | Unspecified | NA         |
 | Vcco33    |       3.300 |     0.005 |       0.001 |      0.004 |       NA    | Unspecified | NA         |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
@@ -141,14 +141,15 @@ Table of Contents
 3.1 By Hierarchy
 ----------------
 
-+------------+-----------+
-| Name       | Power (W) |
-+------------+-----------+
-| top        |     0.052 |
-|   SOC      |     0.047 |
-|     core   |     0.046 |
-|       Core |     0.044 |
-|       M1   |     0.002 |
-+------------+-----------+
++---------------+-----------+
+| Name          | Power (W) |
++---------------+-----------+
+| top           |     0.059 |
+|   SOC         |     0.053 |
+|     Memory    |     0.001 |
+|     Processor |     0.052 |
+|       Core    |     0.050 |
+|       M1      |     0.002 |
++---------------+-----------+
 
 

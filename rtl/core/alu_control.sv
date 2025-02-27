@@ -23,8 +23,6 @@ localparam SLT             = 4'b1110;
 localparam SLT_U           = 4'b1111;
 
 always_comb begin : ALU_CONTROL
-    ALU_OP_o = SUM; // Valor padrão
-
     unique case (ALU_CO_i)
         2'b00: ALU_OP_o = SUM; // Operações de LOAD/STORE
 
@@ -51,6 +49,8 @@ always_comb begin : ALU_CONTROL
                 3'b111: ALU_OP_o = AND;          // ANDI / AND
                 default: ALU_OP_o = SUM;         // Default para operações ALU
             endcase
+
+        default: ALU_OP_o = SUM; // Default
     endcase
 end
 

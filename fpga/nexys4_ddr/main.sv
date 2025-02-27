@@ -32,7 +32,7 @@ logic [31:0] counter;
 
 assign JA = leds;
 
-always @(posedge clk) begin
+always_ff @(posedge clk) begin
     if(!CPU_RESETN) begin
         clk_o <= 1'b0;
         leds <= 8'b0;

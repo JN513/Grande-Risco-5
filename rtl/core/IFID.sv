@@ -1,5 +1,4 @@
 `include "defines.vh"
-`include "grande_risco5_types.sv"
 
 module IFID #(
     parameter BOOT_ADDRESS = 32'h00000000
@@ -13,8 +12,6 @@ module IFID #(
     input logic memory_stall_i,
     input logic execute_stall_i,
 
-    input logic [31:0] INSTRUCTION_i,
-
     input logic [31:0] BRANCH_ADDRESS_i,
 
     input logic [31:0] IMMEDIATE_i,
@@ -22,6 +19,7 @@ module IFID #(
     input logic [31:0] forward_out_a_i,
 
     output logic is_jal_o,
+    output logic IFID_is_compressed_instruction_o,
 
     output logic [31:0] IFID_PC_o,
     output logic [31:0] IFID_IR_o,
@@ -63,7 +61,6 @@ assign unaligned_instruction = {instruction_data_i[15:0], temp_instruction[15:0]
 
 // Desconpressed instruction
 logic [31:0] instr_d_o, instr_c_i;
-logic IFID_is_compressed_instruction;
 logic is_compressed_instruction, illegal_instruction;
 
 assign instr_c_i = (finish_unaligned_pc) ? unaligned_instruction : instruction_data_i;
@@ -80,7 +77,7 @@ always @(posedge clk ) begin // IF/ID
     JALR_PC <= forward_out_a_i + IMMEDIATE_REG_i;
 
     is_different_branch_address    <= PC != (IFID_PC_o + IMMEDIATE_i);
-    IFID_is_compressed_instruction <= 1'b0;
+    IFID_is_compressed_instruction_o <= 1'b0;
 
     if(!rst_n) begin
         pc_is_unaligned     <= 1'b0;
@@ -127,10 +124,10 @@ always @(posedge clk ) begin // IF/ID
             finish_unaligned_pc <= 1'b0;
         end else begin
 
-            if((!instruction_response_i && !memory_stall )) begin //instruction_response_i == 1'b0
+            if((!instruction_response_i && !memory_stall_i )) begin //instruction_response_i == 1'b0
                 IFID_IR_o <= NOP;
                 IFID_PC_o <= BOOT_ADDRESS;
-            end else if (!memory_stall && !execute_stall_i && !flush_bus_o) begin
+            end else if (!memory_stall_i && !execute_stall_i && !flush_bus_o) begin
                 if(finish_unaligned_pc) begin
                     finish_unaligned_pc <= 1'b0;
                     IFID_IR_o <= instr_d_o;
@@ -151,7 +148,7 @@ always @(posedge clk ) begin // IF/ID
                     end
                 end else begin
                     IFID_IR_o                      <= instr_d_o;
-                    IFID_is_compressed_instruction <= is_compressed_instruction;
+                    IFID_is_compressed_instruction_o <= is_compressed_instruction;
                     if(is_compressed_instruction) begin
                         PC <= PC + 'd2;
                         pc_is_unaligned <= 1'b1;

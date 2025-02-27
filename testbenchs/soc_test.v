@@ -1,5 +1,5 @@
-`timescale 1ns/1ns
-module soc_tb();
+`timescale 1ns/1ps
+module top();
 
 reg clk, reset;
 wire rx, tx;
@@ -22,7 +22,8 @@ Grande_Risco_5_SOC #(
     .leds  (led),
     .rx    (),
     .tx    (),
-    .gpios ()
+    .gpios (),
+    .halt  ()
 );
 
 initial begin

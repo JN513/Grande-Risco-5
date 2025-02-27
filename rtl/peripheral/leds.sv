@@ -13,7 +13,7 @@ module LEDs #(
     output logic response
 );
 
-logic [32:0] data;
+logic [31:0] data;
 
 assign response = read || write;
 

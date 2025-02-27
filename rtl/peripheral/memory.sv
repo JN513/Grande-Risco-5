@@ -11,6 +11,9 @@ module Memory #(
     output logic response
 );
 
+
+localparam BIT_INDEX = $clog2(MEMORY_SIZE) - 1'b1;
+
 logic [31:0] memory [(MEMORY_SIZE/4)-1: 0];
 
 `ifdef __ICARUS__
@@ -28,12 +31,12 @@ initial begin
     end
 end
 
-assign read_data = (memory_read == 1'b1) ? memory[address[31:2]] : 32'd0; 
+assign read_data = (memory_read == 1'b1) ? memory[address[BIT_INDEX:2]] : 32'd0; 
 assign response = memory_read | memory_write;
 
 always @(posedge clk ) begin // Always ff does not work with Initialization in slang
     if(memory_write) begin
-        memory[address[31:2]] <= write_data;
+        memory[address[BIT_INDEX:2]] <= write_data;
     end
 end
 

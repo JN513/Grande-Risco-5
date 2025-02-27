@@ -33,7 +33,7 @@ always_comb begin : ALU_LOGIC
         SUB:   ALU_RD_o = ALU_RS1_i - ALU_RS2_i;
         XOR:   ALU_RD_o = ALU_RS1_i ^ ALU_RS2_i;
         NOR:   ALU_RD_o = ~(ALU_RS1_i | ALU_RS2_i);
-        EQUAL: ALU_RD_o = (ALU_RS1_i == ALU_RS2_i);
+        EQUAL: ALU_RD_o = (ALU_RS1_i == ALU_RS2_i) ? 32'h1 : 32'h0;
         
         // Comparações
         SLT:             ALU_RD_o = (ALU_RS1_i < ALU_RS2_i) ? 32'h1 : 32'h0;

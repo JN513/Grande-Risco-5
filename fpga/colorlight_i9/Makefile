@@ -15,8 +15,7 @@ all: ./build/out.bit
 			../../rtl/core/*.sv \
 			../../rtl/peripheral/memory.sv \
 			../../rtl/peripheral/leds.sv \
-			../../rtl/peripheral/soc.sv \
-			../../rtl/core/*.v -top top; \
+			../../rtl/peripheral/soc.sv  -top top; \
 		synth_ecp5 -json ./build/out.json -abc9 \
 	"
 

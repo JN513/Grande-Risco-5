@@ -1,3 +1,5 @@
+`ifndef OPCODES_PKG
+`define OPCODES_PKG
 package opcodes_pkg;
 
     // Instrução NOP (No Operation)
@@ -17,3 +19,4 @@ package opcodes_pkg;
     localparam logic [6:0] ATOMIC_OPCODE    = 7'b0101111;
 
 endpackage
+`endif

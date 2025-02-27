@@ -1,47 +1,46 @@
 module Grande_Risco5 #(
     parameter BOOT_ADDRESS = 32'h00000000,
-    parameter I_CACHE_SIZE = 'd32,
-    parameter D_CACHE_SIZE = 'd32,
-    parameter DATA_WIDTH   = 'd32,
-    parameter ADDR_WIDTH   = 'd32,
-    parameter BAUD_RATE    = 'd115200
+    parameter I_CACHE_SIZE = 32'd32,
+    parameter D_CACHE_SIZE = 32'd32,
+    parameter DATA_WIDTH   = 32'd32,
+    parameter ADDR_WIDTH   = 32'd32,
+    parameter BAUD_RATE    = 32'd115200
 ) (
     // Control signal
-    input wire clk,
-    input wire rst_n,
-    input wire halt,
+    input logic clk,
+    input logic rst_n,
+    input logic halt,
 
     // Memory BUS
-    input  wire memory_response,
-    output wire memory_read_request,
-    output wire memory_write_request,
+    input  logic memory_response,
+    output logic memory_read_request,
+    output logic memory_write_request,
 
-    input wire  [31:0] memory_read_data,
-    output wire [31:0] memory_write_data,
-    output wire [31:0] memory_addr,
+    input  logic [31:0] memory_read_data,
+    output logic [31:0] memory_write_data,
+    output logic [31:0] memory_addr,
 
     // Peripheral Bus
-    input  wire peripheral_response,
-    output wire peripheral_read_request,
-    output wire peripheral_write_request,
+    input  logic peripheral_response,
+    output logic peripheral_read_request,
+    output logic peripheral_write_request,
 
-    input wire  [31:0] peripheral_read_data,
-    output wire [31:0] peripheral_write_data,
-    output wire [31:0] peripheral_addr,
+    input  logic [31:0] peripheral_read_data,
+    output logic [31:0] peripheral_write_data,
+    output logic [31:0] peripheral_addr,
 
-    input wire interruption
+    input logic interruption
 );
 
-wire instruction_response, flush_bus, instruction_request;
-wire [31:0] instruction_address, instruction_data;
+logic instruction_response, flush_bus, instruction_request;
+logic [31:0] instruction_address, instruction_data;
 
-wire data_read_request, data_write_request, data_memory_response;
-wire [31:0] data_read_data, data_write_data, data_address;
+logic data_read_request, data_write_request, data_memory_response;
+logic [31:0] data_read_data, data_write_data, data_address;
 
 // Bus logic for data memory and peripheral
-
-wire d_cache_read_request, d_cache_write_request, d_cache_response;
-wire [31:0] d_cache_read_data;
+logic d_cache_read_request, d_cache_write_request, d_cache_response;
+logic [31:0] d_cache_read_data;
 
 assign d_cache_read_request  = (!data_address[31]) ? data_read_request  : 1'b0;
 assign d_cache_write_request = (!data_address[31])  ? data_write_request : 1'b0;
@@ -57,16 +56,15 @@ assign peripheral_write_data = data_write_data;
 assign data_read_data = (data_address[31]) ? peripheral_read_data : d_cache_read_data;
 
 // Bus logic for memory
-
-wire d_cache_memory_write_request, d_cache_memory_read_request, 
+logic d_cache_memory_write_request, d_cache_memory_read_request, 
     d_cache_memory_response;
 
-wire i_cache_memory_read_request, i_cache_memory_response;
+logic i_cache_memory_read_request, i_cache_memory_response;
 
-wire [31:0] d_cache_memory_write_data, d_cache_memory_read_data,
+logic [31:0] d_cache_memory_write_data, d_cache_memory_read_data,
     d_cache_memory_addr;
 
-wire [31:0] i_cache_memory_read_data, i_cache_memory_addr;
+logic [31:0] i_cache_memory_read_data, i_cache_memory_addr;
 
 Core #(
     .BOOT_ADDRESS(BOOT_ADDRESS)
@@ -74,18 +72,18 @@ Core #(
     .clk   (clk),
     .rst_n (rst_n),
 
-    .flush_bus            (flush_bus),
-    .instruction_request  (instruction_request),
-    .instruction_response (instruction_response),
-    .instruction_address  (instruction_address),
-    .instruction_data     (instruction_data),
+    .instr_flush_o (flush_bus),
+    .instr_req_o   (instruction_request),
+    .instr_rsp_i   (instruction_response),
+    .instr_addr_o  (instruction_address),
+    .instr_data_i  (instruction_data),
 
-    .data_memory_response (data_memory_response),
-    .data_address         (data_address),
-    .data_memory_read     (data_read_request),
-    .data_memory_write    (data_write_request),
-    .write_data           (data_write_data),
-    .read_data            (data_read_data)
+    .data_mem_rsp_i (data_memory_response),
+    .data_addr_o    (data_address),
+    .data_mem_rd_o  (data_read_request),
+    .data_mem_wr_o  (data_write_request),
+    .data_write_o   (data_write_data),
+    .data_read_i    (data_read_data)
 );
 
 ICache #(
@@ -119,7 +117,6 @@ DCache #(
     .read_data     (d_cache_read_data),
     .write_data    (data_write_data),
 
-
     .memory_read_request  (d_cache_memory_read_request),
     .memory_write_request (d_cache_memory_write_request),
     .memory_response      (d_cache_memory_response),
@@ -127,7 +124,6 @@ DCache #(
     .memory_read_data     (d_cache_memory_read_data),
     .memory_write_data    (d_cache_memory_write_data)
 );
-
 
 Cache_request_Multiplexer #(
     .DATA_WIDTH (DATA_WIDTH),

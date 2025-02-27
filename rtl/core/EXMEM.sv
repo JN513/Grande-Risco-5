@@ -5,7 +5,7 @@ module EXMEM (
     input logic rst_n,
 
     input logic execute_stall_i,
-    input logic immediate_i,
+    input logic [31:0] immediate_i,
     input logic [31:0] IDEXIR_i,
     input logic [31:0] ALU_data_i,
     input logic [31:0] MDU_data_i,
@@ -13,16 +13,18 @@ module EXMEM (
     input logic [31:0] forward_out_b_i,
 
 
-    output logic memory_stall_o
+    output logic memory_stall_o,
     `ifdef ENABLE_MDU
     output logic EXMEMMDUop_o,
     output logic [31:0] EXMEMMDUOut_o,
     `endif
     output logic [31:0] EXMEMALUOut_o,
     output logic [31:0] EXMEMIR_o,
-    output logic [31:0] Merge_Word_o,
     output logic [31:0] IMMEDIATE_REG_o,
     output logic [31:0] Merged_Word_o,
+    output logic memory_operation_o,
+    output logic [6:0] EXMEMop_o,
+    output logic [4:0] EXMEMrd_o,
 
     // Data BUS
 
@@ -34,7 +36,10 @@ module EXMEM (
     output logic [31:0] write_data
 );
 
-logic memory_read, memory_write, memory_operation;
+// Importando os opcodes do pacote
+import opcodes_pkg::*;
+
+logic memory_read, memory_write;
 logic [2:0] EXMEMfunc3;
 logic [4:0] EXMEMfunc5;
 logic [4:0] EXMEMrd;
@@ -44,12 +49,12 @@ logic [31:0] EXMEM_mem_data_value;
 // Unaligned logic
 
 logic unaligned_access_in_progress;
-assign memory_stall_o = (memory_operation & ~data_memory_response) | unaligned_access_in_progress;
+assign memory_stall_o = (memory_operation_o & ~data_memory_response) | unaligned_access_in_progress;
 
 
 logic is_unaligned_address;
 
-assign is_unaligned_address = (memory_operation && EXMEMALUOut_o[1:0] != 2'b00);
+assign is_unaligned_address = (memory_operation_o && EXMEMALUOut_o[1:0] != 2'b00);
 
 typedef enum logic [3:0] { 
     IDLE                      = 4'b0000,
@@ -79,7 +84,7 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
     end else if(unaligned_access_in_progress) begin 
         case (unaligned_access_state)
             IDLE: begin
-                memory_operation <= 1'b0;
+                memory_operation_o <= 1'b0;
                 if(EXMEMop == LW_OPCODE) begin
                     unaligned_access_state <= READ_FIRST_WORD;
                 end else if(EXMEMop == SW_OPCODE) begin
@@ -106,21 +111,21 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
             end
             MERGE_WORDS: begin
                 if(data_address[1:0] == 2'b01) begin
-                    Merged_Word_o, <= {Second_Word[7:0], First_Word[31:8]};
+                    Merged_Word_o <= {Second_Word[7:0], First_Word[31:8]};
                 end else if(data_address[1:0] == 2'b10) begin
-                    Merged_Word_o, <= {Second_Word[15:0], First_Word[31:16]};
+                    Merged_Word_o <= {Second_Word[15:0], First_Word[31:16]};
                 end else if(data_address[1:0] == 2'b11) begin
-                    Merged_Word_o, <= {Second_Word[23:0], First_Word[31:24]};
+                    Merged_Word_o <= {Second_Word[23:0], First_Word[31:24]};
                 end
                 unaligned_access_state <= CUT_WORDS;
             end
             CUT_WORDS: begin
                 case (EXMEMfunc3)
-                    3'b000: Merged_Word_o, <= {{24{Merged_Word_o,[7]}}, Merged_Word_o,[7:0]};
-                    3'b001: Merged_Word_o, <= {{16{Merged_Word_o,[15]}}, Merged_Word_o,[15:0]};
-                    3'b100: Merged_Word_o, <= {24'h0, Merged_Word_o,[7:0]};
-                    3'b101: Merged_Word_o, <= {16'h0, Merged_Word_o,[15:0]};
-                    default: Merged_Word_o, <= Merged_Word_o,;
+                    3'b000: Merged_Word_o <= {{24{Merged_Word_o[7]}}, Merged_Word_o[7:0]};
+                    3'b001: Merged_Word_o <= {{16{Merged_Word_o[15]}}, Merged_Word_o[15:0]};
+                    3'b100: Merged_Word_o <= {24'h0, Merged_Word_o[7:0]};
+                    3'b101: Merged_Word_o <= {16'h0, Merged_Word_o[15:0]};
+                    default: Merged_Word_o <= Merged_Word_o;
                 endcase
 
                 unaligned_access_state <= IDLE;
@@ -139,9 +144,9 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
                 if(Data_Address[1:0] == 2'b01) begin
                     EXMEM_mem_data_value <= {EXMEM_mem_data_value[23:0], First_Word[7:0]};
                 end else if(Data_Address[1:0] == 2'b10) begin
-                    EXMEM_mem_data_value <= {EXMEM_mem_data_value[15:0], First_Word[15:8]};
+                    EXMEM_mem_data_value <= {EXMEM_mem_data_value[15:0], First_Word[15:0]};
                 end else if(Data_Address[1:0] == 2'b11) begin
-                    EXMEM_mem_data_value <= {EXMEM_mem_data_value[7:0], First_Word[23:16]};
+                    EXMEM_mem_data_value <= {EXMEM_mem_data_value[7:0], First_Word[23:0]};
                 end
                 memory_write <= 1'b1;
                 unaligned_access_state <= WRITE_FIRST_WORD;
@@ -188,7 +193,7 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
             IMMEDIATE_REG_o <= immediate_i;
         
         if(!memory_stall_o) begin
-            memory_operation <= (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
+            memory_operation_o <= (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
             unaligned_access_in_progress <= |ALU_data_i[1:0] && (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
 
             EXMEMIR_o <= IDEXIR_i;
@@ -211,7 +216,7 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
 
             EXMEM_mem_data_value <= forward_out_b_i; 
         end else begin
-            memory_operation <= (EXMEMop == LW_OPCODE || EXMEMop == SW_OPCODE);
+            memory_operation_o <= (EXMEMop == LW_OPCODE || EXMEMop == SW_OPCODE);
 
             if(EXMEMop == LW_OPCODE) begin
                 memory_read <= 1'b1;
@@ -225,6 +230,8 @@ assign EXMEMop    = EXMEMIR_o[6:0];
 assign EXMEMrd    = EXMEMIR_o[11:7];
 assign EXMEMfunc3 = EXMEMIR_o[14:12];
 assign EXMEMfunc5 = EXMEMIR_o[31:27];
+assign EXMEMop_o  = EXMEMop;
+assign EXMEMrd_o  = EXMEMrd;
 
 assign write_data        = EXMEM_mem_data_value;
 assign data_address      = Data_Address;

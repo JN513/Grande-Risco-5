@@ -77,7 +77,7 @@ always_ff @(posedge clk) begin : MUL_FSM_FPGA
                 if(valid_i & !MDU_op_i[2]) begin
                     state_mul <= MUL_OPERATE;
                     if(MDU_op_i[1]) begin
-                        Data_X <= (MDU_op_i[0]) ? $unsigned(MDU_RS1_i) : $signed({MDU_RS1_i[31], MDU_RS1_i});
+                        Data_X <= (MDU_op_i[0]) ? $unsigned(MDU_RS1_i) : $signed({MDU_RS1_i});
                         Data_Y <= $unsigned(MDU_RS2_i);
                     end else begin
                         Data_X <= $signed(MDU_RS1_i);
@@ -207,7 +207,7 @@ div_state_t state_div;
 
 logic negativo, div_ready_o;
 logic [31:0] dividendo, quociente, quociente_msk, DIV_RD;
-logic [63:0] divisor;
+logic [62:0] divisor;
 
 always_ff @(posedge clk) begin : DIV_FSM
     div_ready_o <= 1'b0;
@@ -235,11 +235,14 @@ always_ff @(posedge clk) begin : DIV_FSM
                 end else begin
                     state_div <= DIV_OPERATE;
                 end
-
+                /* verilator lint_off WIDTHEXPAND */
+                /* verilator lint_off WIDTHTRUNC */
                 if(divisor <= dividendo) begin
                     dividendo <= dividendo - divisor;
                     quociente <= quociente | quociente_msk;
                 end
+                /* verilator lint_on WIDTHEXPAND */
+                /* verilator lint_on WIDTHTRUNC */
 
                 divisor <= divisor >> 1;
                 quociente_msk <= quociente_msk >> 1;

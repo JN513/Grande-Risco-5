@@ -1,5 +1,4 @@
 `include "defines.vh"
-`include "grande_risco5_types.sv"
 
 module MEMWB (
     input logic clk,

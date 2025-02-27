@@ -1,5 +1,4 @@
 `include "defines.vh"
-`include "grande_risco5_types.sv"
 
 module IDEX (
     input logic clk,
@@ -39,13 +38,14 @@ module IDEX (
     output logic mdu_operation_o,
     `endif
     output logic is_immediate_o,
-    output logic [31:0] immediate_o,
-    output logic execute_stall_o
+    output logic [31:0] immediate_o
 );
 
 // Importando os opcodes do pacote
 import opcodes_pkg::*;
 
+logic zero;
+logic mdu_start;
 logic func7_lsb, mdu_done, is_immediate_reg_not, is_branch;
 logic [1:0] aluop, op_rs1, op_rs2;
 logic [2:0] IDEXfunc3;
@@ -124,22 +124,22 @@ logic [31:0] alu_input_a, alu_input_b;
 
 always_comb begin
     case (IDEXop)
-        JAL_OPCODE, JALR_OPCODE, AUIPC_OPCODE: alu_input_a = IDEXPC;
+        JAL_OPCODE, JALR_OPCODE, AUIPC_OPCODE: alu_input_a = IDEXPC_o;
         LUI_OPCODE: alu_input_a = 32'h00000000;
-        default: alu_input_a = forward_out_a;
+        default: alu_input_a = forward_out_a_o;
     endcase
 
     case (IDEXop)
-        JAL_OPCODE, JALR_OPCODE: alu_input_b = (IDEX_is_compressed_instruction) ? 32'h2 : 32'h4;
+        JAL_OPCODE, JALR_OPCODE: alu_input_b = (IDEX_is_compressed_instruction_o) ? 32'h2 : 32'h4;
         AUIPC_OPCODE, LUI_OPCODE, SW_OPCODE, IMMEDIATE_OPCODE, LW_OPCODE: 
         alu_input_b = IMMEDIATE_REG_i;
-        default: alu_input_b = forward_out_b;
+        default: alu_input_b = forward_out_b_o;
     endcase
 end
 
 
 ALU_Control ALU_Control(
-    .is_immediate_o_i (is_immediate_o),
+    .is_immediate_i (is_immediate_o),
     .ALU_CO_i       (aluop),
     .FUNC7_i        (IFIDIR_i[31:25]),
     .FUNC3_i        (IFIDIR_i[14:12]),
@@ -194,8 +194,8 @@ MDU Mdu(
     .rst_n     (rst_n),
     .valid_i   (mdu_start),
     .MDU_op_i  (IDEXfunc3),
-    .MDU_RS1_i (forward_out_a),
-    .MDU_RS2_i (forward_out_b),
+    .MDU_RS1_i (forward_out_a_o),
+    .MDU_RS2_i (forward_out_b_o),
     .ready_o   (mdu_done),
     .MDU_RD_o  (MDU_data_o)
 );

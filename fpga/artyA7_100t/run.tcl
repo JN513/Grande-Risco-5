@@ -21,7 +21,7 @@ read_verilog ../../src/peripheral/leds.v
 read_verilog ../../src/peripheral/memory.v
 read_verilog ../../src/peripheral/soc.v
 
-read_xdc "digilent_arty.xdc"
+read_xdc "pinout.xdc"
 
 # synth
 synth_design -top "top" -part "xc7a100tcsg324-1"

@@ -90,6 +90,29 @@ reg is_different_branch_address, pc_is_unaligned, finish_unaligned_pc;
 
 assign branch_flush = (is_different_branch_address & takebranch);
 
+// Unaligned instruction
+reg [31:0] temp_instruction, temp_pc;
+wire [31:0] unaligned_instruction;
+
+assign unaligned_instruction = {instruction_data[15:0], temp_instruction[15:0]};
+
+// Desconpressed instruction
+wire [31:0] decompressed_instruction_data_out, decompressed_instruction_data_in;
+wire is_compressed_instruction, illegal_instruction;
+
+assign decompressed_instruction_data_in = (finish_unaligned_pc) ? unaligned_instruction : instruction_data;
+
+// MUD
+
+`ifdef ENABLE_MDU
+
+reg mdu_start, mdu_operation, EXMEMMDUop;
+reg [31:0] EXMEMMDUOut;
+wire mdu_done, func7_lsb;
+wire [31:0] MDU_out;
+`endif
+
+
 always @(posedge clk ) begin // IF/ID
     instruction_request <= 1'b1;
     flush_bus           <= 1'b0;
@@ -185,11 +208,6 @@ always @(posedge clk ) begin // IF/ID
     end  
 end
 
-reg [31:0] temp_instruction, temp_pc;
-wire [31:0] unaligned_instruction;
-
-assign unaligned_instruction = {instruction_data[15:0], temp_instruction[15:0]};
-
 reg previous_instruction_is_lw;
 reg IFID_ilegal_instruction; // EX AMO OPCODE and func3 != 010
 
@@ -254,9 +272,11 @@ assign execute_stall = (&op_rs1 || (&op_rs2 && is_immediate_reg_not)
     || (!mdu_done && mdu_operation)
 `endif
 );
-assign memory_stall = (memory_operation & ~data_memory_response) | unaligned_access_in_progress;
 
 reg unaligned_access_in_progress;
+assign memory_stall = (memory_operation & ~data_memory_response) | unaligned_access_in_progress;
+
+
 wire is_unaligned_address;
 
 assign is_unaligned_address = (memory_operation && EXMEMALUOut[1:0] != 2'b00);
@@ -277,6 +297,7 @@ reg [3:0] unaligned_access_state;
 reg [31:0] First_Word, Second_Word;
 
 reg [31:0] Merged_word;
+reg [31:0] Data_Address;
 
 always @(posedge clk ) begin // EX/MEM
     is_immediate_reg_not <= ~is_immediate;
@@ -431,7 +452,6 @@ always @(posedge clk ) begin // EX/MEM
     end   
 end
 
-reg [31:0] Data_Address;
 
 always @(posedge clk ) begin // MEM/WB
     reg_write    <= 1'b0;
@@ -485,96 +505,89 @@ always @(*) begin
     endcase
 end
 
-wire [31:0] decompressed_instruction_data_out, decompressed_instruction_data_in;
-wire is_compressed_instruction, illegal_instruction;
-
-assign decompressed_instruction_data_in = (finish_unaligned_pc) ? unaligned_instruction : instruction_data;
 
 IR_Decompression IR_Decompression(
-    .compressed_instruction    (decompressed_instruction_data_in),
-    .is_compressed_instruction (is_compressed_instruction),
-    .decompressed_instruction  (decompressed_instruction_data_out),
-    .illegal_instruction       (illegal_instruction)
+    .instr_c_i       (decompressed_instruction_data_in),
+    .instr_is_c_o    (is_compressed_instruction),
+    .instr_d_o       (decompressed_instruction_data_out),
+    .instr_illegal_o (illegal_instruction)
 );
 
 Registers RegisterBank(
-    .clk           (clk),
-    .regWrite      (reg_write),
-    .readRegister1 (IFIDrs1),
-    .readRegister2 (IFIDrs2),
-    .writeRegister (MEMWBrd),
-    .writeData     (MEMWBValue),
-    .readData1     (register_data_1_out),
-    .readData2     (register_data_2_out)
+    .clk        (clk),
+    .wr_en_i    (reg_write),
+    .RS1_ADDR_i (IFIDrs1),
+    .RS2_ADDR_i (IFIDrs2),
+    .RD_ADDR_i  (MEMWBrd),
+    .data_i     (MEMWBValue),
+    .RS1_data_o (register_data_1_out),
+    .RS2_data_o (register_data_2_out)
 );
 
 ALU_Control ALU_Control(
-    .is_immediate (is_immediate),
-    .aluop_in     (aluop),
-    .func7        (IFIDIR[31:25]),
-    .func3        (IFIDIR[14:12]),
-    .aluop_out    (aluop_out)
+    .is_immediate_i (is_immediate),
+    .ALU_CO_i       (aluop),
+    .FUNC7_i        (IFIDIR[31:25]),
+    .FUNC3_i        (IFIDIR[14:12]),
+    .ALU_OP_o       (aluop_out)
 );
 
 Alu Alu(
-    .operation (aluop_out_reg),
-    .ALU_in_X  (alu_input_a),
-    .ALU_in_Y  (alu_input_b),
-    .ALU_out_S (alu_out),
-    .ZR        (zero)
+    .ALU_OP_i  (aluop_out_reg),
+    .ALU_RS1_i (alu_input_a),
+    .ALU_RS2_i (alu_input_b),
+    .ALU_RD_o  (alu_out),
+    .ALU_ZR_o  (zero)
 );
 
 `ifdef ENABLE_MDU
-
-reg mdu_start, mdu_operation, EXMEMMDUop;
-reg [31:0] EXMEMMDUOut;
-wire mdu_done, func7_lsb;
-wire [31:0] MDU_out;
 
 assign func7_lsb = IFIDIR[25];
 
 MDU Mdu(
     .clk       (clk),
     .rst_n     (rst_n),
-    .start     (mdu_start),
-    .operation (IDEXfunc3),
-    .MDU_in_X  (forward_out_a),
-    .MDU_in_Y  (forward_out_b),
-    .done      (mdu_done),
-    .MDU_out   (MDU_out)
+    .valid_i   (mdu_start),
+    .MDU_op_i  (IDEXfunc3),
+    .MDU_RS1_i (forward_out_a),
+    .MDU_RS2_i (forward_out_b),
+    .ready_o   (mdu_done),
+    .MDU_RD_o  (MDU_out)
 );
 
 `endif
 
 Immediate_Generator Immediate_Generator(
-    .instruction (IFIDIR),
-    .immediate   (immediate)
+    .instr_i (IFIDIR),
+    .imm_o   (immediate)
 );
 
 Forwarding_Unit Forwarding_Unit(
-    .rs1                        (IDEXrs1),
-    .rs2                        (IDEXrs2),
-    .ex_mem_stage_rd            (EXMEMrd),
-    .mem_wb_stage_rd            (MEMWBrd),
-    .previous_instruction_is_lw (previous_instruction_is_lw),
-    .op_rs1                     (op_rs1),
-    .op_rs2                     (op_rs2)
+    .rs1_i              (IDEXrs1),
+    .rs2_i              (IDEXrs2),
+    .ex_mem_rd_i        (EXMEMrd),
+    .mem_wb_rd_i        (MEMWBrd),
+    .prev_instr_is_lw_i (previous_instruction_is_lw),
+    .fwd_rs1_o          (op_rs1),
+    .fwd_rs2_o          (op_rs2)
 );
 
 MUX ForwardAMUX(
-    .option (op_rs1),
-    .A      (IDEXA),
-    .B      (MEMWBValue),
-    .C      (EXMEMALUOut),
-    .S      (forward_out_a)
+    .op_i (op_rs1),
+    .A_i  (IDEXA),
+    .B_i  (MEMWBValue),
+    .C_i  (EXMEMALUOut),
+    .D_i  (),
+    .S_o  (forward_out_a)
 );
 
 MUX ForwardBMUX(
-    .option (op_rs2),
-    .A      (IDEXB),
-    .B      (MEMWBValue),
-    .C      (EXMEMALUOut),
-    .S      (forward_out_b)
+    .op_i (op_rs2),
+    .A_i  (IDEXB),
+    .B_i  (MEMWBValue),
+    .C_i  (EXMEMALUOut),
+    .D_i  (),
+    .S_o  (forward_out_b)
 );
 
 assign takebranch          = (zero && is_branch);

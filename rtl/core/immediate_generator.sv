@@ -1,6 +1,6 @@
 module Immediate_Generator (
-    input  logic [31:0] instruction,
-    output logic [31:0] immediate
+    input  logic [31:0] instr_i,  // Entrada: Instrução
+    output logic [31:0] imm_o     // Saída: Imediato extraído da instrução
 );
 
 
@@ -14,39 +14,39 @@ localparam AUIPC_OPCODE     = 7'b0010111;
 localparam BRANCH_OPCODE    = 7'b1100011;
 localparam IMMEDIATE_OPCODE = 7'b0010011;
 
-logic [6:0] opcode;
-logic [2:0] func3;
+logic [6:0] instr_opcode;
+logic [2:0] instr_func3;
 
-always_comb begin : IMMEDIATE_GENERATOR
-    case (opcode)
+always_comb begin : imm_o_GENERATOR
+    case (instr_opcode)
         BRANCH_OPCODE: // SB type
-            immediate = {{19{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
+            imm_o = {{19{instr_i[31]}}, instr_i[31], instr_i[7], instr_i[30:25], instr_i[11:8], 1'b0};
         JAL_OPCODE: // UJ type JAL
-            immediate = {{11{instruction[31]}}, instruction[31], instruction[19:12], instruction[20], instruction[30:21], 1'b0};
+            imm_o = {{11{instr_i[31]}}, instr_i[31], instr_i[19:12], instr_i[20], instr_i[30:21], 1'b0};
         AUIPC_OPCODE: // AUIPC U type
-            immediate = {instruction[31:12], 12'h000};
+            imm_o = {instr_i[31:12], 12'h000};
         LUI_OPCODE: // LUI U type
-            immediate = {instruction[31:12], 12'h000};
-        LW_OPCODE: // lw instruction 
-            immediate = {{20{instruction[31]}}, instruction[31:20]};
-        IMMEDIATE_OPCODE: // I type instruction
-            case (func3)
-                3'b001: immediate = {{27{instruction[24]}}, instruction[24:20]};
-                3'b011: immediate = {20'h00000, instruction[31:20]};
-                3'b101: immediate = {{27'h0000000}, instruction[24:20]};
-                default: immediate = {{20{instruction[31]}}, instruction[31:20]};
+            imm_o = {instr_i[31:12], 12'h000};
+        LW_OPCODE: // lw instr_i 
+            imm_o = {{20{instr_i[31]}}, instr_i[31:20]};
+        IMMEDIATE_OPCODE: // I type instr_i
+            case (instr_func3)
+                3'b001: imm_o = {{27{instr_i[24]}}, instr_i[24:20]};
+                3'b011: imm_o = {20'h00000, instr_i[31:20]};
+                3'b101: imm_o = {{27'h0000000}, instr_i[24:20]};
+                default: imm_o = {{20{instr_i[31]}}, instr_i[31:20]};
             endcase
-        JALR_OPCODE: // I type instruction JALR
-            immediate = {{20{instruction[31]}}, instruction[31:20]};
-        CSR_OPCODE: // I type instruction  CSR
-            immediate = {20'h00000, instruction[31:20]};
-        SW_OPCODE: // sw instruction  (S type)
-            immediate = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]};
-        default: immediate = 32'h00000000;
+        JALR_OPCODE: // I type instr_i JALR
+            imm_o = {{20{instr_i[31]}}, instr_i[31:20]};
+        CSR_OPCODE: // I type instr_i  CSR
+            imm_o = {20'h00000, instr_i[31:20]};
+        SW_OPCODE: // sw instr_i  (S type)
+            imm_o = {{20{instr_i[31]}}, instr_i[31:25], instr_i[11:7]};
+        default: imm_o = 32'h00000000;
     endcase
 end
 
-assign opcode = instruction[6:0];
-assign func3  = instruction[14:12];
+assign instr_opcode = instr_i[6:0];
+assign instr_func3  = instr_i[14:12];
     
 endmodule

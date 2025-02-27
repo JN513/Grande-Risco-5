@@ -28,6 +28,11 @@ logic memory_response, memory_read_request,
 logic [DATA_WIDTH-1:0] memory_read_data,
     memory_write_data, memory_addr;
 
+logic peripheral_read_request, peripheral_write_request,
+    peripheral_response;
+logic [31:0] peripheral_addr, peripheral_read_data,
+    peripheral_write_data;
+
 Grande_Risco5 #(
     .BOOT_ADDRESS (BOOT_ADDRESS),
     .I_CACHE_SIZE (I_CACHE_SIZE),
@@ -68,11 +73,6 @@ Memory #(
     .write_data   (memory_write_data),
     .response     (memory_response)
 );
-
-logic peripheral_read_request, peripheral_write_request,
-    peripheral_response;
-logic [31:0] peripheral_addr, peripheral_read_data,
-    peripheral_write_data;
 
 LEDs #(
     .DEVICE_START_ADDRESS (32'h00001000),

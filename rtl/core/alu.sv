@@ -1,9 +1,9 @@
 module Alu (
-    input  logic [3:0] operation,
-    input  logic [31:0] ALU_in_X,
-    input  logic [31:0] ALU_in_Y,
-    output logic [31:0] ALU_out_S,
-    output logic ZR
+    input  logic [3:0]  ALU_OP_i,
+    input  logic [31:0] ALU_RS1_i,
+    input  logic [31:0] ALU_RS2_i,
+    output logic [31:0] ALU_RD_o,
+    output logic ALU_ZR_o
 );
 
 // Definição dos opcodes
@@ -22,31 +22,31 @@ localparam XOR             = 4'b1000;
 localparam NOR             = 4'b1001;
 localparam EQUAL           = 4'b0011;
 
-// Define ZR como 1 se ALU_out_S for 0 (exceto para branches)
-assign ZR = ~( |ALU_out_S ) && operation[3:2] != 2'b01;
+// Define ALU_ZR_o como 1 se ALU_RD_o, for 0 (exceto para branches)
+assign ALU_ZR_o = ~( |ALU_RD_o) && ALU_OP_i[3:2] != 2'b01;
 
-always_comb begin : ALU_OPERATION
-    unique case (operation)
-        AND:   ALU_out_S = ALU_in_X & ALU_in_Y;
-        OR:    ALU_out_S = ALU_in_X | ALU_in_Y;
-        SUM:   ALU_out_S = ALU_in_X + ALU_in_Y;
-        SUB:   ALU_out_S = ALU_in_X - ALU_in_Y;
-        XOR:   ALU_out_S = ALU_in_X ^ ALU_in_Y;
-        NOR:   ALU_out_S = ~(ALU_in_X | ALU_in_Y);
-        EQUAL: ALU_out_S = (ALU_in_X == ALU_in_Y);
+always_comb begin : ALU_LOGIC
+    unique case (ALU_OP_i)
+        AND:   ALU_RD_o = ALU_RS1_i & ALU_RS2_i;
+        OR:    ALU_RD_o = ALU_RS1_i | ALU_RS2_i;
+        SUM:   ALU_RD_o = ALU_RS1_i + ALU_RS2_i;
+        SUB:   ALU_RD_o = ALU_RS1_i - ALU_RS2_i;
+        XOR:   ALU_RD_o = ALU_RS1_i ^ ALU_RS2_i;
+        NOR:   ALU_RD_o = ~(ALU_RS1_i | ALU_RS2_i);
+        EQUAL: ALU_RD_o = (ALU_RS1_i == ALU_RS2_i);
         
         // Comparações
-        SLT:             ALU_out_S = (ALU_in_X < ALU_in_Y) ? 32'h1 : 32'h0;
-        SLT_U:           ALU_out_S = ($unsigned(ALU_in_X) < $unsigned(ALU_in_Y)) ? 32'h1 : 32'h0;
-        GREATER_EQUAL:   ALU_out_S = (ALU_in_X >= ALU_in_Y) ? 32'h1 : 32'h0;
-        GREATER_EQUAL_U: ALU_out_S = ($unsigned(ALU_in_X) >= $unsigned(ALU_in_Y)) ? 32'h1 : 32'h0;
+        SLT:             ALU_RD_o = (ALU_RS1_i < ALU_RS2_i) ? 32'h1 : 32'h0;
+        SLT_U:           ALU_RD_o = ($unsigned(ALU_RS1_i) < $unsigned(ALU_RS2_i)) ? 32'h1 : 32'h0;
+        GREATER_EQUAL:   ALU_RD_o = (ALU_RS1_i >= ALU_RS2_i) ? 32'h1 : 32'h0;
+        GREATER_EQUAL_U: ALU_RD_o = ($unsigned(ALU_RS1_i) >= $unsigned(ALU_RS2_i)) ? 32'h1 : 32'h0;
         
         // Shifts
-        SHIFT_LEFT:    ALU_out_S = ALU_in_X << ALU_in_Y[4:0];
-        SHIFT_RIGHT:   ALU_out_S = ALU_in_X >> ALU_in_Y[4:0];
-        SHIFT_RIGHT_A: ALU_out_S = ALU_in_X >>> ALU_in_Y[4:0];
+        SHIFT_LEFT:    ALU_RD_o = ALU_RS1_i << ALU_RS2_i[4:0];
+        SHIFT_RIGHT:   ALU_RD_o = ALU_RS1_i >> ALU_RS2_i[4:0];
+        SHIFT_RIGHT_A: ALU_RD_o = ALU_RS1_i >>> ALU_RS2_i[4:0];
 
-        default: ALU_out_S = ALU_in_X; // Operação padrão
+        default: ALU_RD_o = ALU_RS1_i; // Operação padrão
     endcase
 end
 

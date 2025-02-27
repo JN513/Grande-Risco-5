@@ -1,38 +1,38 @@
 module Forwarding_Unit (
-    input  logic previous_instruction_is_lw,
-    input  logic [4:0] rs1,
-    input  logic [4:0] rs2,
-    input  logic [4:0] ex_mem_stage_rd,
-    input  logic [4:0] mem_wb_stage_rd,
-    output logic [1:0] op_rs1,
-    output logic [1:0] op_rs2
+    input  logic prev_instr_is_lw_i,  // Indica se a instrução anterior era LW
+    input  logic [4:0] rs1_i,         // Registrador fonte 1
+    input  logic [4:0] rs2_i,         // Registrador fonte 2
+    input  logic [4:0] ex_mem_rd_i,   // Destino da instrução no estágio EX/MEM
+    input  logic [4:0] mem_wb_rd_i,   // Destino da instrução no estágio MEM/WB
+    output logic [1:0] fwd_rs1_o,     // Controle de forwarding para rs1
+    output logic [1:0] fwd_rs2_o      // Controle de forwarding para rs2
 );
 
 localparam LW_OPCODE = 7'b0000011;
 
 always_comb begin : FORWARDING_UNIT_LOGIC
-    op_rs1 = 2'b00;
-    op_rs2 = 2'b00;
+    fwd_rs1_o = 2'b00;
+    fwd_rs2_o = 2'b00;
 
-    if(ex_mem_stage_rd == rs1 && |rs1) begin
-        if(previous_instruction_is_lw) begin
-            op_rs1 = 2'b11;
+    if (ex_mem_rd_i == rs1_i && |rs1_i) begin
+        if (prev_instr_is_lw_i) begin
+            fwd_rs1_o = 2'b11;
         end else begin
-            op_rs1 = 2'b10;
+            fwd_rs1_o = 2'b10;
         end
-    end else if(mem_wb_stage_rd == rs1 && |rs1) begin
-        op_rs1 = 2'b01;
+    end else if (mem_wb_rd_i == rs1_i && |rs1_i) begin
+        fwd_rs1_o = 2'b01;
     end
 
-    if(ex_mem_stage_rd == rs2 && |rs2) begin
-        if(previous_instruction_is_lw) begin
-            op_rs2 = 2'b11;
+    if (ex_mem_rd_i == rs2_i && |rs2_i) begin
+        if (prev_instr_is_lw_i) begin
+            fwd_rs2_o = 2'b11;
         end else begin
-            op_rs2 = 2'b10;
+            fwd_rs2_o = 2'b10;
         end
-    end else if(mem_wb_stage_rd == rs2 && |rs2) begin
-        op_rs2 = 2'b01;
+    end else if (mem_wb_rd_i == rs2_i && |rs2_i) begin
+        fwd_rs2_o = 2'b01;
     end
 end
-    
+
 endmodule

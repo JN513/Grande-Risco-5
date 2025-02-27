@@ -1,21 +1,12 @@
 module top (
-    input wire clk,
-    input wire reset,
-    output wire [7:0]led
-);
-
-wire reset_o;
-
-ResetBootSystem #(
-    .CYCLES(20)
-) ResetBootSystem(
-    .clk      (clk),
-    .resetn_o (reset_o)
+    input  logic clk,
+    input  logic rst_n,
+    output logic [7:0]led
 );
 
 Grande_Risco_5_SOC #(
     .CLOCK_FREQ       (25000000),
-    .BIT_RATE         (115200),
+    .BAUD_RATE        (115200),
     .MEMORY_SIZE      (4096),
     .MEMORY_FILE      ("../../verification_tests/memory/led_test.hex"),
     .GPIO_WIDHT       (6),
@@ -24,11 +15,12 @@ Grande_Risco_5_SOC #(
     .D_CACHE_SIZE     (72)
 ) SOC (
     .clk   (clk),
-    .reset (reset_o),
+    .rst_n (rst_n),
     .leds  (led),
     .rx    (),
     .tx    (),
-    .gpios ()
+    .gpios (),
+    .halt  ()
 );
 
 

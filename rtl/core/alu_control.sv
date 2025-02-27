@@ -1,9 +1,9 @@
 module ALU_Control (
-    input  logic is_immediate,
-    input  logic [1:0] aluop_in,
-    input  logic [6:0] func7,
-    input  logic [2:0] func3,
-    output logic [3:0] aluop_out
+    input  logic is_immediate_i,
+    input  logic [1:0] ALU_CO_i,
+    input  logic [6:0] FUNC7_i,
+    input  logic [2:0] FUNC3_i,
+    output logic [3:0] ALU_OP_o
 );
 
 // Definição dos códigos de operação
@@ -23,33 +23,33 @@ localparam SLT             = 4'b1110;
 localparam SLT_U           = 4'b1111;
 
 always_comb begin : ALU_CONTROL
-    aluop_out = SUM; // Valor padrão
+    ALU_OP_o = SUM; // Valor padrão
 
-    unique case (aluop_in)
-        2'b00: aluop_out = SUM; // Operações de LOAD/STORE
+    unique case (ALU_CO_i)
+        2'b00: ALU_OP_o = SUM; // Operações de LOAD/STORE
 
         2'b01: // Operações de Branch
-            unique case (func3)
-                3'b000: aluop_out = SUB;             // BEQ
-                3'b001: aluop_out = EQUAL;           // BNE
-                3'b100: aluop_out = GREATER_EQUAL;   // BLT
-                3'b101: aluop_out = SLT;             // BGE
-                3'b110: aluop_out = GREATER_EQUAL_U; // BLTU
-                3'b111: aluop_out = SLT_U;           // BGEU
-                default: aluop_out = SUB;            // Default para branches
+            unique case (FUNC3_i)
+                3'b000: ALU_OP_o = SUB;             // BEQ
+                3'b001: ALU_OP_o = EQUAL;           // BNE
+                3'b100: ALU_OP_o = GREATER_EQUAL;   // BLT
+                3'b101: ALU_OP_o = SLT;             // BGE
+                3'b110: ALU_OP_o = GREATER_EQUAL_U; // BLTU
+                3'b111: ALU_OP_o = SLT_U;           // BGEU
+                default: ALU_OP_o = SUB;            // Default para branches
             endcase
 
         2'b10: // Operações de ALU
-            unique case (func3)
-                3'b000: aluop_out = (is_immediate || !func7[5]) ? SUM : SUB; // ADD/SUB
-                3'b001: aluop_out = SHIFT_LEFT;   // SLLI / SLL
-                3'b010: aluop_out = SLT;          // SLTI / SLT
-                3'b011: aluop_out = SLT_U;        // SLTIU / SLTU
-                3'b100: aluop_out = XOR;          // XORI / XOR
-                3'b101: aluop_out = (func7[5]) ? SHIFT_RIGHT_A : SHIFT_RIGHT; // SRAI/SRLI/SRA/SRL
-                3'b110: aluop_out = OR;           // ORI / OR
-                3'b111: aluop_out = AND;          // ANDI / AND
-                default: aluop_out = SUM;         // Default para operações ALU
+            unique case (FUNC3_i)
+                3'b000: ALU_OP_o = (is_immediate_i || !FUNC7_i[5]) ? SUM : SUB; // ADD/SUB
+                3'b001: ALU_OP_o = SHIFT_LEFT;   // SLLI / SLL
+                3'b010: ALU_OP_o = SLT;          // SLTI / SLT
+                3'b011: ALU_OP_o = SLT_U;        // SLTIU / SLTU
+                3'b100: ALU_OP_o = XOR;          // XORI / XOR
+                3'b101: ALU_OP_o = (FUNC7_i[5]) ? SHIFT_RIGHT_A : SHIFT_RIGHT; // SRAI/SRLI/SRA/SRL
+                3'b110: ALU_OP_o = OR;           // ORI / OR
+                3'b111: ALU_OP_o = AND;          // ANDI / AND
+                default: ALU_OP_o = SUM;         // Default para operações ALU
             endcase
     endcase
 end

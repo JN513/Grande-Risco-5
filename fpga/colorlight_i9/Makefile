@@ -9,13 +9,14 @@ all: ./build/out.bit
 		--lpf pinout.lpf --textcfg ./build/out.config --package CABGA381 \
 		--speed 6 --lpf-allow-unconstrained
 
-./build/out.json: main.v pinout.lpf buildFolder
-	yosys -p " \
-		read_verilog main.v; \
-		read_verilog ../../debug/reset.v; \
-		read_verilog ../../src/core/*.v; \
-		read_verilog ../../src/peripheral/memory.v; \
-		read_verilog ../../src/peripheral/leds.v; \
+./build/out.json: main.sv pinout.lpf buildFolder
+	yosys -m slang  -p " \
+		read_slang --error-limit=100 main.sv \
+			../../rtl/core/*.sv \
+			../../rtl/peripheral/memory.sv \
+			../../rtl/peripheral/leds.sv \
+			../../rtl/peripheral/soc.sv \
+			../../rtl/core/*.v -top top; \
 		synth_ecp5 -json ./build/out.json -abc9 \
 	"
 

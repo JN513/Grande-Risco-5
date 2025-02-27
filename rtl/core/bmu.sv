@@ -1,11 +1,11 @@
 `ifdef ENABLE_BMU
 
 module BMU ( // Bit manipulation unit for riscv B extension
-    input  logic clk,
-    input  logic [4:0] option,
-    input  logic [31:0] BMU_in_X,
-    input  logic [31:0] BMU_in_Y,
-    output logic [31:0] BMU_out_S
+    input  logic clk_i,
+    input  logic [4:0]  BMU_OP_i,
+    input  logic [31:0] BMU_RS1_i,
+    input  logic [31:0] BMU_RS2_i,
+    output logic [31:0] BMU_RD_o
 );
 
 localparam OP = 7'b0110011;
@@ -40,132 +40,132 @@ localparam XNOR   = 5'b11001;
 localparam ZEXTH  = 5'b11010;
 
 always_comb begin : BMU_OPERATION
-    case (option)
+    case (BMU_OP_i)
         ANDN:
-            BMU_out_S = BMU_in_X & ~BMU_in_Y;
+            BMU_RD_o = BMU_RS1_i & ~BMU_RS2_i;
             
 /*       CLZ: begin
-            BMU_out_S = 0;
+            BMU_RD_o = 0;
             for (int i = 31; i >= 0; i = i -1) begin
                 if (BMU_out_X[i] == 1'b0) begin
-                    BMU_out_S = BMU_out_S + 1'b1;
+                    BMU_RD_o = BMU_RD_o + 1'b1;
                 end else begin
                     break;
                 end
             end
         end
         CPOP: begin
-            BMU_out_S = 0;
+            BMU_RD_o = 0;
             for (int i = 0; i < 32; i = i + 1) begin
-                if (BMU_in_X[i] == 1'b1) begin
-                    BMU_out_S = BMU_out_S + 1;
+                if (BMU_RS1_i[i] == 1'b1) begin
+                    BMU_RD_o = BMU_RD_o + 1;
                 end
             end
         end
         CTZ: begin
-            BMU_out_S = 0;
+            BMU_RD_o = 0;
             for (int i = 0; i < 32; i = i + 1) begin
                 if (BMU_out_X[i] == 1'b1) begin
-                    BMU_out_S = i;
+                    BMU_RD_o = i;
                     break;
                 end
             end
             if (~|rs1) begin
-                BMU_out_S = 32; // Se todos os bits forem 0, retorna 32
+                BMU_RD_o = 32; // Se todos os bits forem 0, retorna 32
             end
         end*/
 
         MAX: begin
-            if (BMU_in_X[31] == 1 && BMU_in_Y[31] == 0) begin
-                BMU_out_S = BMU_in_X;
-            end else if (BMU_in_X[31] == 0 && BMU_in_Y[31] == 1) begin
-                BMU_out_S = BMU_in_Y;
-            end else if (BMU_in_X > BMU_in_Y) begin
-                BMU_out_S = BMU_in_X;
+            if (BMU_RS1_i[31] == 1 && BMU_RS2_i[31] == 0) begin
+                BMU_RD_o = BMU_RS1_i;
+            end else if (BMU_RS1_i[31] == 0 && BMU_RS2_i[31] == 1) begin
+                BMU_RD_o = BMU_RS2_i;
+            end else if (BMU_RS1_i > BMU_RS2_i) begin
+                BMU_RD_o = BMU_RS1_i;
             end else begin
-                BMU_out_S = BMU_in_Y;
+                BMU_RD_o = BMU_RS2_i;
             end
         end
         MAXU: begin
-            if (BMU_in_X > BMU_in_Y) begin
-                BMU_out_S = BMU_in_X;
+            if (BMU_RS1_i > BMU_RS2_i) begin
+                BMU_RD_o = BMU_RS1_i;
             end else begin
-                BMU_out_S = BMU_in_Y;
+                BMU_RD_o = BMU_RS2_i;
             end
         end
 
         MIN: begin
-            if (BMU_in_X[31] == 1 && BMU_in_Y[31] == 0) begin
-                BMU_out_S = BMU_in_Y;
-            end else if (BMU_in_X[31] == 0 && BMU_in_Y[31] == 1) begin
-                BMU_out_S = BMU_in_X;
-            end else if (BMU_in_X < BMU_in_Y) begin
-                BMU_out_S = BMU_in_X;
+            if (BMU_RS1_i[31] == 1 && BMU_RS2_i[31] == 0) begin
+                BMU_RD_o = BMU_RS2_i;
+            end else if (BMU_RS1_i[31] == 0 && BMU_RS2_i[31] == 1) begin
+                BMU_RD_o = BMU_RS1_i;
+            end else if (BMU_RS1_i < BMU_RS2_i) begin
+                BMU_RD_o = BMU_RS1_i;
             end else begin
-                BMU_out_S = BMU_in_Y;
+                BMU_RD_o = BMU_RS2_i;
             end
         end
 
         MINU: begin
-            if (BMU_in_X < BMU_in_Y) begin
-                BMU_out_S = BMU_in_X;
+            if (BMU_RS1_i < BMU_RS2_i) begin
+                BMU_RD_o = BMU_RS1_i;
             end else begin
-                BMU_out_S = BMU_in_Y;
+                BMU_RD_o = BMU_RS2_i;
             end
         end
 
         ORCB: // Bitwise OR-Combine, byte granule
-            BMU_out_S = {(|BMU_in_X[31:24]) ? 8'hFF : 8'h00, 
-            (|BMU_in_X[23:16]) ? 8'hFF : 8'h00, 
-            (|BMU_in_X[15:8])  ? 8'hFF : 8'h00, 
-            (|BMU_in_X[7:0])   ? 8'hFF : 8'h00};
+            BMU_RD_o = {(|BMU_RS1_i[31:24]) ? 8'hFF : 8'h00, 
+            (|BMU_RS1_i[23:16]) ? 8'hFF : 8'h00, 
+            (|BMU_RS1_i[15:8])  ? 8'hFF : 8'h00, 
+            (|BMU_RS1_i[7:0])   ? 8'hFF : 8'h00};
 
         ORN:
-            BMU_out_S = BMU_in_X | ~BMU_in_Y;
+            BMU_RD_o = BMU_RS1_i | ~BMU_RS2_i;
 
         REV8:
-            BMU_out_S = {BMU_in_X[7:0], BMU_in_X[15:8], BMU_in_X[23:16], BMU_in_X[31:24]};
+            BMU_RD_o = {BMU_RS1_i[7:0], BMU_RS1_i[15:8], BMU_RS1_i[23:16], BMU_RS1_i[31:24]};
 
         ROL:
-            BMU_out_S = BMU_in_X << BMU_in_Y[4:0] | BMU_in_X >> (32 - BMU_in_Y[4:0]);
+            BMU_RD_o = BMU_RS1_i << BMU_RS2_i[4:0] | BMU_RS1_i >> (32 - BMU_RS2_i[4:0]);
 
         ROR:
-            BMU_out_S = BMU_in_X >> BMU_in_Y[4:0] | BMU_in_X << (32 - BMU_in_Y[4:0]);
+            BMU_RD_o = BMU_RS1_i >> BMU_RS2_i[4:0] | BMU_RS1_i << (32 - BMU_RS2_i[4:0]);
 
         BCLR:
-            BMU_out_S = BMU_in_X & ~(1'b1 << BMU_in_Y[4:0]);
+            BMU_RD_o = BMU_RS1_i & ~(1'b1 << BMU_RS2_i[4:0]);
 
         BEXT:
-            BMU_out_S = BMU_in_X >> BMU_in_Y[4:0] & 'd1;
+            BMU_RD_o = BMU_RS1_i >> BMU_RS2_i[4:0] & 'd1;
 
         BINV:
-            BMU_out_S = BMU_in_X ^ (1'b1 << BMU_in_Y[4:0]);
+            BMU_RD_o = BMU_RS1_i ^ (1'b1 << BMU_RS2_i[4:0]);
 
         BSET:
-            BMU_out_S = BMU_in_X | (1'b1 << BMU_in_Y[4:0]);
+            BMU_RD_o = BMU_RS1_i | (1'b1 << BMU_RS2_i[4:0]);
 
         SEXTB:
-            BMU_out_S = {{24{BMU_in_X[7]}}, BMU_in_X[7:0]};
+            BMU_RD_o = {{24{BMU_RS1_i[7]}}, BMU_RS1_i[7:0]};
 
         SEXTH:
-            BMU_out_S = {{16{BMU_in_X[15]}}, BMU_in_X[15:0]};
+            BMU_RD_o = {{16{BMU_RS1_i[15]}}, BMU_RS1_i[15:0]};
 
         SH1ADD:
-            BMU_out_S = BMU_in_X + (BMU_in_Y << 'd1);
+            BMU_RD_o = BMU_RS1_i + (BMU_RS2_i << 'd1);
 
         SH2ADD:
-            BMU_out_S = BMU_in_X + (BMU_in_Y << 'd2);
+            BMU_RD_o = BMU_RS1_i + (BMU_RS2_i << 'd2);
 
         SH3ADD:
-            BMU_out_S = BMU_in_X + (BMU_in_Y << 'd3);
+            BMU_RD_o = BMU_RS1_i + (BMU_RS2_i << 'd3);
 
         XNOR:
-            BMU_out_S = ~(BMU_in_X ^ BMU_in_Y);
+            BMU_RD_o = ~(BMU_RS1_i ^ BMU_RS2_i);
 
         ZEXTH:
-            BMU_out_S = {16'h0, BMU_in_X[15:0]};
+            BMU_RD_o = {16'h0, BMU_RS1_i[15:0]};
             
-        default: BMU_out_S = BMU_in_X;
+        default: BMU_RD_o = BMU_RS1_i;
     endcase
 end
     

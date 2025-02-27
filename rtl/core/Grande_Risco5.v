@@ -3,7 +3,8 @@ module Grande_Risco5 #(
     parameter I_CACHE_SIZE = 'd32,
     parameter D_CACHE_SIZE = 'd32,
     parameter DATA_WIDTH   = 'd32,
-    parameter ADDR_WIDTH   = 'd32
+    parameter ADDR_WIDTH   = 'd32,
+    parameter BAUD_RATE    = 'd115200
 ) (
     // Control signal
     input wire clk,
@@ -36,6 +37,36 @@ wire [31:0] instruction_address, instruction_data;
 
 wire data_read_request, data_write_request, data_memory_response;
 wire [31:0] data_read_data, data_write_data, data_address;
+
+// Bus logic for data memory and peripheral
+
+wire d_cache_read_request, d_cache_write_request, d_cache_response;
+wire [31:0] d_cache_read_data;
+
+assign d_cache_read_request  = (!data_address[31]) ? data_read_request  : 1'b0;
+assign d_cache_write_request = (!data_address[31])  ? data_write_request : 1'b0;
+
+assign peripheral_read_request  = (data_address[31]) ? data_read_request  : 1'b0;
+assign peripheral_write_request = (data_address[31]) ? data_write_request : 1'b0;
+
+assign data_memory_response = (data_address[31]) ? peripheral_response : d_cache_response;
+
+assign peripheral_addr       = data_address;
+assign peripheral_write_data = data_write_data;
+
+assign data_read_data = (data_address[31]) ? peripheral_read_data : d_cache_read_data;
+
+// Bus logic for memory
+
+wire d_cache_memory_write_request, d_cache_memory_read_request, 
+    d_cache_memory_response;
+
+wire i_cache_memory_read_request, i_cache_memory_response;
+
+wire [31:0] d_cache_memory_write_data, d_cache_memory_read_data,
+    d_cache_memory_addr;
+
+wire [31:0] i_cache_memory_read_data, i_cache_memory_addr;
 
 Core #(
     .BOOT_ADDRESS(BOOT_ADDRESS)
@@ -96,37 +127,6 @@ DCache #(
     .memory_read_data     (d_cache_memory_read_data),
     .memory_write_data    (d_cache_memory_write_data)
 );
-
-
-// Bus logic for data memory and peripheral
-
-wire d_cache_read_request, d_cache_write_request, d_cache_response;
-wire [31:0] d_cache_read_data;
-
-assign d_cache_read_request  = (!data_address[31]) ? data_read_request  : 1'b0;
-assign d_cache_write_request = (!data_address[31])  ? data_write_request : 1'b0;
-
-assign peripheral_read_request  = (data_address[31]) ? data_read_request  : 1'b0;
-assign peripheral_write_request = (data_address[31]) ? data_write_request : 1'b0;
-
-assign data_memory_response = (data_address[31]) ? peripheral_response : d_cache_response;
-
-assign peripheral_addr       = data_address;
-assign peripheral_write_data = data_write_data;
-
-assign data_read_data = (data_address[31]) ? peripheral_read_data : d_cache_read_data;
-
-// Bus logic for memory
-
-wire d_cache_memory_write_request, d_cache_memory_read_request, 
-    d_cache_memory_response;
-
-wire i_cache_memory_read_request, i_cache_memory_response;
-
-wire [31:0] d_cache_memory_write_data, d_cache_memory_read_data,
-    d_cache_memory_addr;
-
-wire [31:0] i_cache_memory_read_data, i_cache_memory_addr;
 
 
 Cache_request_Multiplexer #(

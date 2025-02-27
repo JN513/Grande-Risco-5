@@ -40,11 +40,10 @@ module ICache #(
         miss_finished <= 1'b0;
 
         if(!rst_n) begin 
-            clear_response        <= 1'b0;
-            miss_finished         <= 1'b0;
-            request_to_memory     <= 1'b0;
-
-            cache_valid   <= '{default: 1'b0}; // Inicializa todas as posições como inválidas
+            clear_response    <= 1'b0;
+            miss_finished     <= 1'b0;
+            request_to_memory <= 1'b0;
+            cache_valid       <= '{default: 1'b0}; // Inicializa todas as posições como inválidas
         end else begin
             if(read_request && !hit && !flush_bus) begin
                 request_to_memory <= 1'b1;

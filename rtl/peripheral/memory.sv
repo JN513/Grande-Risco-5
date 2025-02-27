@@ -31,7 +31,7 @@ end
 assign read_data = (memory_read == 1'b1) ? memory[address[31:2]] : 32'd0; 
 assign response = memory_read | memory_write;
 
-always_ff @(posedge clk ) begin
+always @(posedge clk ) begin // Always ff does not work with Initialization in slang
     if(memory_write) begin
         memory[address[31:2]] <= write_data;
     end

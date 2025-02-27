@@ -1,27 +1,25 @@
 module ResetBootSystem #(
     parameter CYCLES = 20
 ) (
-    input wire clk,
-    output reg reset_o,
-    output wire resetn_o
+    input logic clk,
+    output logic reset_o,
+    output logic resetn_o
 );
-
-assign resetn_o = ~reset_o;
-
-reg [1:0] state;
-reg [5:0] counter;
 
 localparam INIT = 2'b00;
 localparam RESET_COUNTER = 2'b01;
 localparam IDLE = 2'b10;
 
+logic [1:0] state;
+logic [5:0] counter;
+
 initial begin
-    state = 2'b01;
+    state   = 2'b01;
     reset_o = 2'b0;
     counter = 6'h00;
 end
 
-always @(posedge clk ) begin
+always_ff @(posedge clk ) begin : RESET_SYSTEM_FSM
     case (state)
         INIT: begin
             reset_o <= 1'b1;
@@ -55,5 +53,7 @@ always @(posedge clk ) begin
         default: state <= INIT;
     endcase
 end
+
+assign resetn_o = ~reset_o;
 
 endmodule

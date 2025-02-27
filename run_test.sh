@@ -12,12 +12,12 @@ fi
 
 cp verification_tests/memory/$nome_do_teste.hex verification_tests/memory/generic.hex
 
-iverilog -o build/soc.o -s soc_tb -I src/core src/core/alu_control.v src/core/alu.v \
-    src/core/Grande_Risco5.v src/core/core.v src/core/forwarding_unit.v src/core/immediate_generator.v \
-    src/core/mux.v src/core/registers.v src/core/csr_unit.v src/core/fpu.v src/core/bmu.v \
-    src/core/i_cache.v src/core/d_cache.v src/core/branch_prediction.v src/core/mdu.v \
-    src/core/cache_request_multiplexer.v src/peripheral/memory.v tests/soc_test.v \
-    src/peripheral/leds.v src/peripheral/soc.v src/core/ir_decomp.v
+iverilog -o build/soc.o -s soc_tb -I rtl/core -g2012 rtl/core/alu_control.sv rtl/core/alu.sv \
+    rtl/core/Grande_Risco5.v rtl/core/core.v rtl/core/forwarding_unit.sv rtl/core/immediate_generator.sv \
+    rtl/core/mux.sv rtl/core/registers.sv rtl/core/csr_unit.sv rtl/core/fpu.sv rtl/core/bmu.sv \
+    rtl/core/i_cache.sv rtl/core/d_cache.sv rtl/core/branch_prediction.sv rtl/core/mdu.sv \
+    rtl/core/cache_request_multiplexer.sv rtl/peripheral/memory.sv tests/soc_test.sv \
+    rtl/peripheral/leds.sv rtl/peripheral/soc.sv rtl/core/ir_decomp.sv
 
 vvp build/soc.o
 

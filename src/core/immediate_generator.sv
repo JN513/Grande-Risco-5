@@ -14,9 +14,11 @@ localparam AUIPC_OPCODE     = 7'b0010111;
 localparam BRANCH_OPCODE    = 7'b1100011;
 localparam IMMEDIATE_OPCODE = 7'b0010011;
 
+logic [6:0] opcode;
+logic [2:0] func3;
 
 always_comb begin : IMMEDIATE_GENERATOR
-    case (instruction[6:0])
+    case (opcode)
         BRANCH_OPCODE: // SB type
             immediate = {{19{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
         JAL_OPCODE: // UJ type JAL
@@ -28,7 +30,7 @@ always_comb begin : IMMEDIATE_GENERATOR
         LW_OPCODE: // lw instruction 
             immediate = {{20{instruction[31]}}, instruction[31:20]};
         IMMEDIATE_OPCODE: // I type instruction
-            case (instruction[14:12])
+            case (func3)
                 3'b001: immediate = {{27{instruction[24]}}, instruction[24:20]};
                 3'b011: immediate = {20'h00000, instruction[31:20]};
                 3'b101: immediate = {{27'h0000000}, instruction[24:20]};
@@ -43,5 +45,8 @@ always_comb begin : IMMEDIATE_GENERATOR
         default: immediate = 32'h00000000;
     endcase
 end
+
+assign opcode = instruction[6:0];
+assign func3  = instruction[14:12];
     
 endmodule

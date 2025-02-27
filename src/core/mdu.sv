@@ -52,11 +52,13 @@ logic [31:0] MUL_RD;
 
 `ifdef FPGA
 
-localparam IDLE    = 2'b00;
-localparam OPERATE = 2'b01;
-localparam FINISH  = 2'b10;
+typedef enum logic [1:0] {
+    MUL_IDLE    = 2'b00,
+    MUL_OPERATE = 2'b01,
+    MUL_FINISH  = 2'b10
+} mul_state_t;
 
-logic [1:0] state_mul;
+mul_state_t state_mul;
 
 logic [31:0] Data_X, Data_Y;
 logic [63:0] acumulador;
@@ -68,12 +70,12 @@ always_ff @(posedge clk) begin : MUL_FSM_FPGA
         Data_X <= 0;
         Data_Y <= 0;
         MUL_RD <= 0;
-        state_mul <= IDLE;
+        state_mul <= MUL_IDLE;
     end else begin
         case (state_mul)
-            IDLE: begin
+            MUL_IDLE: begin
                 if(start & !operation[2]) begin
-                    state_mul <= OPERATE;
+                    state_mul <= MUL_OPERATE;
                     if(operation[1]) begin
                         Data_X <= (operation[0]) ? $unsigned(MDU_in_X) : $signed({MDU_in_X[31], MDU_in_X});
                         Data_Y <= $unsigned(MDU_in_Y);
@@ -82,20 +84,20 @@ always_ff @(posedge clk) begin : MUL_FSM_FPGA
                         Data_Y <= $signed(MDU_in_Y);
                     end
                 end else begin
-                    state_mul <= IDLE;
+                    state_mul <= MUL_IDLE;
                 end
             end 
-            OPERATE: begin
+            MUL_OPERATE: begin
                 acumulador <= $signed(Data_X)*$signed(Data_Y);
-                state_mul <= FINISH;
+                state_mul <= MUL_FINISH;
             end
 
-            FINISH: begin
-                state_mul <= IDLE;
+            MUL_FINISH: begin
+                state_mul <= MUL_IDLE;
                 MUL_RD <= (|operation) ? acumulador[63:32] : acumulador[31:0];
                 mul_done <= 1'b1;
             end
-            default: state_mul <= IDLE;
+            default: state_mul <= MUL_IDLE;
         endcase
     end
 end
@@ -103,33 +105,35 @@ end
 `else
 // State machine states
 
-localparam IDLE   = 3'b000;
-localparam INIT   = 3'b001;
-localparam EXEC   = 3'b010;
-localparam FINISH = 3'b011;
-localparam DONE   = 3'b100;
+typedef enum logic [2:0] {
+    MUL_IDLE   = 3'b000,
+    MUL_INIT   = 3'b001,
+    MUL_EXEC   = 3'b010,
+    MUL_FINISH = 3'b011,
+    MUL_DONE   = 3'b100
+} mul_state_t;
 
-reg [2:0] mul_state;
-reg [63:0] final_product, product_one, product_two, product_three, product_four;
-reg [63:0] multiplicand_1, multiplicand_2, multiplicand_3, multiplicand_4;
-reg [7:0] multiplier_1, multiplier_2, multiplier_3, multiplier_4;
+mul_state_t mul_state;
+logic [63:0] final_product, product_one, product_two, product_three, product_four;
+logic [63:0] multiplicand_1, multiplicand_2, multiplicand_3, multiplicand_4;
+logic [7:0] multiplier_1, multiplier_2, multiplier_3, multiplier_4;
 
 // State machine
 always_ff @(posedge clk) begin : MUL_FSM
     mul_done <= 1'b0;
 
     if(!rst_n) begin
-        mul_state <= IDLE;
+        mul_state <= MUL_IDLE;
         MUL_RD    <= 32'h0;
     end else begin
         case (mul_state)
-            IDLE: begin
-                mul_state <= IDLE;
+            MUL_IDLE: begin
+                mul_state <= MUL_IDLE;
                 if( start == 1'b1 && !operation[2]) begin
-                    mul_state <= INIT;
+                    mul_state <= MUL_INIT;
                 end
             end
-            INIT: begin
+            MUL_INIT: begin
                 multiplier_1 <= MDU_in_X[7:0];
                 multiplier_2 <= MDU_in_X[15:8];
                 multiplier_3 <= MDU_in_X[23:16];
@@ -152,10 +156,10 @@ always_ff @(posedge clk) begin : MUL_FSM
                     multiplicand_4 <= {8'h0, MDU_in_Y[31:0], 24'h0};
                 end
 
-                mul_state <= EXEC;
+                mul_state <= MUL_EXEC;
             end
 
-            EXEC: begin
+            MUL_EXEC: begin
                 product_one <= (multiplier_1[0]) ? product_one + (multiplicand_1) : product_one;
                 product_two <= (multiplier_2[0]) ? product_two + (multiplicand_2) : product_two;
                 product_three <= (multiplier_3[0]) ? product_three + (multiplicand_3) : product_three;
@@ -172,40 +176,43 @@ always_ff @(posedge clk) begin : MUL_FSM
                 multiplier_4 <= multiplier_4 >> 1'b1;
 
                 if((~|multiplier_1) && (~|multiplier_2) && (~|multiplier_3) && (~|multiplier_4)) begin
-                    mul_state <= FINISH;
+                    mul_state <= MUL_FINISH;
                 end
             end
 
-            FINISH: begin
+            MUL_FINISH: begin
                 final_product <= product_one + product_two + product_three + product_four;
-                mul_state <= DONE;
+                mul_state <= MUL_DONE;
             end
 
-            DONE: begin
+            MUL_DONE: begin
                 MUL_RD <= (|operation) ? final_product[63:32] : final_product[31:0];
                 mul_done <= 1'b1;
-                mul_state <= IDLE;
+                mul_state <= MUL_IDLE;
             end
-            default: mul_state <= IDLE;
+            default: mul_state <= MUL_IDLE;
         endcase
     end
 end
 
 `endif
 
-localparam DIV_IDLE    = 2'b00;
-localparam DIV_OPERATE = 2'b01;
-localparam DIV_FINISH  = 2'b10;
+typedef enum logic [1:0] {
+    DIV_IDLE    = 2'b00,
+    DIV_OPERATE = 2'b01,
+    DIV_FINISH  = 2'b10
+} div_state_t;
+
+div_state_t state_div;
 
 logic negativo, div_done;
-logic [1:0] state_div;
 logic [31:0] dividendo, quociente, quociente_msk, DIV_RD;
 logic [63:0] divisor;
 
 always_ff @(posedge clk) begin : DIV_FSM
     div_done <= 1'b0;
     if(!rst_n) begin
-        state_div <= IDLE;
+        state_div <= DIV_IDLE;
         quociente <= 32'h00000000;
     end else begin
         case (state_div)

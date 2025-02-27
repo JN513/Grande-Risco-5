@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Mon Feb 17 01:56:21 2025
+| Date         : Wed Feb 26 21:50:53 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_control_sets -verbose -file reports/control_sets.rpt
 | Design       : top
@@ -27,7 +27,7 @@ Table of Contents
 |    Minimum number of control sets                        |    78 |
 |    Addition due to synthesis replication                 |     0 |
 |    Addition due to physical synthesis replication        |     0 |
-| Unused register locations in slices containing registers |    73 |
+| Unused register locations in slices containing registers |    72 |
 +----------------------------------------------------------+-------+
 * Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
 ** Run report_qor_suggestions for automated merging and remapping suggestions
@@ -46,8 +46,8 @@ Table of Contents
 | >= 8 to < 10       |     3 |
 | >= 10 to < 12      |     1 |
 | >= 12 to < 14      |     0 |
-| >= 14 to < 16      |     2 |
-| >= 16              |    70 |
+| >= 14 to < 16      |     1 |
+| >= 16              |    71 |
 +--------------------+-------+
 * Control sets can be remapped at either synth_design or opt_design
 
@@ -58,12 +58,12 @@ Table of Contents
 +--------------+-----------------------+------------------------+-----------------+--------------+
 | Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
 +--------------+-----------------------+------------------------+-----------------+--------------+
-| No           | No                    | No                     |             149 |           56 |
+| No           | No                    | No                     |              85 |           28 |
 | No           | No                    | Yes                    |               0 |            0 |
-| No           | Yes                   | No                     |              21 |            9 |
-| Yes          | No                    | No                     |            1600 |          723 |
+| No           | Yes                   | No                     |              85 |           29 |
+| Yes          | No                    | No                     |            1601 |          768 |
 | Yes          | No                    | Yes                    |               0 |            0 |
-| Yes          | Yes                   | No                     |             485 |          156 |
+| Yes          | Yes                   | No                     |             485 |          152 |
 +--------------+-----------------------+------------------------+-----------------+--------------+
 
 
@@ -74,83 +74,83 @@ Table of Contents
 |  Clock Signal  |                           Enable Signal                          |                       Set/Reset Signal                       | Slice Load Count | Bel Load Count | Bels / Slice |
 +----------------+------------------------------------------------------------------+--------------------------------------------------------------+------------------+----------------+--------------+
 |  clk_IBUF_BUFG |                                                                  |                                                              |                1 |              1 |         1.00 |
-|  clk_o_BUFG    |                                                                  | SOC/Processor/Core/MEMWBIR[11]_i_1_n_0                       |                2 |              7 |         3.50 |
-|  clk_IBUF_BUFG | leds[7]_i_1_n_0                                                  | SOC/Processor/Core/Mdu/CPU_RESETN                            |                3 |              8 |         2.67 |
+|  clk_o_BUFG    |                                                                  | SOC/Processor/Core/MEMWBIR[11]_i_1_n_0                       |                3 |              7 |         2.33 |
+|  clk_IBUF_BUFG | leds[7]_i_1_n_0                                                  | SOC/Processor/Core/Mdu/CPU_RESETN                            |                2 |              8 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/Core/Merged_word[7]_i_1_n_0                        |                                                              |                3 |              8 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/Core/Merged_word[15]_i_2_n_0                       | SOC/Processor/Core/Merged_word[15]_i_1_n_0                   |                3 |              8 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/Core/FSM_onehot_unaligned_access_state[10]_i_1_n_0 | SOC/Processor/Core/Mdu/CPU_RESETN                            |                4 |             11 |         2.75 |
-|  clk_o_BUFG    |                                                                  | SOC/Processor/Core/Mdu/CPU_RESETN                            |                7 |             14 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Merged_word[15]_i_2_n_0                       | SOC/Processor/Core/Merged_word[15]_i_1_n_0                   |                2 |              8 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/FSM_onehot_unaligned_access_state[10]_i_1_n_0 | SOC/Processor/Core/Mdu/CPU_RESETN                            |                2 |             11 |         5.50 |
 |  clk_o_BUFG    | SOC/Processor/Core/EXMEMIR                                       | SOC/Processor/Core/Mdu/unaligned_access_in_progress_reg_2[0] |                3 |             15 |         5.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Merged_word[31]_i_2_n_0                       | SOC/Processor/Core/Merged_word[31]_i_1_n_0                   |                5 |             16 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/p_33_in                                   | SOC/Processor/Core/Mdu/SR[0]                                 |               10 |             26 |         2.60 |
+|  clk_o_BUFG    | SOC/Processor/Core/Merged_word[31]_i_2_n_0                       | SOC/Processor/Core/Merged_word[31]_i_1_n_0                   |                6 |             16 |         2.67 |
 |  clk_IBUF_BUFG | CPU_RESETN_IBUF                                                  | counter[0]_i_1_n_0                                           |                7 |             26 |         3.71 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[16][31]_i_1_n_0        |                                                              |               12 |             32 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/Data_Address_reg[1][0]                    |                                                              |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/unaligned_access_in_progress_reg_4        |                                                              |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/E[0]                                          | SOC/Processor/Core/Mdu/CPU_RESETN                            |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/flush_bus_reg_0[0]                        | SOC/Processor/Core/Mdu/is_jal_reg_0[0]                       |                4 |             32 |         8.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[4][31]_i_1_n_0         |                                                              |               15 |             32 |         2.13 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[18][31]_i_1_n_0        |                                                              |               15 |             32 |         2.13 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[12][31]_i_1_n_0        |                                                              |               11 |             32 |         2.91 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[3][31]_i_1_n_0         |                                                              |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[11][31]_i_1_n_0        |                                                              |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[21][31]_i_1_n_0        |                                                              |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[14][31]_i_1_n_0        |                                                              |               11 |             32 |         2.91 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/unaligned_access_in_progress_reg_0[0]     |                                                              |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[17][31]_i_1_n_0        |                                                              |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[1][31]_i_1_n_0         |                                                              |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[2][31]_i_1_n_0         |                                                              |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[15][31]_i_1_n_0        |                                                              |               18 |             32 |         1.78 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[5][31]_i_1_n_0         |                                                              |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[13][31]_i_1_n_0        |                                                              |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[20][31]_i_1_n_0        |                                                              |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[19][31]_i_1_n_0        |                                                              |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Word[31]_i_1_n_0                       |                                                              |                6 |             32 |         5.33 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/mul_done                                  | SOC/Processor/Core/Mdu/CPU_RESETN                            |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[9][31]_i_1_n_0         |                                                              |               21 |             32 |         1.52 |
-|  clk_o_BUFG    | SOC/Processor/M1/i_cache_read_data[31]_i_2_n_0                   | SOC/Processor/M1/i_cache_read_data[31]_i_1_n_0               |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/M1/d_cache_read_data[31]_i_2_n_0                   | SOC/Processor/M1/d_cache_read_data[31]_i_1_n_0               |               11 |             32 |         2.91 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_data                                      |                                                              |               17 |             32 |         1.88 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/DIV_RD                                    |                                                              |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/dividendo[31]_i_1_n_0                     |                                                              |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/First_Word[31]_i_1_n_0                        |                                                              |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[6][31]_i_1_n_0         |                                                              |               22 |             32 |         1.45 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[24][31]_i_1_n_0        |                                                              |               11 |             32 |         2.91 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[22][31]_i_1_n_0        |                                                              |               19 |             32 |         1.68 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[10][31]_i_1_n_0        |                                                              |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/p_33_in                                   | SOC/Processor/Core/Mdu/SR[0]                                 |                8 |             26 |         3.25 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[30][31]_i_1_n_0        |                                                              |               19 |             32 |         1.68 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[10][31]_i_1_n_0        |                                                              |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[28][31]_i_1_n_0        |                                                              |               18 |             32 |         1.78 |
 |  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[27][31]_i_1_n_0        |                                                              |               15 |             32 |         2.13 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[29][31]_i_1_n_0        |                                                              |               15 |             32 |         2.13 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[25][31]_i_1_n_0        |                                                              |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[22][31]_i_1_n_0        |                                                              |               19 |             32 |         1.68 |
 |  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[23][31]_i_1_n_0        |                                                              |               19 |             32 |         1.68 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[31][31]_i_1_n_0        |                                                              |               21 |             32 |         1.52 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[26][31]_i_1_n_0        |                                                              |               15 |             32 |         2.13 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[28][31]_i_1_n_0        |                                                              |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[8][31]_i_1_n_0         |                                                              |               17 |             32 |         1.88 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[7][31]_i_1_n_0         |                                                              |               23 |             32 |         1.39 |
-|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[30][31]_i_1_n_0        |                                                              |               21 |             32 |         1.52 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/quociente[31]_i_1_n_0                     | SOC/Processor/Core/Mdu/CPU_RESETN                            |                6 |             32 |         5.33 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/flush_bus_reg[0]                          | SOC/Processor/Core/Mdu/CPU_RESETN                            |               13 |             33 |         2.54 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/quociente_msk[31]_i_1_n_0                 |                                                              |               11 |             33 |         3.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/acumulador[16]_i_1_n_0                    |                                                              |               11 |             34 |         3.09 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/IFID_is_compressed_instruction134_out     | SOC/Processor/Core/IFIDIR[31]_i_1_n_0                        |               21 |             36 |         1.71 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/E[0]                                      |                                                              |               11 |             36 |         3.27 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/pc_is_unaligned_reg[0]                    |                                                              |               20 |             48 |         2.40 |
-|  clk_o_BUFG    | SOC/Processor/M1/response_out                                    | SOC/Processor/Core/Mdu/CPU_RESETN                            |               19 |             52 |         2.74 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[24][31]_i_1_n_0        |                                                              |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[5][31]_i_1_n_0         |                                                              |               19 |             32 |         1.68 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[9][31]_i_1_n_0         |                                                              |               21 |             32 |         1.52 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[11][31]_i_1_n_0        |                                                              |               22 |             32 |         1.45 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[26][31]_i_1_n_0        |                                                              |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[29][31]_i_1_n_0        |                                                              |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[4][31]_i_1_n_0         |                                                              |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[25][31]_i_1_n_0        |                                                              |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/M1/d_cache_read_data[31]_i_2_n_0                   | SOC/Processor/M1/d_cache_read_data[31]_i_1_n_0               |                8 |             32 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/i_cache_read_data[31]_i_2_n_0                   | SOC/Processor/M1/i_cache_read_data[31]_i_1_n_0               |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_data                                      |                                                              |                7 |             32 |         4.57 |
+|  clk_o_BUFG    | SOC/Processor/Core/E[0]                                          | SOC/Processor/Core/Mdu/CPU_RESETN                            |                7 |             32 |         4.57 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/quociente[31]_i_1_n_0                     | SOC/Processor/Core/Mdu/CPU_RESETN                            |                7 |             32 |         4.57 |
+|  clk_o_BUFG    | SOC/Processor/Core/First_Word[31]_i_1_n_0                        |                                                              |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/mul_done                                  | SOC/Processor/Core/Mdu/CPU_RESETN                            |                8 |             32 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[3][31]_i_1_n_0         |                                                              |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[1][31]_i_1_n_0         |                                                              |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[2][31]_i_1_n_0         |                                                              |               18 |             32 |         1.78 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[8][31]_i_1_n_0         |                                                              |               20 |             32 |         1.60 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/unaligned_access_in_progress_reg_4        |                                                              |                9 |             32 |         3.56 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[19][31]_i_1_n_0        |                                                              |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/dividendo[31]_i_1_n_0                     |                                                              |                9 |             32 |         3.56 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/flush_bus_reg[0]                          | SOC/Processor/Core/Mdu/is_jalr_reg_1[0]                      |                5 |             32 |         6.40 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[7][31]_i_1_n_0         |                                                              |               24 |             32 |         1.33 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[13][31]_i_1_n_0        |                                                              |               21 |             32 |         1.52 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[15][31]_i_1_n_0        |                                                              |               22 |             32 |         1.45 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[20][31]_i_1_n_0        |                                                              |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/Data_Address_reg[1][0]                    |                                                              |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[14][31]_i_1_n_0        |                                                              |               20 |             32 |         1.60 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/DIV_RD                                    |                                                              |               10 |             32 |         3.20 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[18][31]_i_1_n_0        |                                                              |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[21][31]_i_1_n_0        |                                                              |               18 |             32 |         1.78 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[6][31]_i_1_n_0         |                                                              |               24 |             32 |         1.33 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/unaligned_access_in_progress_reg_0[0]     |                                                              |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[16][31]_i_1_n_0        |                                                              |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[12][31]_i_1_n_0        |                                                              |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[17][31]_i_1_n_0        |                                                              |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/RegisterBank/registers[31][31]_i_1_n_0        |                                                              |               22 |             32 |         1.45 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Word[31]_i_1_n_0                       |                                                              |                6 |             32 |         5.33 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/finish_unaligned_pc_reg[0]                | SOC/Processor/Core/Mdu/CPU_RESETN                            |               12 |             33 |         2.75 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/quociente_msk[31]_i_1_n_0                 |                                                              |               10 |             33 |         3.30 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/acumulador[16]_i_1_n_0                    |                                                              |               10 |             34 |         3.40 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/IFID_is_compressed_instruction134_out     | SOC/Processor/Core/IFIDIR[31]_i_1_n_0                        |               25 |             36 |         1.44 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/E[0]                                      |                                                              |               13 |             37 |         2.85 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/is_jal_reg[0]                             |                                                              |               21 |             48 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/M1/response_out                                    | SOC/Processor/Core/Mdu/CPU_RESETN                            |               17 |             52 |         3.06 |
 |  clk_o_BUFG    | SOC/Processor/ICache/p_1_in__0                                   |                                                              |               15 |             57 |         3.80 |
 |  clk_o_BUFG    | SOC/Processor/Core/p_1_in__1                                     |                                                              |               15 |             57 |         3.80 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/quociente_msk[31]_i_1_n_0                 | SOC/Processor/Core/Mdu/quociente_msk[30]_i_1_n_0             |               19 |             62 |         3.26 |
-|  clk_o_BUFG    | SOC/Processor/Core/MEMWBALUOut[31]_i_1_n_0                       |                                                              |               25 |             64 |         2.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/is_jalr_reg[0]                            |                                                              |               37 |             64 |         1.73 |
-|  clk_o_BUFG    | SOC/Processor/Core/Mdu/unaligned_access_in_progress_reg_3[0]     |                                                              |               28 |             65 |         2.32 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[12]_0                 |                                                              |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[11]_0                 |                                                              |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/quociente_msk[31]_i_1_n_0                 | SOC/Processor/Core/Mdu/quociente_msk[30]_i_1_n_0             |               17 |             62 |         3.65 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/is_jalr_reg_0[0]                          |                                                              |               36 |             64 |         1.78 |
+|  clk_o_BUFG    | SOC/Processor/Core/MEMWBALUOut[31]_i_1_n_0                       |                                                              |               23 |             64 |         2.78 |
+|  clk_o_BUFG    | SOC/Processor/Core/Mdu/unaligned_access_in_progress_reg_3[0]     |                                                              |               18 |             65 |         3.61 |
+|  clk_o_BUFG    |                                                                  | SOC/Processor/Core/Mdu/CPU_RESETN                            |               26 |             78 |         3.00 |
+|  clk_o_BUFG    |                                                                  |                                                              |               27 |             84 |         3.11 |
 |  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[10]_0                 |                                                              |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_1                             |                                                              |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_2                             |                                                              |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[12]_0                 |                                                              |               32 |            128 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_3                             |                                                              |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_1                             |                                                              |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[11]_0                 |                                                              |               32 |            128 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[10]_1                 |                                                              |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_2                             |                                                              |               32 |            128 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_0                             |                                                              |               32 |            128 |         4.00 |
-|  clk_o_BUFG    |                                                                  |                                                              |               55 |            148 |         2.69 |
 +----------------+------------------------------------------------------------------+--------------------------------------------------------------+------------------+----------------+--------------+
 
 

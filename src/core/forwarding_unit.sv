@@ -10,7 +10,7 @@ module Forwarding_Unit (
 
 localparam LW_OPCODE = 7'b0000011;
 
-always_comb begin : FORWARFIN_UNIT_LOGIC
+always_comb begin : FORWARDING_UNIT_LOGIC
     op_rs1 = 2'b00;
     op_rs2 = 2'b00;
 

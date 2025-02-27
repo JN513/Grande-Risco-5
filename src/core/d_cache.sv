@@ -20,59 +20,62 @@ module DCache #(
     output logic [31:0] memory_write_data,
     input  logic [31:0] memory_read_data
 );
-    // caso mude tamanho da cache, alterar o tamanho do tag e espaco de endereco
-    localparam TAG_SIZE                  = 'd32 - $clog2(CACHE_SIZE);
-    localparam BLOCK_SIZE                = 'd32;
-    localparam ADDRES_END_BIT            = $clog2(CACHE_SIZE) - 1'b1;
 
-    logic [BLOCK_SIZE:0] cache_data  [0 : (CACHE_SIZE / 'd4) - 1'b1];    
-    logic   [TAG_SIZE:0] cache_tag   [0 : (CACHE_SIZE / 'd4) - 1'b1];
-    logic                cache_valid [0 : (CACHE_SIZE / 'd4) - 1'b1];
+    // Definições automáticas com base no tamanho da cache
+    localparam int TAG_SIZE   = 32 - $clog2(CACHE_SIZE);
+    localparam int BLOCK_SIZE = 32;
+    localparam int INDEX_BITS = $clog2(CACHE_SIZE) - 1;
+
+    typedef logic [BLOCK_SIZE-1:0] cache_block_t;
+    typedef logic [TAG_SIZE-1:0]   cache_tag_t;
+
+    // Estruturas da cache
+    cache_block_t cache_data  [0:(CACHE_SIZE/4)-1];
+    cache_tag_t   cache_tag   [0:(CACHE_SIZE/4)-1];
+    logic         cache_valid [0:(CACHE_SIZE/4)-1];
 
     logic hit;
     logic miss_finished, write_through;
 
-    integer i;
+    assign hit = read_request &&
+                 cache_valid[addr[INDEX_BITS:2]] &&
+                 cache_tag[addr[INDEX_BITS:2]] == addr[31:INDEX_BITS+1];
 
-    assign hit = (read_request && cache_valid[addr[ADDRES_END_BIT:2]] 
-                 && cache_tag[addr[ADDRES_END_BIT:2]] == addr[31:ADDRES_END_BIT + 1]);
-
-    always_ff @( posedge clk ) begin : CACHE_LOGIC
+    always_ff @(posedge clk) begin : CACHE_LOGIC
         miss_finished <= 1'b0;
 
-        if(!rst_n) begin
+        if (!rst_n) begin
             write_through <= 1'b0;
             miss_finished <= 1'b0;
-            
-            for(i = 0; i < (CACHE_SIZE / 'd4 ); i = i + 1'b1) begin
-                cache_valid [i] = 1'b0;
-            end
+            cache_valid   <= '{default: 1'b0}; // Inicializa todas as posições como inválidas
         end else begin 
-            if(memory_response && read_request && !hit) begin
-                cache_valid   [addr[ADDRES_END_BIT:2]] <= 1'b1;
-                cache_tag     [addr[ADDRES_END_BIT:2]] <= addr[31:ADDRES_END_BIT + 1];
-                cache_data    [addr[ADDRES_END_BIT:2]] <= memory_read_data;
-                miss_finished                          <= 1'b1;
+            if (memory_response && read_request && !hit) begin
+                cache_valid [addr[INDEX_BITS:2]] <= 1'b1;
+                cache_tag   [addr[INDEX_BITS:2]] <= addr[31:INDEX_BITS+1];
+                cache_data  [addr[INDEX_BITS:2]] <= memory_read_data;
+                miss_finished                    <= 1'b1;
             end
-            if(write_request) begin
-                cache_valid [addr[ADDRES_END_BIT:2]] <= 1'b1;
-                cache_data  [addr[ADDRES_END_BIT:2]] <= write_data;
-                cache_tag   [addr[ADDRES_END_BIT:2]] <= addr[31:ADDRES_END_BIT + 1];
-                write_through                        <= 1'b1;
+            if (write_request) begin
+                cache_valid [addr[INDEX_BITS:2]] <= 1'b1;
+                cache_tag   [addr[INDEX_BITS:2]] <= addr[31:INDEX_BITS+1];
+                cache_data  [addr[INDEX_BITS:2]] <= write_data;
+                write_through                    <= 1'b1;
             end
-            if(write_through && memory_response) begin
+            if (write_through && memory_response) begin
                 miss_finished <= 1'b1;
                 write_through <= 1'b0;
             end
         end
     end
 
+    // Conexão com a memória
     assign memory_addr          = addr;
-    assign memory_read_request  = (hit) ? 1'b0  : read_request;
+    assign memory_read_request  = hit ? 1'b0 : read_request;
     assign memory_write_data    = write_data;
     assign memory_write_request = write_through;
 
+    // Saídas
     assign response   = hit | miss_finished;
-    assign read_data  = cache_data[addr[ADDRES_END_BIT:2]];
+    assign read_data  = cache_data[addr[INDEX_BITS:2]];
 
 endmodule

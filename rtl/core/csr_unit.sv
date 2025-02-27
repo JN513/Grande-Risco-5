@@ -69,7 +69,7 @@ logic [63:0] MCYCLE_reg, MINSTRET_reg;
 
 // Read CSR
 always_comb begin : READ_CSR
-    case (csr_addr)
+    unique case (csr_addr)
         // Performance Counters
         CYCLE:     csr_data_out = MCYCLE_reg[31:0];
         CYCLEH:    csr_data_out = MCYCLE_reg[63:32];

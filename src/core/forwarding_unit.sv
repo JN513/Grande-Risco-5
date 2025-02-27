@@ -1,16 +1,16 @@
 module Forwarding_Unit (
-    input wire previous_instruction_is_lw,
-    input wire [4:0] rs1,
-    input wire [4:0] rs2,
-    input wire [4:0] ex_mem_stage_rd,
-    input wire [4:0] mem_wb_stage_rd,
-    output reg [1:0] op_rs1,
-    output reg [1:0] op_rs2
+    input  logic previous_instruction_is_lw,
+    input  logic [4:0] rs1,
+    input  logic [4:0] rs2,
+    input  logic [4:0] ex_mem_stage_rd,
+    input  logic [4:0] mem_wb_stage_rd,
+    output logic [1:0] op_rs1,
+    output logic [1:0] op_rs2
 );
 
 localparam LW_OPCODE = 7'b0000011;
 
-always @(*) begin
+always_comb begin : FORWARFIN_UNIT_LOGIC
     op_rs1 = 2'b00;
     op_rs2 = 2'b00;
 

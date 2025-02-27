@@ -2,14 +2,14 @@
 
 `ifdef ENABLE_MDU
 module MDU (
-    input wire clk,
-    input wire rst_n,
-    input wire start,
-    output wire done,
-    input wire [2:0] operation,
-    input wire [31:0] MDU_in_X,
-    input wire [31:0] MDU_in_Y,
-    output wire [31:0] MDU_out
+    input  logic clk,
+    input  logic rst_n,
+    input  logic start,
+    output logic done,
+    input  logic [2:0] operation,
+    input  logic [31:0] MDU_in_X,
+    input  logic [31:0] MDU_in_Y,
+    output logic [31:0] MDU_out
 );
 
 // Operation codes
@@ -46,8 +46,8 @@ localparam REMU   = 3'b111; // rd = rs1 % rs2
 
 
 
-reg mul_done;
-reg [31:0] MUL_RD;
+logic mul_done;
+logic [31:0] MUL_RD;
 
 
 `ifdef FPGA
@@ -56,12 +56,12 @@ localparam IDLE    = 2'b00;
 localparam OPERATE = 2'b01;
 localparam FINISH  = 2'b10;
 
-reg [1:0] state_mul;
+logic [1:0] state_mul;
 
-reg [31:0] Data_X, Data_Y;
-reg [63:0] acumulador;
+logic [31:0] Data_X, Data_Y;
+logic [63:0] acumulador;
 
-always @(posedge clk) begin
+always_ff @(posedge clk) begin : MUL_FSM_FPGA
     mul_done <= 1'b0;
 
     if(!rst_n) begin
@@ -75,7 +75,7 @@ always @(posedge clk) begin
                 if(start & !operation[2]) begin
                     state_mul <= OPERATE;
                     if(operation[1]) begin
-                        Data_X <= (operation[0]) ? $unsigned(MDU_in_X) : $signed(MDU_in_X);
+                        Data_X <= (operation[0]) ? $unsigned(MDU_in_X) : $signed({MDU_in_X[31], MDU_in_X});
                         Data_Y <= $unsigned(MDU_in_Y);
                     end else begin
                         Data_X <= $signed(MDU_in_X);
@@ -115,7 +115,7 @@ reg [63:0] multiplicand_1, multiplicand_2, multiplicand_3, multiplicand_4;
 reg [7:0] multiplier_1, multiplier_2, multiplier_3, multiplier_4;
 
 // State machine
-always @(posedge clk) begin
+always_ff @(posedge clk) begin : MUL_FSM
     mul_done <= 1'b0;
 
     if(!rst_n) begin
@@ -197,12 +197,12 @@ localparam DIV_IDLE    = 2'b00;
 localparam DIV_OPERATE = 2'b01;
 localparam DIV_FINISH  = 2'b10;
 
-reg negativo, div_done;
-reg [1:0] state_div;
-reg [31:0] dividendo, quociente, quociente_msk, DIV_RD;
-reg [63:0] divisor;
+logic negativo, div_done;
+logic [1:0] state_div;
+logic [31:0] dividendo, quociente, quociente_msk, DIV_RD;
+logic [63:0] divisor;
 
-always @(posedge clk) begin
+always_ff @(posedge clk) begin : DIV_FSM
     div_done <= 1'b0;
     if(!rst_n) begin
         state_div <= IDLE;

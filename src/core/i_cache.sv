@@ -1,41 +1,41 @@
 module ICache #(
     parameter CACHE_SIZE = 72
 ) (
-    input wire clk,
-    input wire rst_n,
+    input logic clk,
+    input logic rst_n,
 
     // Processor interface
-    input  wire flush_bus,
-    input  wire read_request,
-    input  wire [31:0] addr,
-    output wire read_response,
-    output wire [31:0] read_data,
+    input  logic flush_bus,
+    input  logic read_request,
+    input  logic [31:0] addr,
+    output logic read_response,
+    output logic [31:0] read_data,
 
     // Memory interface
-    output wire memory_read_request,
-    input  wire memory_read_response,
-    output wire [31:0] memory_addr,
-    input  wire [31:0] memory_read_data
+    output logic memory_read_request,
+    input  logic memory_read_response,
+    output logic [31:0] memory_addr,
+    input  logic [31:0] memory_read_data
 );
 
     localparam TAG_SIZE                  = 'd32 - $clog2(CACHE_SIZE);
     localparam BLOCK_SIZE                = 'd32;
     localparam ADDRES_END_BIT            = $clog2(CACHE_SIZE) - 1'b1;
 
-    reg [BLOCK_SIZE:0] cache_data  [0 : (CACHE_SIZE / 'd4) - 1'b1];    
-    reg   [TAG_SIZE:0] cache_tag   [0 : (CACHE_SIZE / 'd4) - 1'b1];
-    reg                cache_valid [0 : (CACHE_SIZE / 'd4) - 1'b1];
+    logic [BLOCK_SIZE:0] cache_data  [0 : (CACHE_SIZE / 'd4) - 1'b1];    
+    logic   [TAG_SIZE:0] cache_tag   [0 : (CACHE_SIZE / 'd4) - 1'b1];
+    logic                cache_valid [0 : (CACHE_SIZE / 'd4) - 1'b1];
 
-    reg request_to_memory, clear_response;
-    wire hit;
-    reg miss_finished;
+    logic request_to_memory, clear_response;
+    logic hit;
+    logic miss_finished;
 
     integer i;
 
     assign hit = (read_request && cache_valid[addr[ADDRES_END_BIT:2]] 
                  && cache_tag[addr[ADDRES_END_BIT:2]] == addr[31:ADDRES_END_BIT + 1]);
 
-    always @(posedge clk) begin
+    always_ff @( posedge clk ) begin : CACHE_LOGIC
         miss_finished <= 1'b0;
 
         if(!rst_n) begin 

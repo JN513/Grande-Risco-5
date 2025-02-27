@@ -1,10 +1,10 @@
 // This module is based in ibex implementation, available in: https://github.com/lowRISC/ibex/blob/master/rtl/ibex_compressed_decoder.sv
 
 module IR_Decompression ( // Convert compressed instruction to decompressed instruction
-    input wire [31:0] compressed_instruction,
-    output wire is_compressed_instruction,
-    output reg [31:0] decompressed_instruction,
-    output reg illegal_instruction
+    input  logic [31:0] compressed_instruction,
+    output logic is_compressed_instruction,
+    output logic [31:0] decompressed_instruction,
+    output logic illegal_instruction
 );
 
 localparam OPCODE_LOAD     = 7'h03;
@@ -21,7 +21,7 @@ localparam OPCODE_SYSTEM   = 7'h73;
 
 
 
-always @(*) begin
+always_comb begin : DECOMPRESS
     // By default, forward incoming instruction, mark it as legal.
     decompressed_instruction = compressed_instruction;
     illegal_instruction = 1'b0;

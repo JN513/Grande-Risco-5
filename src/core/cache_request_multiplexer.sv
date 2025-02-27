@@ -2,43 +2,43 @@ module Cache_request_Multiplexer #(
     parameter DATA_WIDTH = 32, // Largura dos dados na requisição
     parameter ADDR_WIDTH = 32
 )(
-    input wire clk,
-    input wire rst_n,
+    input logic clk,
+    input logic rst_n,
 
     // Entradas das caches
     
-    input  wire [ADDR_WIDTH-1:0] i_cache_address,
-    output  reg [DATA_WIDTH-1:0] i_cache_read_data,
-    input  wire i_cache_read_request,
+    input  logic [ADDR_WIDTH-1:0] i_cache_address,
+    output logic [DATA_WIDTH-1:0] i_cache_read_data,
+    input  logic i_cache_read_request,
 
-    input  wire [ADDR_WIDTH-1:0] d_cache_address,
-    output  reg [DATA_WIDTH-1:0] d_cache_read_data,
-    input  wire [DATA_WIDTH-1:0] d_cache_write_data,
-    input  wire d_cache_read_request,
-    input  wire d_cache_write_request,
+    input  logic [ADDR_WIDTH-1:0] d_cache_address,
+    output logic [DATA_WIDTH-1:0] d_cache_read_data,
+    input  logic [DATA_WIDTH-1:0] d_cache_write_data,
+    input  logic d_cache_read_request,
+    input  logic d_cache_write_request,
 
     // Saidas das caches
 
-    output  reg i_cache_response,
-    output  reg d_cache_response,
+    output logic i_cache_response,
+    output logic d_cache_response,
 
     // Sinais de memória
      
-    output wire memory_read_request,
-    output wire memory_write_request,
-    output wire [ADDR_WIDTH-1:0] memory_addr,
-    output wire [DATA_WIDTH-1:0] memory_write_data,
-    input  wire memory_response,
-    input  wire [DATA_WIDTH-1:0] memory_read_data
+    output logic memory_read_request,
+    output logic memory_write_request,
+    output logic [ADDR_WIDTH-1:0] memory_addr,
+    output logic [DATA_WIDTH-1:0] memory_write_data,
+    input  logic memory_response,
+    input  logic [DATA_WIDTH-1:0] memory_read_data
 );
 
 // response out: 0 = i_cache, 1 = d_cache
 // request type: 0 = read, 1 = write
 
-reg [31:0] requested_memory_addr, write_data;
-reg response_out, write_request, read_request, access_pedding;
+logic [31:0] requested_memory_addr, write_data;
+logic response_out, write_request, read_request, access_pedding;
 
-always @(posedge clk ) begin
+always_ff @(posedge clk ) begin : cache_request_multiplexer
     i_cache_response <= 1'b0;
     d_cache_response <= 1'b0;
 

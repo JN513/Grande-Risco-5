@@ -1,12 +1,12 @@
 module ALU_Control (
-    input wire is_immediate,
-    input wire [1:0] aluop_in,
-    input wire [6:0] func7,
-    input wire [2:0] func3,
-    output reg [3:0] aluop_out
+    input  logic is_immediate,
+    input  logic [1:0] aluop_in,
+    input  logic [6:0] func7,
+    input  logic [2:0] func3,
+    output logic [3:0] aluop_out
 );
 
-always @(*) begin
+always_comb begin : ALU_CONTROL
     aluop_out <= 4'b0010; // Default para SUM
     case (aluop_in)
         2'b00: 

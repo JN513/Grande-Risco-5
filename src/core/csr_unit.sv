@@ -1,26 +1,26 @@
 module CSR_Unit (
-    input wire clk,
-    input wire rst_n,
+    input logic clk,
+    input logic rst_n,
 
     // CSR read/write signals
-    input wire write_enable,
-    output reg write_done,
+    input  logic write_enable,
+    output logic write_done,
 
-    input wire [2:0] func3,
-    input wire [4:0] csr_imm,
-    input wire [11:0] csr_addr,
+    input logic [2:0] func3,
+    input logic [4:0] csr_imm,
+    input logic [11:0] csr_addr,
 
-    input wire [31:0] csr_data_in,
-    output reg [31:0] csr_data_out,
+    input  logic [31:0] csr_data_in,
+    output logic [31:0] csr_data_out,
 
     // Processor signals
-    input wire invalid_decode_instruction,
-    input wire instruction_finished,
+    input logic invalid_decode_instruction,
+    input logic instruction_finished,
 
-    input wire [31:0] decode_pc,
-    input wire [31:0] execute_pc,
-    input wire [31:0] memory_pc,
-    input wire [31:0] writeback_pc
+    input logic [31:0] decode_pc,
+    input logic [31:0] execute_pc,
+    input logic [31:0] memory_pc,
+    input logic [31:0] writeback_pc
 );
 
 // Address of Performance Counters CSRs
@@ -62,13 +62,13 @@ localparam MCYCLEH              = 12'hB80; // Campo de extensão do registrador 
 localparam MINSTRETH            = 12'hB82; // Campo de extensão do registrador MINSTRET.
 
 
-reg [31:0] MEPC_reg, MSTATUS_reg, MCAUSE_reg, MTVAL_reg, 
+logic [31:0] MEPC_reg, MSTATUS_reg, MCAUSE_reg, MTVAL_reg, 
     MIP_reg, MIE_reg, MTVEC_reg, MSCRATCH_reg;
-reg [63:0] MCYCLE_reg, MINSTRET_reg;
+logic [63:0] MCYCLE_reg, MINSTRET_reg;
 
 
 // Read CSR
-always @(*) begin
+always_comb begin : READ_CSR
     case (csr_addr)
         // Performance Counters
         CYCLE:     csr_data_out = MCYCLE_reg[31:0];
@@ -104,7 +104,7 @@ end
 
 
 // Counters incrementation
-always @(posedge clk ) begin
+always_ff @( posedge clk ) begin : COUNTERS
     if(!rst_n) begin
         MCYCLE_reg   <= 64'h0000000000000000;
         MINSTRET_reg <= 64'h0000000000000000;
@@ -117,7 +117,7 @@ always @(posedge clk ) begin
 end
 
 // Write CSR (only for MSTATUS, MIE, MTVEC, MSCRATCH, MEPC)
-always @(posedge clk ) begin
+always_ff @(posedge clk ) begin : WRITE_CSR
     write_done <= 1'b0;
     
     if(!rst_n) begin

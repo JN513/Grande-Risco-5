@@ -1,9 +1,9 @@
 module Alu (
-    input wire [3:0] operation,
-    input wire [31:0] ALU_in_X,
-    input wire [31:0] ALU_in_Y,
-    output reg [31:0] ALU_out_S,
-    output wire ZR
+    input  logic [3:0] operation,
+    input  logic [31:0] ALU_in_X,
+    input  logic [31:0] ALU_in_Y,
+    output logic [31:0] ALU_out_S,
+    output logic ZR
 );
 
 localparam AND             = 4'b0000;
@@ -23,7 +23,7 @@ localparam EQUAL           = 4'b0011;
 
 assign ZR = ~( |ALU_out_S ) && operation[3:2] != 2'b01; // ZR = 1 se ALU_out_S == 0
 
-always @(*) begin
+always_comb begin : ALU_OPERATION
     case(operation)
         AND: // AND
             ALU_out_S = ALU_in_X & ALU_in_Y; 

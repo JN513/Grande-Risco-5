@@ -1,13 +1,13 @@
 module top (
-    input  wire clk,
-    input  wire CPU_RESETN,
-    input  wire rx,
-    output wire tx,
-    output wire [7:0]LED,
-    output wire [7:0] JA
+    input  logic clk,
+    input  logic CPU_RESETN,
+    input  logic rx,
+    output logic tx,
+    output logic [7:0]LED,
+    output logic [7:0] JA
 );
 
-reg clk_o;
+logic clk_o;
 
 Grande_Risco_5_SOC #(
     .CLOCK_FREQ       (50000000),
@@ -27,8 +27,8 @@ Grande_Risco_5_SOC #(
     .gpios ()
 );
 
-reg [7:0] leds;
-reg [31:0] counter;
+logic [7:0] leds;
+logic [31:0] counter;
 
 assign JA = leds;
 

@@ -1,6 +1,6 @@
 module Immediate_Generator (
-    input wire [31:0] instruction,
-    output reg [31:0] immediate
+    input  logic [31:0] instruction,
+    output logic [31:0] immediate
 );
 
 
@@ -15,7 +15,7 @@ localparam BRANCH_OPCODE    = 7'b1100011;
 localparam IMMEDIATE_OPCODE = 7'b0010011;
 
 
-always @(*) begin
+always_comb begin : IMMEDIATE_GENERATOR
     case (instruction[6:0])
         BRANCH_OPCODE: // SB type
             immediate = {{19{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};

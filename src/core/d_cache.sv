@@ -1,43 +1,43 @@
 module DCache #(
     parameter CACHE_SIZE = 32
 ) (
-    input wire clk,
-    input wire rst_n,
+    input logic clk,
+    input logic rst_n,
 
     // Processor interface
-    input  wire read_request,
-    input  wire write_request,
-    input  wire [31:0] addr,
-    input  wire [31:0] write_data,
-    output wire response,
-    output wire [31:0] read_data,
+    input  logic read_request,
+    input  logic write_request,
+    input  logic [31:0] addr,
+    input  logic [31:0] write_data,
+    output logic response,
+    output logic [31:0] read_data,
 
     // Memory interface
-    output wire memory_read_request,
-    output wire memory_write_request,
-    input  wire memory_response,
-    output wire [31:0] memory_addr,
-    output wire [31:0] memory_write_data,
-    input  wire [31:0] memory_read_data
+    output logic memory_read_request,
+    output logic memory_write_request,
+    input  logic memory_response,
+    output logic [31:0] memory_addr,
+    output logic [31:0] memory_write_data,
+    input  logic [31:0] memory_read_data
 );
     // caso mude tamanho da cache, alterar o tamanho do tag e espaco de endereco
     localparam TAG_SIZE                  = 'd32 - $clog2(CACHE_SIZE);
     localparam BLOCK_SIZE                = 'd32;
     localparam ADDRES_END_BIT            = $clog2(CACHE_SIZE) - 1'b1;
 
-    reg [BLOCK_SIZE:0] cache_data  [0 : (CACHE_SIZE / 'd4) - 1'b1];    
-    reg   [TAG_SIZE:0] cache_tag   [0 : (CACHE_SIZE / 'd4) - 1'b1];
-    reg                cache_valid [0 : (CACHE_SIZE / 'd4) - 1'b1];
+    logic [BLOCK_SIZE:0] cache_data  [0 : (CACHE_SIZE / 'd4) - 1'b1];    
+    logic   [TAG_SIZE:0] cache_tag   [0 : (CACHE_SIZE / 'd4) - 1'b1];
+    logic                cache_valid [0 : (CACHE_SIZE / 'd4) - 1'b1];
 
-    wire hit;
-    reg miss_finished, write_through;
+    logic hit;
+    logic miss_finished, write_through;
 
     integer i;
 
     assign hit = (read_request && cache_valid[addr[ADDRES_END_BIT:2]] 
                  && cache_tag[addr[ADDRES_END_BIT:2]] == addr[31:ADDRES_END_BIT + 1]);
 
-    always @(posedge clk) begin
+    always_ff @( posedge clk ) begin : CACHE_LOGIC
         miss_finished <= 1'b0;
 
         if(!rst_n) begin

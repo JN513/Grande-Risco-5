@@ -1,11 +1,11 @@
 `ifdef ENABLE_BMU
 
 module BMU ( // Bit manipulation unit for riscv B extension
-    input wire clk,
-    input wire [4:0] option,
-    input wire [31:0] BMU_in_X,
-    input wire [31:0] BMU_in_Y,
-    output reg [31:0] BMU_out_S
+    input  logic clk,
+    input  logic [4:0] option,
+    input  logic [31:0] BMU_in_X,
+    input  logic [31:0] BMU_in_Y,
+    output logic [31:0] BMU_out_S
 );
 
 localparam OP = 7'b0110011;
@@ -39,7 +39,7 @@ localparam SH3ADD = 5'b11000;
 localparam XNOR   = 5'b11001;
 localparam ZEXTH  = 5'b11010;
 
-always @(*) begin
+always_comb begin : BMU_OPERATION
     case (option)
         ANDN:
             BMU_out_S = BMU_in_X & ~BMU_in_Y;

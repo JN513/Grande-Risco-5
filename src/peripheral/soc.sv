@@ -11,21 +11,21 @@ module Grande_Risco_5_SOC #(
     parameter ADDR_WIDTH       = 32,
     parameter UART_BUFFER_SIZE = 16
 )(
-    input  wire clk,
-    input  wire rst_n,
-    input  wire halt,
+    input  logic clk,
+    input  logic rst_n,
+    input  logic halt,
 
-    input  wire rx,
-    output wire tx,
+    input  logic rx,
+    output logic tx,
 
-    output wire [7:0] leds,
+    output logic [7:0] leds,
     inout [GPIO_WIDHT-1:0] gpios
 );
 
-wire memory_response, memory_read_request,
+logic memory_response, memory_read_request,
     memory_write_request;
 
-wire [DATA_WIDTH-1:0] memory_read_data,
+logic [DATA_WIDTH-1:0] memory_read_data,
     memory_write_data, memory_addr;
 
 Grande_Risco5 #(
@@ -69,9 +69,9 @@ Memory #(
     .response     (memory_response)
 );
 
-wire peripheral_read_request, peripheral_write_request,
+logic peripheral_read_request, peripheral_write_request,
     peripheral_response;
-wire [31:0] peripheral_addr, peripheral_read_data,
+logic [31:0] peripheral_addr, peripheral_read_data,
     peripheral_write_data;
 
 LEDs #(

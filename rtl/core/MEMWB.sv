@@ -1,0 +1,80 @@
+`include "defines.vh"
+`include "grande_risco5_types.sv"
+
+module MEMWB (
+    input logic clk,
+    input logic rst_n,
+
+    // EXEMEM_INPUT
+    `ifdef ENABLE_MDU
+    input logic EXMEMMDUop_i,
+    input logic [31:0] EXMEMMDUOut,
+    `endif
+    input logic [31:0] EXMEMALUOut_i,
+    input logic [31:0] EXMEM_IR_i,
+    input logic [31:0] read_data_i,
+    input logic [31:0] Merged_word_i,
+    input logic memory_operation_i,
+
+    input logic memory_stall_i,
+
+    output logic reg_wr_en_o,
+    output logic [4:0] MEMWB_RD_ADDR_o,
+    output logic [31:0] MEMWB_RD_o
+);
+
+// Importando os opcodes do pacote
+import opcodes_pkg::*;
+
+logic mem_to_reg;
+logic [4:0] EXMEMrd;
+logic [6:0] MEMWBop, EXMEMop;
+logic [31:0] MEMWB_mem_read_data, MEMWBALUOut, MEMWB_IR;
+logic is_unaligned_address;
+
+always_ff @(posedge clk ) begin : MEMWB_STAGE
+    reg_wr_en_o <= 1'b0;
+    mem_to_reg  <= 1'b0;
+
+    if(!rst_n || memory_stall_i) begin
+        MEMWB_IR <= NOP;
+    end else begin // memory_stall
+        MEMWB_IR <= EXMEM_IR_i;
+        MEMWB_mem_read_data <= (is_unaligned_address) ? Merged_word_i : read_data_i;
+        
+        `ifdef ENABLE_MDU
+        MEMWBALUOut <= (EXMEMMDUop_i) ? EXMEMMDUOut : EXMEMALUOut_i;
+        `else
+        MEMWBALUOut <= EXMEMALUOut_i;
+        `endif
+
+        // wb stage - five stage
+
+        if ((EXMEMop == RTYPE_OPCODE || 
+            EXMEMop == IMMEDIATE_OPCODE || 
+            EXMEMop == AUIPC_OPCODE || 
+            EXMEMop == CSR_OPCODE || 
+            EXMEMop == LUI_OPCODE || 
+            EXMEMop == LW_OPCODE ||
+            EXMEMop == JAL_OPCODE ||
+            EXMEMop == JALR_OPCODE ) && (|EXMEMrd)) 
+        begin
+            // verifica se tem wb
+            reg_wr_en_o <= 1'b1;
+        end
+
+        if(EXMEMop == LW_OPCODE) begin 
+            mem_to_reg <= 1'b1;
+        end
+    end 
+end
+
+assign EXMEMop              = EXMEM_IR_i[6:0];
+assign EXMEMrd              = EXMEM_IR_i[11:7];
+assign MEMWBop              = MEMWB_IR[6:0];
+assign MEMWB_RD_ADDR_o      = MEMWB_IR[11:7];
+assign MEMWB_RD_o           = (mem_to_reg) ? MEMWB_mem_read_data : MEMWBALUOut;
+assign is_unaligned_address = (memory_operation_i && EXMEMALUOut_i[1:0] != 2'b00);
+
+
+endmodule

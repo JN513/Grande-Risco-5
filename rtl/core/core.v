@@ -296,7 +296,7 @@ localparam CUT_WORDS                 = 4'b1010;
 reg [3:0] unaligned_access_state;
 reg [31:0] First_Word, Second_Word;
 
-reg [31:0] Merged_word;
+reg [31:0] Merged_Word;
 reg [31:0] Data_Address;
 
 always @(posedge clk ) begin // EX/MEM
@@ -338,21 +338,21 @@ always @(posedge clk ) begin // EX/MEM
             end
             MERGE_WORDS: begin
                 if(data_address[1:0] == 2'b01) begin
-                    Merged_word <= {Second_Word[7:0], First_Word[31:8]};
+                    Merged_Word <= {Second_Word[7:0], First_Word[31:8]};
                 end else if(data_address[1:0] == 2'b10) begin
-                    Merged_word <= {Second_Word[15:0], First_Word[31:16]};
+                    Merged_Word <= {Second_Word[15:0], First_Word[31:16]};
                 end else if(data_address[1:0] == 2'b11) begin
-                    Merged_word <= {Second_Word[23:0], First_Word[31:24]};
+                    Merged_Word <= {Second_Word[23:0], First_Word[31:24]};
                 end
                 unaligned_access_state <= CUT_WORDS;
             end
             CUT_WORDS: begin
                 case (EXMEMfunc3)
-                    3'b000: Merged_word <= {{24{Merged_word[7]}}, Merged_word[7:0]};
-                    3'b001: Merged_word <= {{16{Merged_word[15]}}, Merged_word[15:0]};
-                    3'b100: Merged_word <= {24'h0, Merged_word[7:0]};
-                    3'b101: Merged_word <= {16'h0, Merged_word[15:0]};
-                    default: Merged_word <= Merged_word;
+                    3'b000: Merged_Word <= {{24{Merged_Word[7]}}, Merged_Word[7:0]};
+                    3'b001: Merged_Word <= {{16{Merged_Word[15]}}, Merged_Word[15:0]};
+                    3'b100: Merged_Word <= {24'h0, Merged_Word[7:0]};
+                    3'b101: Merged_Word <= {16'h0, Merged_Word[15:0]};
+                    default: Merged_Word <= Merged_Word;
                 endcase
 
                 unaligned_access_state <= IDLE;
@@ -461,7 +461,7 @@ always @(posedge clk ) begin // MEM/WB
         MEMWBIR <= NOP;
     end else begin // memory_stall
         MEMWBIR <= EXMEMIR;
-        MEMWB_mem_read_data <= (is_unaligned_address) ? Merged_word : read_data;
+        MEMWB_mem_read_data <= (is_unaligned_address) ? Merged_Word : read_data;
         
         `ifdef ENABLE_MDU
         MEMWBALUOut <= (EXMEMMDUop) ? EXMEMMDUOut : EXMEMALUOut;

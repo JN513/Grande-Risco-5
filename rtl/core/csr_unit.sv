@@ -3,12 +3,12 @@ module CSR_Unit (
     input logic rst_n,
 
     // CSR read/write signals
-    input  logic write_enable,
+    input  logic csr_wr_en,
     output logic write_done,
 
-    input logic [2:0] func3,
-    input logic [4:0] csr_imm,
-    input logic [11:0] csr_addr,
+    input logic [2:0] func3_i,
+    input logic [4:0] csr_imm_i,
+    input logic [11:0] csr_addr_i,
 
     input  logic [31:0] csr_data_in,
     output logic [31:0] csr_data_out,
@@ -17,6 +17,7 @@ module CSR_Unit (
     input logic invalid_decode_instruction,
     input logic instruction_finished,
 
+    input logic [31:0] fetch_pc,
     input logic [31:0] decode_pc,
     input logic [31:0] execute_pc,
     input logic [31:0] memory_pc,
@@ -66,10 +67,23 @@ logic [31:0] MEPC_reg, MSTATUS_reg, MCAUSE_reg, MTVAL_reg,
     MIP_reg, MIE_reg, MTVEC_reg, MSCRATCH_reg;
 logic [63:0] MCYCLE_reg, MINSTRET_reg;
 
+logic [31:0] csr_input, csr_write_data;
+
+assign csr_input = (func3_i[2] == 1'b1) ? {27'h0000000, csr_imm_i} : csr_data_in;
+
+always_comb begin : CSR_ALU
+    unique case (func3_i[1:0])
+        2'b01: csr_write_data = csr_input;
+        2'b10: csr_write_data = csr_data_out | csr_input;
+        2'b11: csr_write_data = csr_data_out & ~csr_input;
+        default: csr_write_data = csr_data_out;
+    endcase
+end
+
 
 // Read CSR
 always_comb begin : READ_CSR
-    unique case (csr_addr)
+    unique case (csr_addr_i)
         // Performance Counters
         CYCLE:     csr_data_out = MCYCLE_reg[31:0];
         CYCLEH:    csr_data_out = MCYCLE_reg[63:32];
@@ -127,13 +141,13 @@ always_ff @(posedge clk ) begin : WRITE_CSR
         MSCRATCH_reg <= 32'h00000000;
         MEPC_reg     <= 32'h00000000;
     end else begin
-        if(write_enable) begin
-            case (csr_addr)
-                MSTATUS:   MSTATUS_reg  <= csr_data_in;
-                MIE:       MIE_reg      <= csr_data_in;
-                MTVEC:     MTVEC_reg    <= csr_data_in;
-                MSCRATCH:  MSCRATCH_reg <= csr_data_in;
-                MEPC:      MEPC_reg     <= csr_data_in;
+        if(csr_wr_en) begin
+            case (csr_addr_i)
+                MSTATUS:   MSTATUS_reg  <= csr_write_data;
+                MIE:       MIE_reg      <= csr_write_data;
+                MTVEC:     MTVEC_reg    <= csr_write_data;
+                MSCRATCH:  MSCRATCH_reg <= csr_write_data;
+                MEPC:      MEPC_reg     <= csr_write_data;
                 default: begin
                     // Do nothing
                 end

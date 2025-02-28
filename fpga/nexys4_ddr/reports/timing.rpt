@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Thu Feb 27 23:19:25 2025
+| Date         : Fri Feb 28 10:58:35 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_timing_summary -datasheet -max_paths 10 -file reports/timing.rpt
 | Design       : top
@@ -49,10 +49,10 @@ check_timing report
 
 Table of Contents
 -----------------
-1. checking no_clock (5024)
+1. checking no_clock (5018)
 2. checking constant_clock (0)
 3. checking pulse_width_clock (0)
-4. checking unconstrained_internal_endpoints (29586)
+4. checking unconstrained_internal_endpoints (29560)
 5. checking no_input_delay (1)
 6. checking no_output_delay (8)
 7. checking multiple_clock (0)
@@ -62,9 +62,9 @@ Table of Contents
 11. checking partial_output_delay (0)
 12. checking latch_loops (0)
 
-1. checking no_clock (5024)
+1. checking no_clock (5018)
 ---------------------------
- There are 5024 register/latch pins with no clock driven by root clock pin: clk_o_reg/Q (HIGH)
+ There are 5018 register/latch pins with no clock driven by root clock pin: clk_o_reg/Q (HIGH)
 
 
 2. checking constant_clock (0)
@@ -77,9 +77,9 @@ Table of Contents
  There are 0 register/latch pins which need pulse_width check
 
 
-4. checking unconstrained_internal_endpoints (29586)
+4. checking unconstrained_internal_endpoints (29560)
 ----------------------------------------------------
- There are 29586 pins that are not constrained for maximum delay. (HIGH)
+ There are 29560 pins that are not constrained for maximum delay. (HIGH)
 
  There are 0 pins that are not constrained for maximum delay due to constant clock.
 
@@ -346,7 +346,7 @@ Input Ports Setup/Hold
 Reference   | Input      | IO Reg  | Delay |     Setup(ns) | Process |      Hold(ns) | Process | Internal |
 Clock       | Port       | Type    | Type  | to Clk (Edge) | Corner  | to Clk (Edge) | Corner  | Clock    |
 ------------+------------+---------+-------+---------------+---------+---------------+---------+----------+
-sys_clk_pin | CPU_RESETN | FDRE    | -     |     3.478 (r) | SLOW    |    -1.150 (r) | FAST    |          |
+sys_clk_pin | CPU_RESETN | FDRE    | -     |     1.901 (r) | SLOW    |    -0.414 (r) | FAST    |          |
 ------------+------------+---------+-------+---------------+---------+---------------+---------+----------+
 
 

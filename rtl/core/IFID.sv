@@ -132,6 +132,11 @@ always @(posedge clk ) begin // IF/ID
                     finish_unaligned_pc <= 1'b0;
                     IFID_IR_o <= instr_d_o;
                     IFID_PC_o <= temp_pc;
+
+                    if(illegal_instruction) begin
+                        IFID_IR_o <= NOP;
+                        IFID_PC_o <= BOOT_ADDRESS;
+                    end
                 end else if(pc_is_unaligned) begin
                     temp_instruction <= {16'h0, instruction_data_i[31:16]};
                     IFID_IR_o <= NOP;
@@ -147,7 +152,7 @@ always @(posedge clk ) begin // IF/ID
                         pc_is_unaligned <= 1'b1;
                     end
                 end else begin
-                    IFID_IR_o                      <= instr_d_o;
+                    IFID_IR_o                        <= instr_d_o;
                     IFID_is_compressed_instruction_o <= is_compressed_instruction;
                     if(is_compressed_instruction) begin
                         PC <= PC + 'd2;
@@ -157,6 +162,11 @@ always @(posedge clk ) begin // IF/ID
                         pc_is_unaligned <= 1'b0;
                     end
                     IFID_PC_o <= PC;
+                    
+                    if(illegal_instruction) begin
+                        IFID_IR_o <= NOP;
+                        IFID_PC_o <= BOOT_ADDRESS;
+                    end
                 end
             end
         end
@@ -171,11 +181,22 @@ IR_Decompression IR_Decompression(
     .instr_illegal_o (illegal_instruction)
 );
 
-assign IFIDop              = IFID_IR_o[6:0];
-assign IFIDrs1             = IFID_IR_o[19:15];
-assign IFIDrs2             = IFID_IR_o[24:20];
-assign IFIDfunc3           = IFID_IR_o[14:12];
-assign IFIDfunc5           = IFID_IR_o[31:27];
+Branch_Prediction Branch_Prediction(
+    .clk                 (clk),
+    .rst_n               (rst_n),
+
+    .valid_instruction_i (instruction_response_i),
+    .PC_i                (PC),
+    .instruction_data_i  (instruction_data_i),
+
+    .address_o           ()
+);
+
+assign IFIDop    = IFID_IR_o[6:0];
+assign IFIDrs1   = IFID_IR_o[19:15];
+assign IFIDrs2   = IFID_IR_o[24:20];
+assign IFIDfunc3 = IFID_IR_o[14:12];
+assign IFIDfunc5 = IFID_IR_o[31:27];
     
 assign instruction_addr_o = PC;
 

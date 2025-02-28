@@ -207,6 +207,31 @@ Registers RegisterBank(
 );
 
 
+CSR_Unit CSR(
+    .clk                        (clk),
+    .rst_n                      (rst_n),
+
+    .csr_wr_en                  (),
+    .write_done                 (),
+    
+    .func3_i                    (IDEX_IR[14:12]),
+    .csr_imm_i                  (IDEX_IR[19:15]),
+    .csr_addr_i                 (IDEX_IR[31:20]),
+
+    .csr_data_in                (),
+    .csr_data_out               (),
+
+    .invalid_decode_instruction (),
+    .instruction_finished       (),
+    
+    .fetch_pc                   (instr_addr_o),
+    .decode_pc                  (IFID_PC),
+    .execute_pc                 (IDEX_PC),
+    .memory_pc                  (),
+    .writeback_pc               ()
+);
+
+
 assign IFIDrs1 = IFID_IR[19:15];
 assign IFIDrs2 = IFID_IR[24:20];
 assign IFIDrd  = IFID_IR[11:7];

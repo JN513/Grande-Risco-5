@@ -3,10 +3,10 @@ module Grande_Risco_5_SOC #(
     parameter BAUD_RATE        = 9600,
     parameter BOOT_ADDRESS     = 32'h00000000,
     parameter MEMORY_SIZE      = 4096,
-    parameter MEMORY_FILE      = "",
+    parameter MEMORY_FILE      = "verification_tests/memory/generic.hex",
     parameter GPIO_WIDHT       = 5,
-    parameter I_CACHE_SIZE     = 1024,
-    parameter D_CACHE_SIZE     = 1024,
+    parameter I_CACHE_SIZE     = 32,
+    parameter D_CACHE_SIZE     = 32,
     parameter DATA_WIDTH       = 32,
     parameter ADDR_WIDTH       = 32,
     parameter UART_BUFFER_SIZE = 16

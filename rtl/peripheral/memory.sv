@@ -16,16 +16,7 @@ localparam BIT_INDEX = $clog2(MEMORY_SIZE) - 1'b1;
 
 logic [31:0] memory [(MEMORY_SIZE/4)-1: 0];
 
-`ifdef __ICARUS__
-integer i;
-`endif
-
 initial begin
-    `ifdef __ICARUS__
-        for(i = 0; i < (MEMORY_SIZE/4); i = i + 1) begin
-            memory[i] = 32'h0;
-        end
-    `endif
     if(MEMORY_FILE != "") begin
         $readmemh(MEMORY_FILE, memory, 0, (MEMORY_SIZE/4) - 1);
     end

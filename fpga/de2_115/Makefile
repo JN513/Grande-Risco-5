@@ -3,10 +3,10 @@ ifndef QUARTUS_PATH
 endif
 
 all:
-	$(QUARTUS_PATH)quartus_sh --flow compile de1soc
+	$(QUARTUS_PATH)quartus_sh --flow compile De_115_Grande_Risco5
 
 load:
-	$(QUARTUS_PATH)quartus_pgm -a -o "p;build/de1soc.sof"
+	$(QUARTUS_PATH)quartus_pgm -m jtag -c "DE-SoC " -o "p;build/De_115_Grande_Risco5.sof@2"
 
 create_project:
 	$(QUARTUS_PATH)quartus_sh -t create_project.tcl

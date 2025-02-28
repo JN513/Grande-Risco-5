@@ -1,0 +1,122 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 2024  Intel Corporation. All rights reserved.
+# Your use of Intel Corporation's design tools, logic functions 
+# and other software and tools, and any partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Intel Program License 
+# Subscription Agreement, the Intel Quartus Prime License Agreement,
+# the Intel FPGA IP License Agreement, or other applicable license
+# agreement, including, without limitation, that your use is for
+# the sole purpose of programming logic devices manufactured by
+# Intel and sold by Intel or its authorized distributors.  Please
+# refer to the applicable agreement for further details, at
+# https://fpgasoftware.intel.com/eula.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus Prime
+# Version 23.1std.1 Build 993 05/14/2024 SC Standard Edition
+# Date created = 21:57:49  February 27, 2025
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		De2_115_Grande_Risco5_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Intel recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus Prime software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone IV E"
+set_global_assignment -name DEVICE EP4CE115F29C7
+set_global_assignment -name TOP_LEVEL_ENTITY top
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 23.1STD.1
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:57:49  FEBRUARY 27, 2025"
+set_global_assignment -name LAST_QUARTUS_VERSION "23.1std.1 Standard Edition"
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY build
+set_global_assignment -name SYSTEMVERILOG_FILE "/eda/projetos/Risco-5-family/Grande-Risco-5/fpga/de2_115/main.sv"
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/grande_risco5_types.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/alu_control.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/alu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/bmu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/branch_prediction.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/cache_request_multiplexer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/core.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/csr_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/d_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/forwarding_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/fpu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/Grande_Risco5.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/i_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/immediate_generator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/ir_decomp.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/mdu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/mux.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/registers.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/IFID.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/IDEX.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/EXMEM.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/MEMWB.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/peripheral/leds.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/peripheral/memory.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/peripheral/soc.sv
+
+set_location_assignment Pin_Y2 -to clk
+
+set_location_assignment PIN_G19 -to led[0]
+set_location_assignment PIN_F19 -to led[1]
+set_location_assignment PIN_E19 -to led[2]
+set_location_assignment PIN_F21 -to led[3]
+set_location_assignment PIN_F18 -to led[4]
+set_location_assignment PIN_E18 -to led[5]
+set_location_assignment PIN_J19 -to led[6]
+set_location_assignment PIN_H19 -to led[7]
+set_location_assignment PIN_J17 -to led[8]
+set_location_assignment PIN_G17 -to led[9]
+set_location_assignment PIN_J15 -to led[10]
+set_location_assignment PIN_H16 -to led[11]
+set_location_assignment PIN_J16 -to led[12]
+set_location_assignment PIN_H17 -to led[13]
+set_location_assignment PIN_F15 -to led[14]
+set_location_assignment PIN_G15 -to led[15]
+set_location_assignment PIN_G16 -to led[16]
+set_location_assignment PIN_H15 -to led[17]
+
+set_location_assignment PIN_AB28 -to sw[0]
+set_location_assignment PIN_AC28 -to sw[1]
+set_location_assignment PIN_AC27 -to sw[2]
+set_location_assignment PIN_AD27 -to sw[3]
+set_location_assignment PIN_AB27 -to sw[4]
+set_location_assignment PIN_AC26 -to sw[5]
+set_location_assignment PIN_AD26 -to sw[6]
+set_location_assignment PIN_AB26 -to sw[7]
+set_location_assignment PIN_AC25 -to sw[8]
+set_location_assignment PIN_AB25 -to sw[9]
+set_location_assignment PIN_AC24 -to sw[10]
+set_location_assignment PIN_AB24 -to sw[11]
+set_location_assignment PIN_AB23 -to sw[12]
+set_location_assignment PIN_AA24 -to sw[13]
+set_location_assignment PIN_AA23 -to sw[14]
+set_location_assignment PIN_AA22 -to sw[15]
+set_location_assignment PIN_Y24  -to sw[16]
+set_location_assignment PIN_Y23  -to sw[17]
+
+set_location_assignment PIN_M23 -to btn[0]
+set_location_assignment PIN_M21 -to btn[1]
+set_location_assignment PIN_N21 -to btn[2]
+set_location_assignment PIN_R24 -to btn[3]
+
+set_location_assignment PIN_G12 -to uart_tx
+set_location_assignment PIN_G9  -to uart_rx
+
+set_global_assignment -name SDC_FILE pinout.sdc

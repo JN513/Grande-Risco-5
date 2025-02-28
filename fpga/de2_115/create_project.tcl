@@ -1,4 +1,4 @@
-set proj_name "de1soc"
+set proj_name "De2_115_Grande_Risco5"
 set proj_dir [pwd]
 
 # Cria um novo projeto
@@ -6,36 +6,38 @@ project_new -overwrite $proj_name -revision $proj_name
 
 # Configurações do projeto
 set_global_assignment -name FAMILY "Cyclone IV"
-set_global_assignment -name DEVICE 5CSEMA5F31C6
+set_global_assignment -name DEVICE EP4CE115F29C7
 set_global_assignment -name TOP_LEVEL_ENTITY top
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY build
 
 # Adiciona arquivos Verilog ao projeto
-set_global_assignment -name VERILOG_FILE $proj_dir/main.v
+set_global_assignment -name SYSTEMVERILOG_FILE $proj_dir/main.sv
 
-set_global_assignment -name VERILOG_FILE ../../src/core/core.v
-set_global_assignment -name VERILOG_FILE ../../src/core/alu_control.v
-set_global_assignment -name VERILOG_FILE ../../src/core/alu.v
-set_global_assignment -name VERILOG_FILE ../../src/core/control_unit.v
-set_global_assignment -name VERILOG_FILE ../../src/core/csr_unit.v
-set_global_assignment -name VERILOG_FILE ../../src/core/immediate_generator.v
-set_global_assignment -name VERILOG_FILE ../../src/core/mdu.v
-set_global_assignment -name VERILOG_FILE ../../src/core/mux.v
-set_global_assignment -name VERILOG_FILE ../../src/core/pc.v
-set_global_assignment -name VERILOG_FILE ../../src/core/registers.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/bus.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/fifo.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/gpio.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/gpios.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/leds.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/memory.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/soc.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/uart_rx.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/uart_tx.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/uart.v
-set_global_assignment -name VERILOG_FILE ../../src/peripheral/pwm.v
-set_global_assignment -name VERILOG_FILE ../../debug/reset.v
-
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/grande_risco5_types.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/alu_control.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/alu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/bmu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/branch_prediction.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/cache_request_multiplexer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/core.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/csr_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/d_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/forwarding_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/fpu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/Grande_Risco5.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/i_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/immediate_generator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/ir_decomp.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/mdu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/mux.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/registers.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/IFID.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/IDEX.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/EXMEM.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/core/MEMWB.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/peripheral/leds.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/peripheral/memory.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/peripheral/soc.sv
 # Atribuições de pinos
 set_location_assignment PIN_AF14 -to clk
 set_location_assignment PIN_V16 -to led[0]
@@ -65,7 +67,7 @@ set_location_assignment PIN_AA15 -to btn[1]
 set_location_assignment PIN_W15  -to btn[2]
 set_location_assignment PIN_Y16  -to btn[3]
 
-#set_location_assignment PIN_B25 -to uart_tx
-#set_location_assignment PIN_C25 -to uart_rx
+set_location_assignment PIN_B25 -to uart_tx
+set_location_assignment PIN_C25 -to uart_rx
 
 set_global_assignment -name SDC_FILE pinout.sdc

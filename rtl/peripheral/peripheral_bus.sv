@@ -1,14 +1,6 @@
 module Peripheral_BUS #(
     parameter DATA_WIDTH = 32,
-    parameter ADDR_WIDTH = 32,
-    parameter DEVICE0_START_ADDRESS = 32'h00000000,
-    parameter DEVICE0_FINAL_ADDRESS = 32'h00000FFF,
-    parameter DEVICE1_START_ADDRESS = 32'h00001000,
-    parameter DEVICE1_FINAL_ADDRESS = 32'h00001002,
-    parameter DEVICE2_START_ADDRESS = 32'h00001003,
-    parameter DEVICE2_FINAL_ADDRESS = 32'h000013BA,
-    parameter DEVICE3_START_ADDRESS = 32'h000013BB,
-    parameter DEVICE3_FINAL_ADDRESS = 32'h000013BE
+    parameter ADDR_WIDTH = 32
 )(
     // master connection
     input  logic read_request,
@@ -50,11 +42,5 @@ module Peripheral_BUS #(
     output logic [ADDR_WIDTH-1:0] slave_3_address,
     output logic [DATA_WIDTH-1:0] slave_3_write_data
 );
-
-localparam DEVICE0 = 3'd0;
-localparam DEVICE1 = 3'd1;
-localparam DEVICE2 = 3'd2;
-localparam DEVICE3 = 3'd3;
-localparam RESET   = 3'd4;
 
 endmodule

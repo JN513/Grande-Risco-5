@@ -1,0 +1,9 @@
+`define UART_ENABLE 1
+//`define GPIO_ENABLE 1
+`define LED_ENABLE  1
+`define PWM_ENABLE  1
+`define SPI_ENABLE  1
+`define I2C_ENABLE  1
+`define TIMER_ENABLE 1
+`define VGA_ENABLE  1
+`define DRAM_ENABLE 1

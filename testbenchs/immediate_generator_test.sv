@@ -1,6 +1,6 @@
 module immediate_generator_tb ();
 
-reg clk, reset;
+logic clk, reset;
 
 initial begin
     clk = 1'b0;

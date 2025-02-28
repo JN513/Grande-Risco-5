@@ -1,10 +1,10 @@
 module gpio_tb ();
     
-reg clk, reset, read, write,
+logic clk, reset, read, write,
     pin1, pin2, pin3;
-wire [4:0] gpios;
-reg [31:0] address, write_data;
-wire [31:0] read_data;
+logic [4:0] gpios;
+logic [31:0] address, write_data;
+logic [31:0] read_data;
 
 always #1 clk = ~clk;
 

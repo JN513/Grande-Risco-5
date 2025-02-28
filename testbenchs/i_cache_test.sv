@@ -1,6 +1,6 @@
 module i_cache_tb ();
     
-reg clk, reset;
+logic clk, reset;
 
 always #1 clk = ~clk;
 
@@ -34,14 +34,14 @@ initial begin
     #100 $finish;
 end
 
-wire memory_read_request, memory_read_response;
-wire [31:0] memory_addr, memory_read_data;
+logic memory_read_request, memory_read_response;
+logic [31:0] memory_addr, memory_read_data;
 
-reg read_request;
-reg [31:0] addr;
+logic read_request;
+logic [31:0] addr;
 
-wire read_response;
-wire [31:0] read_data;
+logic read_response;
+logic [31:0] read_data;
 
 ICache #(
     .CACHE_SIZE(1024)

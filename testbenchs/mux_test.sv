@@ -1,8 +1,8 @@
 module mux_tb();
 
-reg [31:0] MUX_A, MUX_B;
-reg MUX_Option;
-wire [31:0] MUX_S;
+logic [31:0] MUX_A, MUX_B;
+logic MUX_Option;
+logic [31:0] MUX_S;
 
 MUX MUX(
     .A(MUX_A),

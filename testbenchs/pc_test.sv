@@ -1,10 +1,11 @@
 module pc_tb();
 
-reg clk, pc_load, reset;
+logic clk, pc_load, reset;
 
 always #1 clk = ~clk;
-wire [31:0] pc_output;
-reg [31:0] pc_input;
+
+logic [31:0] pc_output;
+logic [31:0] pc_input;
 
 PC PC(
     .clk(clk),

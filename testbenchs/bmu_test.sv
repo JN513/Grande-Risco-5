@@ -1,6 +1,6 @@
 module bmu_tb ();
     
-reg clk, reset;
+logic clk, reset;
 
 always #1 clk = ~clk;
 

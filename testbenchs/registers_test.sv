@@ -1,9 +1,9 @@
 module registers_tb ();
     
-wire [31:0] read_data_1, read_data_2;
-reg [31:0] write_data;
-reg [4:0] read_reg_1, read_reg_2, write_reg;
-reg clk, reg_write;
+logic [31:0] read_data_1, read_data_2;
+logic [31:0] write_data;
+logic [4:0] read_reg_1, read_reg_2, write_reg;
+logic clk, reg_write;
 integer i;
 
 always #1 clk = ~clk;

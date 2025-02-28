@@ -1,11 +1,11 @@
 module mdu_tb ();
 
-reg clk, reset, start;
-wire done;
+logic clk, reset, start;
+logic done;
 
-reg [2:0] operation;
-reg [31:0] MDU_in_X, MDU_in_Y;
-wire [31:0] MDU_out;
+logic [2:0] operation;
+logic [31:0] MDU_in_X, MDU_in_Y;
+logic [31:0] MDU_out;
 
 always #1 clk = ~clk;
 

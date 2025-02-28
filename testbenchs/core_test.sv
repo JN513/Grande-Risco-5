@@ -1,11 +1,11 @@
 module core_tb();
 
-reg clk, reset;
+logic clk, reset;
 
-wire memory_response, memory_read_request,
+logic memory_response, memory_read_request,
     memory_write_request;
 
-wire [31:0] memory_read_data,
+logic [31:0] memory_read_data,
     memory_write_data, memory_addr;
 
 Grande_Risco5 #(

@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
 module top();
 
-reg clk, reset;
-wire rx, tx;
-wire [7:0] led;
+logic clk, reset;
+logic rx, tx;
+logic [7:0] led;
 
 always #1 clk = ~clk;
 

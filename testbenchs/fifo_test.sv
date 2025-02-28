@@ -1,6 +1,6 @@
 module fifo_tb ();
 
-reg clk, reset;
+logic clk, reset;
 
 initial begin
     clk = 1'b0;

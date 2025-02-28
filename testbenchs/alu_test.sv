@@ -1,10 +1,10 @@
 module alu_tb();
 
-reg [31:0] input_A, input_B;
-wire [31:0] res;
-reg [3:0] operation;
-reg clk;
-wire zr;
+logic [31:0] input_A, input_B;
+logic [31:0] res;
+logic [3:0] operation;
+logic clk;
+logic zr;
 
 
 ALU u1(

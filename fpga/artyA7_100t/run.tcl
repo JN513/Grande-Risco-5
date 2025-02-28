@@ -1,21 +1,26 @@
 read_verilog -sv main.sv
+read_verilog -sv ../../rtl/core/grande_risco5_types.sv
 read_verilog -sv ../../rtl/core/alu_control.sv
 read_verilog -sv ../../rtl/core/alu.sv
 read_verilog -sv ../../rtl/core/bmu.sv
 read_verilog -sv ../../rtl/core/branch_prediction.sv
 read_verilog -sv ../../rtl/core/cache_request_multiplexer.sv
-read_verilog ../../rtl/core/core.v
+read_verilog -sv ../../rtl/core/core.sv
 read_verilog -sv ../../rtl/core/csr_unit.sv
 read_verilog -sv ../../rtl/core/d_cache.sv
 read_verilog -sv ../../rtl/core/forwarding_unit.sv
 read_verilog -sv ../../rtl/core/fpu.sv
-read_verilog ../../rtl/core/Grande_Risco5.v
+read_verilog -sv ../../rtl/core/Grande_Risco5.sv
 read_verilog -sv ../../rtl/core/i_cache.sv
 read_verilog -sv ../../rtl/core/immediate_generator.sv
 read_verilog -sv ../../rtl/core/ir_decomp.sv
 read_verilog -sv ../../rtl/core/mdu.sv
 read_verilog -sv ../../rtl/core/mux.sv
 read_verilog -sv ../../rtl/core/registers.sv
+read_verilog -sv ../../rtl/core/IFID.sv
+read_verilog -sv ../../rtl/core/IDEX.sv
+read_verilog -sv ../../rtl/core/EXMEM.sv
+read_verilog -sv ../../rtl/core/MEMWB.sv
 read_verilog -sv ../../rtl/peripheral/leds.sv
 read_verilog -sv ../../rtl/peripheral/memory.sv
 read_verilog -sv ../../rtl/peripheral/soc.sv

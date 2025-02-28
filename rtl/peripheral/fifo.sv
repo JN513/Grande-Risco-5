@@ -2,27 +2,21 @@ module FIFO #(
     parameter DEPTH = 8,
     parameter WIDTH = 8
 ) (
-    input  wire clk,
-    input  wire rst_n,
-    input  wire write,
-    input  wire read,
-    input  wire [WIDTH-1:0] write_data,
-    output wire full,
-    output wire empty,
-    output  reg [WIDTH-1:0] read_data
+    input  logic clk,
+    input  logic rst_n,
+    input  logic write,
+    input  logic read,
+    input  logic [WIDTH-1:0] write_data,
+    output logic full,
+    output logic empty,
+    output logic [WIDTH-1:0] read_data
 );
 
-reg [WIDTH-1:0] memory[DEPTH-1:0];
-reg [5:0] read_ptr;
-reg [5:0] write_ptr;
+logic [WIDTH-1:0] memory[DEPTH-1:0];
+logic [5:0] read_ptr;
+logic [5:0] write_ptr;
 
-initial begin
-    read_ptr = 6'd0;
-    write_ptr = 6'd0;
-end
-
-
-always @(posedge clk ) begin
+always_ff @(posedge clk ) begin
     if(!rst_n) begin
         read_ptr <= 6'd0;
     end else begin
@@ -33,7 +27,7 @@ always @(posedge clk ) begin
     end
 end
 
-always @(posedge clk ) begin
+always_ff @(posedge clk ) begin
     if(!rst_n) begin
         write_ptr <= 6'd0;
     end else begin

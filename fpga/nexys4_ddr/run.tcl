@@ -1,4 +1,5 @@
 read_verilog -sv main.sv
+read_verilog -sv ../../rtl/core/grande_risco5_types.sv
 read_verilog -sv ../../rtl/core/alu_control.sv
 read_verilog -sv ../../rtl/core/alu.sv
 read_verilog -sv ../../rtl/core/bmu.sv

@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Thu Feb 27 20:45:08 2025
+| Date         : Thu Feb 27 21:14:09 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_utilization -hierarchical -file reports/utilization_hierarchical_place.rpt
 | Design       : top
@@ -22,25 +22,25 @@ Table of Contents
 +--------------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
 |         Instance         |           Module          | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
 +--------------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
-| top                      |                     (top) |       3971 |       2833 |    1138 |    0 | 2291 |      0 |      0 |          4 |
-|   (top)                  |                     (top) |         15 |         15 |       0 |    0 |   35 |      0 |      0 |          0 |
-|   SOC                    |        Grande_Risco_5_SOC |       3957 |       2819 |    1138 |    0 | 2256 |      0 |      0 |          4 |
+| top                      |                     (top) |       3959 |       2821 |    1138 |    0 | 2257 |      0 |      0 |          4 |
+|   (top)                  |                     (top) |          1 |          1 |       0 |    0 |    1 |      0 |      0 |          0 |
+|   SOC                    |        Grande_Risco_5_SOC |       3958 |       2820 |    1138 |    0 | 2256 |      0 |      0 |          4 |
 |     Memory               |                    Memory |       1088 |         64 |    1024 |    0 |    0 |      0 |      0 |          0 |
 |     P1                   |                      LEDs |          8 |          8 |       0 |    0 |   32 |      0 |      0 |          0 |
-|     Processor            |             Grande_Risco5 |       2868 |       2754 |     114 |    0 | 2224 |      0 |      0 |          4 |
+|     Processor            |             Grande_Risco5 |       2869 |       2755 |     114 |    0 | 2224 |      0 |      0 |          4 |
 |       (Processor)        |             Grande_Risco5 |         50 |         50 |       0 |    0 |    0 |      0 |      0 |          0 |
-|       Core               |                      Core |       2633 |       2633 |       0 |    0 | 2002 |      0 |      0 |          4 |
-|         First_Stage      |                      IFID |        421 |        421 |       0 |    0 |  221 |      0 |      0 |          0 |
+|       Core               |                      Core |       2617 |       2617 |       0 |    0 | 2002 |      0 |      0 |          4 |
+|         First_Stage      |                      IFID |        412 |        412 |       0 |    0 |  221 |      0 |      0 |          0 |
 |         Fourth_Stage     |                     MEMWB |        118 |        118 |       0 |    0 |   71 |      0 |      0 |          0 |
 |         RegisterBank     |                 Registers |        576 |        576 |       0 |    0 |  992 |      0 |      0 |          0 |
-|         Second_Stage     |                      IDEX |       1161 |       1161 |       0 |    0 |  431 |      0 |      0 |          4 |
+|         Second_Stage     |                      IDEX |       1162 |       1162 |       0 |    0 |  431 |      0 |      0 |          4 |
 |           (Second_Stage) |                      IDEX |        463 |        463 |       0 |    0 |  165 |      0 |      0 |          0 |
 |           Alu            |                       Alu |        181 |        181 |       0 |    0 |    0 |      0 |      0 |          0 |
 |           Mdu            |                       MDU |        519 |        519 |       0 |    0 |  266 |      0 |      0 |          4 |
-|         Third_Stage      |                     EXMEM |        357 |        357 |       0 |    0 |  287 |      0 |      0 |          0 |
-|       DCache             |                    DCache |         99 |         42 |      57 |    0 |   34 |      0 |      0 |          0 |
-|       ICache             |                    ICache |         77 |         20 |      57 |    0 |   35 |      0 |      0 |          0 |
-|       M1                 | Cache_request_Multiplexer |         13 |         13 |       0 |    0 |  153 |      0 |      0 |          0 |
+|         Third_Stage      |                     EXMEM |        350 |        350 |       0 |    0 |  287 |      0 |      0 |          0 |
+|       DCache             |                    DCache |        107 |         50 |      57 |    0 |   34 |      0 |      0 |          0 |
+|       ICache             |                    ICache |         86 |         29 |      57 |    0 |   35 |      0 |      0 |          0 |
+|       M1                 | Cache_request_Multiplexer |         12 |         12 |       0 |    0 |  153 |      0 |      0 |          0 |
 +--------------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
 * Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
 

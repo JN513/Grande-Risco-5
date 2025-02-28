@@ -1,18 +1,18 @@
 module GPIOS #(
     parameter WIDHT = 20
 ) (
-    input wire clk,
-    input wire rst_n,
-    input wire read,
-    input wire write,
-    input wire [31:0] address,
-    input wire [31:0] write_data,
-    output wire [31:0] read_data,
+    input  logic clk,
+    input  logic rst_n,
+    input  logic read,
+    input  logic write,
+    input  logic [31:0] address,
+    input  logic [31:0] write_data,
+    output logic [31:0] read_data,
     inout [WIDHT - 1:0] gpios
 );
 
-reg [WIDHT - 1:0] gpio_direction, gpio_value;
-wire [WIDHT -1:0] gpio_out;
+logic [WIDHT - 1:0] gpio_direction, gpio_value;
+logic [WIDHT -1:0] gpio_out;
 
 parameter SET_DIRECTION = 1'b0;
 parameter READ = 1'b1;
@@ -26,7 +26,7 @@ GPIO Gpios[WIDHT - 1:0](
     .data_out(gpio_out)
 );
 
-always @(posedge clk) begin
+always_ff @(posedge clk) begin
     if(!rst_n) begin
         gpio_direction <= 32'h00000000;
         gpio_value <= 32'h00000000;

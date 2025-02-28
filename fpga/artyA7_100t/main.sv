@@ -1,23 +1,15 @@
 module top (
-    input wire clk,
-    input wire reset,
-    input wire rx,
-    output wire tx,
-    output wire [3:0]led,
+    input  logic clk,
+    input  logic reset,
+    input  logic rx,
+    output logic tx,
+    output logic [3:0]led,
     inout [5:0]gpios
 );
 
-wire reset_o;
-wire [7:0] leds;
+logic [7:0] leds;
 
 assign led = leds[3:0];
-
-ResetBootSystem #(
-    .CYCLES(20)
-) ResetBootSystem(
-    .clk     (clk),
-    .reset_o (reset_o)
-);
 
 Grande_Risco_5_SOC #(
     .CLOCK_FREQ       (100000000),
@@ -28,11 +20,11 @@ Grande_Risco_5_SOC #(
     .UART_BUFFER_SIZE (16)
 ) SOC (
     .clk   (clk),
-    .reset (reset_o),
+    .rst_n (!reset),
     .leds  (leds),
-    .rx    (),
-    .tx    (),
-    .gpios ()
+    .rx    (rx),
+    .tx    (tx),
+    .gpios (gpios)
 );
 
 

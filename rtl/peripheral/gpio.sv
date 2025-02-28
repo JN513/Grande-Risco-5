@@ -1,8 +1,8 @@
 module GPIO (
-    inout wire gpio,
-    input wire data_in,
-    input wire direction,
-    output wire data_out
+    inout  logic gpio,
+    input  logic data_in,
+    input  logic direction,
+    output logic data_out
 );
 
 assign data_out = (gpio & direction) | (data_in & ~data_in);

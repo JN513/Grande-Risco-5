@@ -187,19 +187,28 @@ IR_Decompression IR_Decompression(
 );
 
 Branch_Prediction Branch_Prediction(
-    .clk                 (clk),
-    .rst_n               (rst_n),
+    .clk                   (clk),
+    .rst_n                 (rst_n),
 
-    .valid_instruction_i (instruction_response_i),
-    .PC_i                (PC),
-    .instruction_data_i  (instruction_data_i),
+    .valid_instruction_i   (instruction_response_i),
+    .PC_i                  (PC),
+    .instruction_data_i    (instruction_data_i),
+    .is_incondicional_jump (),
+    .is_condicional_jump   (),
 
-    .address_o           ()
+    .branch_address_i      (),
+    .branch_taken_i        (takebranch_i),
+    .is_branch_i           (),
+    .address_to_jump_i     (BRANCH_ADDRESS_i),
+
+    .address_o             ()
 );
 
 Invalid_IR_Check Invalid_IR_Check (
     .instruction            (instr_d_o),
-    .invalid_instruction_o  (illegal_fetch_instruction)
+    .invalid_instruction_o  (illegal_fetch_instruction),
+    .is_incondicional_jump  (),
+    .is_condicional_jump    ()
 );
 
 assign IFIDop    = IFID_IR_o[6:0];

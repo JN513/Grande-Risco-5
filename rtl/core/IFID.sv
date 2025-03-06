@@ -174,12 +174,16 @@ always @(posedge clk ) begin // IF/ID
     end  
 end
 
+logic illegal_compressed_instruction, illegal_fetch_instruction;
+
+
+assign illegal_instruction_o = illegal_compressed_instruction | illegal_fetch_instruction;
 
 IR_Decompression IR_Decompression(
     .instr_c_i       (instr_c_i),
     .instr_is_c_o    (is_compressed_instruction),
     .instr_d_o       (instr_d_o),
-    .instr_illegal_o (illegal_instruction_o)
+    .instr_illegal_o (illegal_compressed_instruction)
 );
 
 Branch_Prediction Branch_Prediction(
@@ -191,6 +195,11 @@ Branch_Prediction Branch_Prediction(
     .instruction_data_i  (instruction_data_i),
 
     .address_o           ()
+);
+
+Invalid_IR_Check Invalid_IR_Check (
+    .instruction            (instr_d_o),
+    .invalid_instruction_o  (illegal_fetch_instruction)
 );
 
 assign IFIDop    = IFID_IR_o[6:0];

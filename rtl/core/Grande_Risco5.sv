@@ -67,23 +67,25 @@ logic [31:0] d_cache_memory_write_data, d_cache_memory_read_data,
 logic [31:0] i_cache_memory_read_data, i_cache_memory_addr;
 
 Core #(
-    .BOOT_ADDRESS(BOOT_ADDRESS)
+    .BOOT_ADDRESS (BOOT_ADDRESS)
 ) Core(
-    .clk   (clk),
-    .rst_n (rst_n),
+    .clk                     (clk),
+    .rst_n                   (rst_n),
 
-    .instr_flush_o (flush_bus),
-    .instr_req_o   (instruction_request),
-    .instr_rsp_i   (instruction_response),
-    .instr_addr_o  (instruction_address),
-    .instr_data_i  (instruction_data),
+    .instr_flush_o           (flush_bus),
+    .instr_req_o             (instruction_request),
+    .instr_rsp_i             (instruction_response),
+    .instr_addr_o            (instruction_address),
+    .instr_data_i            (instruction_data),
 
-    .data_mem_rsp_i (data_memory_response),
-    .data_addr_o    (data_address),
-    .data_mem_rd_o  (data_read_request),
-    .data_mem_wr_o  (data_write_request),
-    .data_write_o   (data_write_data),
-    .data_read_i    (data_read_data)
+    .data_mem_rsp_i          (data_memory_response),
+    .data_addr_o             (data_address),
+    .data_mem_rd_o           (data_read_request),
+    .data_mem_wr_o           (data_write_request),
+    .data_write_o            (data_write_data),
+    .data_read_i             (data_read_data),
+
+    .external_interruption_i ()
 );
 
 ICache #(

@@ -204,7 +204,7 @@ MEMWB Fourth_Stage (
 
     .memory_stall_i         (memory_stall),
 
-    .instruction_finished_o (instruction_finished)
+    .instruction_finished_o (instruction_finished),
     .reg_wr_en_o            (reg_wr_en),
     .MEMWB_RD_ADDR_o        (MEMWB_RD_ADDR),
     .MEMWB_RD_o             (MEMWB_RD)

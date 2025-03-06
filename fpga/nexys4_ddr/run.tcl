@@ -21,6 +21,7 @@ read_verilog -sv ../../rtl/core/IFID.sv
 read_verilog -sv ../../rtl/core/IDEX.sv
 read_verilog -sv ../../rtl/core/EXMEM.sv
 read_verilog -sv ../../rtl/core/MEMWB.sv
+read_verilog -sv ../../rtl/core/invalid_ir_check.sv
 read_verilog -sv ../../rtl/peripheral/leds.sv
 read_verilog -sv ../../rtl/peripheral/memory.sv
 read_verilog -sv ../../rtl/peripheral/soc.sv

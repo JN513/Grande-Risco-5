@@ -3,8 +3,7 @@ module CSR_Unit (
     input logic rst_n,
 
     // CSR read/write signals
-    input  logic csr_wr_en,
-    output logic write_done,
+    input  logic csr_wr_en, // Fazer bypass na escrita dos registradores depois
 
     input logic [2:0] func3_i,
     input logic [4:0] csr_imm_i,
@@ -14,6 +13,7 @@ module CSR_Unit (
     output logic [31:0] csr_data_out,
 
     // Processor signals
+    input logic invalid_fetch_instruction,
     input logic invalid_decode_instruction,
     input logic instruction_finished,
 
@@ -21,7 +21,9 @@ module CSR_Unit (
     input logic [31:0] decode_pc,
     input logic [31:0] execute_pc,
     input logic [31:0] memory_pc,
-    input logic [31:0] writeback_pc
+    input logic [31:0] writeback_pc,
+
+    input logic external_interruption_i
 );
 
 // Address of Performance Counters CSRs
@@ -32,6 +34,7 @@ localparam INSTRET              = 12'hC02; // Contador de instruções.
 localparam CYCLEH               = 12'hC80; // Campo de extensão do registrador CYCLE.
 localparam TIMEH                = 12'hC81; // Campo de extensão do registrador TIME.
 localparam INSTRETH             = 12'hC82; // Campo de extensão do registrador INSTRET.
+localparam TIMECMP              = 12'hFFF; // Implementar depois
 
 // Address of Machine Information CSRs
 
@@ -71,48 +74,51 @@ logic [31:0] csr_input, csr_write_data;
 
 assign csr_input = (func3_i[2] == 1'b1) ? {27'h0000000, csr_imm_i} : csr_data_in;
 
+logic [31:0] csr_read_data;
+
 always_comb begin : CSR_ALU
     unique case (func3_i[1:0])
         2'b01: csr_write_data = csr_input;
-        2'b10: csr_write_data = csr_data_out | csr_input;
-        2'b11: csr_write_data = csr_data_out & ~csr_input;
-        default: csr_write_data = csr_data_out;
+        2'b10: csr_write_data = csr_read_data | csr_input;
+        2'b11: csr_write_data = csr_read_data & ~csr_input;
+        default: csr_write_data = csr_read_data;
     endcase
 end
 
+assign csr_data_out = csr_read_data; // verificar necessidade de bypass
 
 // Read CSR
 always_comb begin : READ_CSR
     unique case (csr_addr_i)
         // Performance Counters
-        CYCLE:     csr_data_out = MCYCLE_reg[31:0];
-        CYCLEH:    csr_data_out = MCYCLE_reg[63:32];
-        TIME:      csr_data_out = 32'h00000000;
-        TIMEH:     csr_data_out = 32'h00000000;
-        INSTRET:   csr_data_out = MINSTRET_reg[31:0];
-        INSTRETH:  csr_data_out = MINSTRET_reg[63:32];
-        MCYCLE:    csr_data_out = MCYCLE_reg[31:0];
-        MINSTRET:  csr_data_out = MINSTRET_reg[31:0];
-        MCYCLEH:   csr_data_out = MCYCLE_reg[63:32];
-        MINSTRETH: csr_data_out = MINSTRET_reg[63:32];
+        CYCLE:     csr_read_data = MCYCLE_reg[31:0];
+        CYCLEH:    csr_read_data = MCYCLE_reg[63:32];
+        TIME:      csr_read_data = 32'h00000000;
+        TIMEH:     csr_read_data = 32'h00000000;
+        INSTRET:   csr_read_data = MINSTRET_reg[31:0];
+        INSTRETH:  csr_read_data = MINSTRET_reg[63:32];
+        MCYCLE:    csr_read_data = MCYCLE_reg[31:0];
+        MINSTRET:  csr_read_data = MINSTRET_reg[31:0];
+        MCYCLEH:   csr_read_data = MCYCLE_reg[63:32];
+        MINSTRETH: csr_read_data = MINSTRET_reg[63:32];
 
         // Machine Information
-        MVENDORID: csr_data_out = 32'h00000000;
-        MARCHID:   csr_data_out = 32'h00000000;
-        MIMPID:    csr_data_out = 32'h00000000;
-        MSTATUSH:  csr_data_out = 32'h00000000;
-        MISA:      csr_data_out = 32'b01_000000000000000001000100100111; // RV32IMABC_Zicsr
+        MVENDORID: csr_read_data = 32'h00000000;
+        MARCHID:   csr_read_data = 32'h00000000;
+        MIMPID:    csr_read_data = 32'h00000000;
+        MSTATUSH:  csr_read_data = 32'h00000000;
+        MISA:      csr_read_data = 32'b01_000000000000000001000100100111; // RV32IMABC_Zicsr
 
         // Machine Trap Setup
-        MSTATUS:   csr_data_out = MSTATUS_reg;
-        MIE:       csr_data_out = MIE_reg;
-        MTVEC:     csr_data_out = MTVEC_reg;
-        MSCRATCH:  csr_data_out = MSCRATCH_reg;
-        MEPC:      csr_data_out = MEPC_reg;
-        MCAUSE:    csr_data_out = MCAUSE_reg;
-        MTVAL:     csr_data_out = MTVAL_reg;
-        MIP:       csr_data_out = MIP_reg;
-        default:   csr_data_out = 32'h00000000;
+        MSTATUS:   csr_read_data = MSTATUS_reg;
+        MIE:       csr_read_data = MIE_reg;
+        MTVEC:     csr_read_data = MTVEC_reg;
+        MSCRATCH:  csr_read_data = MSCRATCH_reg;
+        MEPC:      csr_read_data = MEPC_reg;
+        MCAUSE:    csr_read_data = MCAUSE_reg;
+        MTVAL:     csr_read_data = MTVAL_reg;
+        MIP:       csr_read_data = MIP_reg;
+        default:   csr_read_data = 32'h00000000;
     endcase
 end
 
@@ -130,16 +136,17 @@ always_ff @( posedge clk ) begin : COUNTERS
     end
 end
 
-// Write CSR (only for MSTATUS, MIE, MTVEC, MSCRATCH, MEPC)
-always_ff @(posedge clk ) begin : WRITE_CSR
-    write_done <= 1'b0;
-    
+// Write CSR (only for MSTATUS, MIE, MTVEC, MSCRATCH, MEPC, MCAUSE, MTVAL, MIP)
+always_ff @(posedge clk ) begin : WRITE_CSR    
     if(!rst_n) begin
         MSTATUS_reg  <= 32'h00000000;
         MIE_reg      <= 32'h00000000;
         MTVEC_reg    <= 32'h00000000;
         MSCRATCH_reg <= 32'h00000000;
         MEPC_reg     <= 32'h00000000;
+        MCAUSE_reg   <= 32'h00000000;
+        MTVAL_reg    <= 32'h00000000;
+        MIP_reg      <= 32'h00000000;
     end else begin
         if(csr_wr_en) begin
             case (csr_addr_i)
@@ -148,11 +155,13 @@ always_ff @(posedge clk ) begin : WRITE_CSR
                 MTVEC:     MTVEC_reg    <= csr_write_data;
                 MSCRATCH:  MSCRATCH_reg <= csr_write_data;
                 MEPC:      MEPC_reg     <= csr_write_data;
+                MCAUSE:    MCAUSE_reg   <= csr_write_data;
+                MTVAL:     MTVAL_reg    <= csr_write_data;
+                MIP:       MIE_reg      <= csr_write_data;
                 default: begin
                     // Do nothing
                 end
             endcase
-            write_done <= 1'b1;
         end
     end
 end

@@ -6,8 +6,8 @@ module MEMWB (
 
     // EXEMEM_INPUT
     `ifdef ENABLE_MDU
-    input logic EXMEMMDUop_i,
-    input logic [31:0] EXMEMMDUOut,
+    //input logic EXMEMMDUop_i,
+    //input logic [31:0] EXMEMMDUOut,
     `endif
     input logic [31:0] EXMEMALUOut_i,
     input logic [31:0] EXMEM_IR_i,
@@ -17,6 +17,7 @@ module MEMWB (
 
     input logic memory_stall_i,
 
+    output logic instruction_finished_o,
     output logic reg_wr_en_o,
     output logic [4:0] MEMWB_RD_ADDR_o,
     output logic [31:0] MEMWB_RD_o
@@ -32,20 +33,22 @@ logic [31:0] MEMWB_mem_read_data, MEMWBALUOut, MEMWB_IR;
 logic is_unaligned_address;
 
 always_ff @(posedge clk ) begin : MEMWB_STAGE
-    reg_wr_en_o <= 1'b0;
-    mem_to_reg  <= 1'b0;
+    reg_wr_en_o            <= 1'b0;
+    mem_to_reg             <= 1'b0;
+    instruction_finished_o <= 1'b0;
 
     if(!rst_n || memory_stall_i) begin
         MEMWB_IR <= NOP;
     end else begin // memory_stall
-        MEMWB_IR <= EXMEM_IR_i;
-        MEMWB_mem_read_data <= (is_unaligned_address) ? Merged_word_i : read_data_i;
+        instruction_finished_o <= 1'b1;
+        MEMWB_IR               <= EXMEM_IR_i;
+        MEMWB_mem_read_data    <= (is_unaligned_address) ? Merged_word_i : read_data_i;
         
-        `ifdef ENABLE_MDU
-        MEMWBALUOut <= (EXMEMMDUop_i) ? EXMEMMDUOut : EXMEMALUOut_i;
-        `else
+        //`ifdef ENABLE_MDU
+        //MEMWBALUOut <= (EXMEMMDUop_i) ? EXMEMMDUOut : EXMEMALUOut_i;
+        //`else
         MEMWBALUOut <= EXMEMALUOut_i;
-        `endif
+        //`endif
 
         // wb stage - five stage
 

@@ -20,8 +20,13 @@ module Core #(
     output logic data_mem_wr_o,
     input  logic [31:0] data_read_i,
     output logic [31:0] data_addr_o,
-    output logic [31:0] data_write_o
+    output logic [31:0] data_write_o,
+
+    input  logic external_interruption_i
 );
+
+// Importando os opcodes do pacote
+import opcodes_pkg::*;
 
 // Fios intermediários
 logic is_jal;
@@ -33,6 +38,7 @@ logic [31:0] IFID_IR;
 logic [31:0] BRANCH_ADDRESS;
 logic [31:0] IDEX_PC;
 logic [31:0] IDEX_IR;
+logic [31:0] CSR_data;
 logic [31:0] ALU_data;
 logic [31:0] MDU_data;
 logic [31:0] EXMEM_ALUOut;
@@ -49,9 +55,11 @@ logic [31:0] immediate_reg;
 logic [31:0] immediate;
 logic is_immediate;
 logic zero;
+logic invalid_fetch_instruction;
 logic is_jalr;
 logic is_compressed;
 logic memory_operation;
+logic instruction_finished;
 logic [6:0] EXMEMop;
 logic [4:0] EXMEM_RD;
 logic [4:0] IFIDrs1, IFIDrs2, IFIDrd;
@@ -59,9 +67,11 @@ logic [4:0] MEMWBrd;
 
 `ifdef ENABLE_MDU
 logic mdu_operation;
-logic EXMEM_MDUop;
-logic [31:0] EXMEM_MDUOut;
+//logic EXMEM_MDUop;
+//logic [31:0] EXMEM_MDUOut;
 `endif
+
+logic [6:0] IFIDop, IDEXop;
 
 // Estágio IF/ID
 IFID #(
@@ -80,6 +90,7 @@ IFID #(
     .forward_out_a_i        (forward_out_a),
     .IFID_is_compressed_instruction_o (is_compressed),
 
+    .illegal_instruction_o  (invalid_fetch_instruction),
     .is_jal_o               (is_jal),
     .IFID_PC_o              (IFID_PC),
     .IFID_IR_o              (IFID_IR),
@@ -142,17 +153,20 @@ EXMEM Third_Stage (
     .execute_stall_i       (execute_stall),
     .immediate_i           (immediate),
     .IDEXIR_i              (IDEX_IR),
+    .CSR_data_i            (CSR_data),
     .ALU_data_i            (ALU_data),
     .MDU_data_i            (MDU_data),
+    `ifdef ENABLE_MDU
     .mdu_operation_i       (mdu_operation),
+    `endif
     .forward_out_b_i       (forward_out_b),
 
     .memory_stall_o        (memory_stall),
 
-    `ifdef ENABLE_MDU
-    .EXMEMMDUop_o          (EXMEM_MDUop),
-    .EXMEMMDUOut_o         (EXMEM_MDUOut),
-    `endif
+    //`ifdef ENABLE_MDU
+    //.EXMEMMDUop_o          (EXMEM_MDUop),
+    //.EXMEMMDUOut_o         (EXMEM_MDUOut),
+    //`endif
 
     .EXMEMALUOut_o         (EXMEM_ALUOut),
     .EXMEMIR_o             (EXMEM_IR),
@@ -173,26 +187,27 @@ EXMEM Third_Stage (
 
 // Estágio MEM/WB
 MEMWB Fourth_Stage (
-    .clk                  (clk),
-    .rst_n                (rst_n),
+    .clk                    (clk),
+    .rst_n                  (rst_n),
 
     // EXMEM INPUT
-    `ifdef ENABLE_MDU
-    .EXMEMMDUop_i        (EXMEM_MDUop),
-    .EXMEMMDUOut         (EXMEM_MDUOut),
-    `endif
+    //`ifdef ENABLE_MDU
+    //.EXMEMMDUop_i        (EXMEM_MDUop),
+    //.EXMEMMDUOut         (EXMEM_MDUOut),
+    //`endif
 
-    .EXMEMALUOut_i       (EXMEM_ALUOut),
-    .EXMEM_IR_i          (EXMEM_IR),
-    .read_data_i         (data_read_i),
-    .Merged_word_i       (Merged_Word),
-    .memory_operation_i  (memory_operation),
+    .EXMEMALUOut_i          (EXMEM_ALUOut),
+    .EXMEM_IR_i             (EXMEM_IR),
+    .read_data_i            (data_read_i),
+    .Merged_word_i          (Merged_Word),
+    .memory_operation_i     (memory_operation),
 
-    .memory_stall_i      (memory_stall),
+    .memory_stall_i         (memory_stall),
 
-    .reg_wr_en_o         (reg_wr_en),
-    .MEMWB_RD_ADDR_o     (MEMWB_RD_ADDR),
-    .MEMWB_RD_o          (MEMWB_RD)
+    .instruction_finished_o (instruction_finished)
+    .reg_wr_en_o            (reg_wr_en),
+    .MEMWB_RD_ADDR_o        (MEMWB_RD_ADDR),
+    .MEMWB_RD_o             (MEMWB_RD)
 );
 
 Registers RegisterBank(
@@ -211,29 +226,33 @@ CSR_Unit CSR(
     .clk                        (clk),
     .rst_n                      (rst_n),
 
-    .csr_wr_en                  (),
-    .write_done                 (),
+    .csr_wr_en                  (IDEXop == CSR_OPCODE),
     
     .func3_i                    (IDEX_IR[14:12]),
     .csr_imm_i                  (IDEX_IR[19:15]),
     .csr_addr_i                 (IDEX_IR[31:20]),
 
-    .csr_data_in                (),
-    .csr_data_out               (),
+    .csr_data_in                (forward_out_a),
+    .csr_data_out               (CSR_data),
 
+    .invalid_fetch_instruction  (invalid_fetch_instruction),
     .invalid_decode_instruction (),
-    .instruction_finished       (),
+    .instruction_finished       (instruction_finished),
     
     .fetch_pc                   (instr_addr_o),
     .decode_pc                  (IFID_PC),
     .execute_pc                 (IDEX_PC),
     .memory_pc                  (),
-    .writeback_pc               ()
+    .writeback_pc               (),
+
+    .external_interruption_i    (external_interruption_i)
 );
 
 
+assign IFIDop  = IFID_IR[6:0];
 assign IFIDrs1 = IFID_IR[19:15];
 assign IFIDrs2 = IFID_IR[24:20];
 assign IFIDrd  = IFID_IR[11:7];
+assign IDEXop  = IDEX_IR[6:0];
 
 endmodule

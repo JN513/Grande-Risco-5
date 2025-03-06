@@ -18,6 +18,7 @@ module IFID #(
     input logic [31:0] IMMEDIATE_REG_i,
     input logic [31:0] forward_out_a_i,
 
+    output logic illegal_instruction_o,
     output logic is_jal_o,
     output logic IFID_is_compressed_instruction_o,
 
@@ -61,7 +62,7 @@ assign unaligned_instruction = {instruction_data_i[15:0], temp_instruction[15:0]
 
 // Desconpressed instruction
 logic [31:0] instr_d_o, instr_c_i;
-logic is_compressed_instruction, illegal_instruction;
+logic is_compressed_instruction;
 
 assign instr_c_i = (finish_unaligned_pc) ? unaligned_instruction : instruction_data_i;
 
@@ -133,7 +134,7 @@ always @(posedge clk ) begin // IF/ID
                     IFID_IR_o <= instr_d_o;
                     IFID_PC_o <= temp_pc;
 
-                    if(illegal_instruction) begin
+                    if(illegal_instruction_o) begin
                         IFID_IR_o <= NOP;
                         IFID_PC_o <= BOOT_ADDRESS;
                     end
@@ -163,7 +164,7 @@ always @(posedge clk ) begin // IF/ID
                     end
                     IFID_PC_o <= PC;
                     
-                    if(illegal_instruction) begin
+                    if(illegal_instruction_o) begin
                         IFID_IR_o <= NOP;
                         IFID_PC_o <= BOOT_ADDRESS;
                     end
@@ -178,7 +179,7 @@ IR_Decompression IR_Decompression(
     .instr_c_i       (instr_c_i),
     .instr_is_c_o    (is_compressed_instruction),
     .instr_d_o       (instr_d_o),
-    .instr_illegal_o (illegal_instruction)
+    .instr_illegal_o (illegal_instruction_o)
 );
 
 Branch_Prediction Branch_Prediction(

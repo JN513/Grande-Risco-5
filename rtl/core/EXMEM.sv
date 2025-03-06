@@ -7,16 +7,19 @@ module EXMEM (
     input logic execute_stall_i,
     input logic [31:0] immediate_i,
     input logic [31:0] IDEXIR_i,
+    input logic [31:0] CSR_data_i,
     input logic [31:0] ALU_data_i,
     input logic [31:0] MDU_data_i,
+    `ifdef ENABLE_MDU
     input logic mdu_operation_i,
+    `endif
     input logic [31:0] forward_out_b_i,
 
 
     output logic memory_stall_o,
     `ifdef ENABLE_MDU
-    output logic EXMEMMDUop_o,
-    output logic [31:0] EXMEMMDUOut_o,
+    //output logic EXMEMMDUop_o,
+    //output logic [31:0] EXMEMMDUOut_o,
     `endif
     output logic [31:0] EXMEMALUOut_o,
     output logic [31:0] EXMEMIR_o,
@@ -198,13 +201,15 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
 
             EXMEMIR_o <= IDEXIR_i;
 
-            EXMEMALUOut_o  <= ALU_data_i;
             Data_Address <= ALU_data_i;
 
 
             `ifdef ENABLE_MDU
-            EXMEMMDUOut_o <= MDU_data_i;
-            EXMEMMDUop_o <= mdu_operation_i;
+                EXMEMALUOut_o  <= (IDEXop == CSR_OPCODE) ? CSR_data_i : (mdu_operation_i) ? MDU_data_i : ALU_data_i;
+                //EXMEMMDUOut_o <= MDU_data_i;
+                //EXMEMMDUop_o <= mdu_operation_i;
+            `else
+                EXMEMALUOut_o  <= (IDEXop == CSR_OPCODE) ? CSR_data_i : ALU_data_i;
             `endif
 
             if(IDEXop == LW_OPCODE) begin

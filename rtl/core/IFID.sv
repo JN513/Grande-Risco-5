@@ -1,11 +1,14 @@
 `include "defines.vh"
 
 module IFID #(
-    parameter BOOT_ADDRESS = 32'h00000000
+    parameter BOOT_ADDRESS           = 32'h00000000,
+    parameter BRANCH_PREDICTION_SIZE = 512
 ) (
     input logic clk,
     input logic rst_n,
 
+    input logic take_jalr_i,
+    input logic is_branch_i,
     input logic is_jalr_i,
     input logic takebranch_i,
 
@@ -13,11 +16,17 @@ module IFID #(
     input logic execute_stall_i,
 
     input logic [31:0] BRANCH_ADDRESS_i,
+    input logic [31:0] NON_BRANCH_ADDRESS_i,
 
     input logic [31:0] IMMEDIATE_i,
     input logic [31:0] IMMEDIATE_REG_i,
     input logic [31:0] forward_out_a_i,
 
+    input logic [31:0] IDEX_PC_i,
+    input logic [31:0] EXMEM_PC_i,
+
+    output logic take_jal_o,
+    output logic branch_flush_o,
     output logic illegal_instruction_o,
     output logic is_jal_o,
     output logic IFID_is_compressed_instruction_o,
@@ -45,18 +54,22 @@ logic [6:0] IFIDop;
 
 logic [31:0] PC;
 
-logic branch_flush;
 logic flush;
+logic prediction_taken;
+logic jump_is_predicted;
 
-logic is_different_branch_address, pc_is_unaligned, finish_unaligned_pc;
+logic is_different_branch_address, pc_is_unaligned, finish_unaligned_pc, is_different_no_branch_address;
+logic illegal_predicted_instruction;
 
-assign flush = branch_flush | is_jal_o;
+assign flush = branch_flush_o | is_jal_o;
 
-assign branch_flush = (is_different_branch_address & takebranch_i);
+assign illegal_predicted_instruction = (is_different_no_branch_address & !takebranch_i & is_branch_i);
+assign branch_flush_o = (is_different_branch_address & takebranch_i) || illegal_predicted_instruction;
 
 // Unaligned instruction
 logic [31:0] temp_instruction, temp_pc;
 logic [31:0] unaligned_instruction;
+logic [31:0] prediction_address;
 
 assign unaligned_instruction = {instruction_data_i[15:0], temp_instruction[15:0]};
 
@@ -71,13 +84,17 @@ logic [31:0] JAL_PC, JALR_PC;
 always @(posedge clk ) begin // IF/ID
     instruction_request_o <= 1'b1;
     flush_bus_o           <= 1'b0;
+    jump_is_predicted     <= 1'b0;
 
-    is_jal_o <= (IFIDop == JAL_OPCODE) && (~execute_stall_i);
+    is_jal_o   <= (IFIDop == JAL_OPCODE) && (~execute_stall_i);
+    take_jal_o <= (IFIDop == JAL_OPCODE) && (~execute_stall_i) && (PC != IFID_PC_o + IMMEDIATE_i);
 
     JAL_PC  <= IFID_PC_o + IMMEDIATE_i;
     JALR_PC <= forward_out_a_i + IMMEDIATE_REG_i;
 
     is_different_branch_address    <= PC != (IFID_PC_o + IMMEDIATE_i);
+    is_different_no_branch_address <= PC != (IFID_PC_o + 'd4);
+
     IFID_is_compressed_instruction_o <= 1'b0;
 
     if(!rst_n) begin
@@ -91,7 +108,7 @@ always @(posedge clk ) begin // IF/ID
             instruction_request_o <= 1'b1;
         end
         
-        if(is_jal_o) begin
+        if(take_jal_o) begin
             IFID_IR_o       <= NOP;
             PC              <= JAL_PC; // imediato
             IFID_PC_o       <= BOOT_ADDRESS;
@@ -101,7 +118,7 @@ always @(posedge clk ) begin // IF/ID
             end
 
             finish_unaligned_pc <= 1'b0;
-        end else if (is_jalr_i) begin 
+        end else if (take_jalr_i) begin 
             IFID_IR_o       <= NOP;
             PC              <= JALR_PC; // imediato
             IFID_PC_o       <= BOOT_ADDRESS;
@@ -112,11 +129,11 @@ always @(posedge clk ) begin // IF/ID
             end
 
             finish_unaligned_pc <= 1'b0;
-        end else if(branch_flush) begin
+        end else if(branch_flush_o) begin
             IFID_IR_o       <= NOP;
-            PC              <= BRANCH_ADDRESS_i; // imediato
+            PC              <= (illegal_predicted_instruction) ? NON_BRANCH_ADDRESS_i : BRANCH_ADDRESS_i; // imediato
             IFID_PC_o       <= BOOT_ADDRESS;
-            pc_is_unaligned <= (BRANCH_ADDRESS_i[1] == 1'b1);
+            pc_is_unaligned <= (illegal_predicted_instruction) ? (NON_BRANCH_ADDRESS_i[1]) : (BRANCH_ADDRESS_i[1]);
 
             if(!instruction_response_i) begin
                 flush_bus_o <= 1'b1;
@@ -155,13 +172,18 @@ always @(posedge clk ) begin // IF/ID
                 end else begin
                     IFID_IR_o                        <= instr_d_o;
                     IFID_is_compressed_instruction_o <= is_compressed_instruction;
-                    if(is_compressed_instruction) begin
+                    if(prediction_taken) begin
+                        PC                <= prediction_address;
+                        pc_is_unaligned   <= prediction_address[1];
+                        jump_is_predicted <= 1'b1;
+                    end else if(is_compressed_instruction) begin
                         PC <= PC + 'd2;
                         pc_is_unaligned <= 1'b1;
                     end else begin
                         PC <= PC + 'd4;
                         pc_is_unaligned <= 1'b0;
                     end
+
                     IFID_PC_o <= PC;
                     
                     if(illegal_instruction_o) begin
@@ -179,27 +201,46 @@ logic illegal_compressed_instruction, illegal_fetch_instruction;
 
 assign illegal_instruction_o = illegal_compressed_instruction | illegal_fetch_instruction;
 
-IR_Decompression IR_Decompression(
+IR_Decompression IR_Decompression (
     .instr_c_i       (instr_c_i),
     .instr_is_c_o    (is_compressed_instruction),
     .instr_d_o       (instr_d_o),
     .instr_illegal_o (illegal_compressed_instruction)
 );
 
-Branch_Prediction Branch_Prediction(
-    .clk                 (clk),
-    .rst_n               (rst_n),
+logic is_condicional_jump, is_incondicional_jump;
 
-    .valid_instruction_i (instruction_response_i),
-    .PC_i                (PC),
-    .instruction_data_i  (instruction_data_i),
+Branch_Prediction #(
+    .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
+) Branch_Prediction (
+    .clk                   (clk),
+    .rst_n                 (rst_n),
 
-    .address_o           ()
+    .PC_i                  (PC),
+    .is_incondicional_jump (is_incondicional_jump),
+    .is_condicional_jump   (is_condicional_jump),
+
+    .branch_address_i      (IDEX_PC_i),
+    .branch_taken_i        (takebranch_i),
+    .is_branch_i           (is_branch_i),
+    .address_to_branch_i   (BRANCH_ADDRESS_i),
+
+    .jal_address_i         (IDEX_PC_i),
+    .jalr_address_i        (EXMEM_PC_i),
+    .is_jal_i              (is_jal_o),
+    .is_jalr_i             (is_jalr_i),
+    .address_to_jal_i      (JAL_PC),
+    .address_to_jalr_i     (JALR_PC),
+
+    .prediction_taken_o    (prediction_taken),
+    .address_o             (prediction_address)
 );
 
 Invalid_IR_Check Invalid_IR_Check (
     .instruction            (instr_d_o),
-    .invalid_instruction_o  (illegal_fetch_instruction)
+    .invalid_instruction_o  (illegal_fetch_instruction),
+    .is_incondicional_jump  (is_incondicional_jump),
+    .is_condicional_jump    (is_condicional_jump)
 );
 
 assign IFIDop    = IFID_IR_o[6:0];

@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Fri Feb 28 10:58:35 2025
+| Date         : Fri Mar  7 00:51:49 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_timing_summary -datasheet -max_paths 10 -file reports/timing.rpt
 | Design       : top
@@ -49,10 +49,10 @@ check_timing report
 
 Table of Contents
 -----------------
-1. checking no_clock (5018)
+1. checking no_clock (8274)
 2. checking constant_clock (0)
 3. checking pulse_width_clock (0)
-4. checking unconstrained_internal_endpoints (29560)
+4. checking unconstrained_internal_endpoints (44976)
 5. checking no_input_delay (1)
 6. checking no_output_delay (8)
 7. checking multiple_clock (0)
@@ -62,9 +62,9 @@ Table of Contents
 11. checking partial_output_delay (0)
 12. checking latch_loops (0)
 
-1. checking no_clock (5018)
+1. checking no_clock (8274)
 ---------------------------
- There are 5018 register/latch pins with no clock driven by root clock pin: clk_o_reg/Q (HIGH)
+ There are 8274 register/latch pins with no clock driven by root clock pin: clk_o_reg/Q (HIGH)
 
 
 2. checking constant_clock (0)
@@ -77,9 +77,9 @@ Table of Contents
  There are 0 register/latch pins which need pulse_width check
 
 
-4. checking unconstrained_internal_endpoints (29560)
+4. checking unconstrained_internal_endpoints (44976)
 ----------------------------------------------------
- There are 29560 pins that are not constrained for maximum delay. (HIGH)
+ There are 44976 pins that are not constrained for maximum delay. (HIGH)
 
  There are 0 pins that are not constrained for maximum delay due to constant clock.
 
@@ -234,7 +234,7 @@ Slack (MET) :             8.661ns  (required time - arrival time)
   -------------------------------------------------------------------    -------------------
     SLICE_X52Y96         FDRE (Prop_fdre_C_Q)         0.456     5.684 f  clk_o_reg/Q
                          net (fo=2, routed)           0.753     6.436    clk_o
-    SLICE_X52Y96         LUT2 (Prop_lut2_I0_O)        0.124     6.560 r  clk_o_i_1/O
+    SLICE_X52Y96         LUT2 (Prop_lut2_I1_O)        0.124     6.560 r  clk_o_i_1/O
                          net (fo=1, routed)           0.000     6.560    clk_o_i_1_n_0
     SLICE_X52Y96         FDRE                                         r  clk_o_reg/D
   -------------------------------------------------------------------    -------------------
@@ -292,7 +292,7 @@ Slack (MET) :             0.380ns  (arrival time - required time)
   -------------------------------------------------------------------    -------------------
     SLICE_X52Y96         FDRE (Prop_fdre_C_Q)         0.141     1.624 f  clk_o_reg/Q
                          net (fo=2, routed)           0.285     1.909    clk_o
-    SLICE_X52Y96         LUT2 (Prop_lut2_I0_O)        0.045     1.954 r  clk_o_i_1/O
+    SLICE_X52Y96         LUT2 (Prop_lut2_I1_O)        0.045     1.954 r  clk_o_i_1/O
                          net (fo=1, routed)           0.000     1.954    clk_o_i_1_n_0
     SLICE_X52Y96         FDRE                                         r  clk_o_reg/D
   -------------------------------------------------------------------    -------------------
@@ -346,7 +346,7 @@ Input Ports Setup/Hold
 Reference   | Input      | IO Reg  | Delay |     Setup(ns) | Process |      Hold(ns) | Process | Internal |
 Clock       | Port       | Type    | Type  | to Clk (Edge) | Corner  | to Clk (Edge) | Corner  | Clock    |
 ------------+------------+---------+-------+---------------+---------+---------------+---------+----------+
-sys_clk_pin | CPU_RESETN | FDRE    | -     |     1.901 (r) | SLOW    |    -0.414 (r) | FAST    |          |
+sys_clk_pin | CPU_RESETN | FDRE    | -     |     1.509 (r) | SLOW    |    -0.116 (r) | SLOW    |          |
 ------------+------------+---------+-------+---------------+---------+---------------+---------+----------+
 
 

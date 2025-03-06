@@ -1,15 +1,16 @@
 module Grande_Risco_5_SOC #(
-    parameter CLOCK_FREQ       = 25000000,
-    parameter BAUD_RATE        = 9600,
-    parameter BOOT_ADDRESS     = 32'h00000000,
-    parameter MEMORY_SIZE      = 4096,
-    parameter MEMORY_FILE      = "verification_tests/memory/generic.hex",
-    parameter GPIO_WIDHT       = 5,
-    parameter I_CACHE_SIZE     = 32,
-    parameter D_CACHE_SIZE     = 32,
-    parameter DATA_WIDTH       = 32,
-    parameter ADDR_WIDTH       = 32,
-    parameter UART_BUFFER_SIZE = 16
+    parameter CLOCK_FREQ             = 50000000,
+    parameter BAUD_RATE              = 115200,
+    parameter BOOT_ADDRESS           = 32'h00000000,
+    parameter MEMORY_SIZE            = 4096,
+    parameter MEMORY_FILE            = "verification_tests/memory/generic.hex",
+    parameter GPIO_WIDHT             = 5,
+    parameter I_CACHE_SIZE           = 256,
+    parameter D_CACHE_SIZE           = 256,
+    parameter DATA_WIDTH             = 32,
+    parameter ADDR_WIDTH             = 32,
+    parameter UART_BUFFER_SIZE       = 16,
+    parameter BRANCH_PREDICTION_SIZE = 512
 )(
     input  logic clk,
     input  logic rst_n,
@@ -34,11 +35,12 @@ logic [31:0] peripheral_addr, peripheral_read_data,
     peripheral_write_data;
 
 Grande_Risco5 #(
-    .BOOT_ADDRESS (BOOT_ADDRESS),
-    .I_CACHE_SIZE (I_CACHE_SIZE),
-    .D_CACHE_SIZE (D_CACHE_SIZE),
-    .DATA_WIDTH   (DATA_WIDTH),
-    .ADDR_WIDTH   (ADDR_WIDTH)
+    .BOOT_ADDRESS           (BOOT_ADDRESS),
+    .I_CACHE_SIZE           (I_CACHE_SIZE),
+    .D_CACHE_SIZE           (D_CACHE_SIZE),
+    .DATA_WIDTH             (DATA_WIDTH),
+    .ADDR_WIDTH             (ADDR_WIDTH),
+    .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
 ) Processor(
     .clk   (clk),
     .rst_n (rst_n),

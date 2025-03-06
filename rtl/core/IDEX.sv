@@ -4,6 +4,9 @@ module IDEX (
     input logic clk,
     input logic rst_n,
 
+    input logic [31:0] PC_i,
+
+    input logic take_jal_i,
     input logic is_jal_i,
     input logic branch_flush_i,
     input logic memory_stall_i,
@@ -24,12 +27,15 @@ module IDEX (
     output logic [31:0] MDU_data_o,
     output logic [31:0] ALU_data_o,
 
+    output logic take_jalr_o,
+    output logic is_branch_o,
     output logic execute_stall_o,
     output logic is_jalr_o,
     output logic zero_o,
     output logic IDEX_is_compressed_instruction_o,
     output logic takebranch_o,
     output logic [31:0] BRANCH_ADDRESS_o,
+    output logic [31:0] NON_BRANCH_ADDRESS_o,
 
     output logic [31:0] IDEXIR_o,
     output logic [31:0] IDEXPC_o,
@@ -46,7 +52,7 @@ import opcodes_pkg::*;
 
 logic zero;
 logic mdu_start;
-logic func7_lsb, mdu_done, is_immediate_reg_not, is_branch;
+logic func7_lsb, mdu_done, is_immediate_reg_not;
 logic [1:0] aluop, op_rs1, op_rs2;
 logic [2:0] IDEXfunc3;
 logic [3:0] alu_op_o;
@@ -66,16 +72,18 @@ assign execute_stall_o = (&op_rs1 || (&op_rs2 && is_immediate_reg_not)
 
 always_ff @(posedge clk ) begin : IDEX_STAGE
     is_immediate_reg_not <= ~is_immediate_o;
-    is_jalr_o <= (IDEXop == JALR_OPCODE) && (~execute_stall_o);
+    is_jalr_o   <= (IDEXop == JALR_OPCODE) && (~execute_stall_o);
+    take_jalr_o <= (IDEXop == JALR_OPCODE) && (~execute_stall_o) && (IFIDPC_i != forward_out_a_o + IMMEDIATE_REG_i);
 `ifdef ENABLE_MDU
     mdu_start <= 1'b0;
 `endif
-    BRANCH_ADDRESS_o <= IFIDPC_i + immediate_o;
-    is_branch        <= (IFIDop == BRANCH_OPCODE);
+    BRANCH_ADDRESS_o     <= IFIDPC_i + immediate_o;
+    NON_BRANCH_ADDRESS_o <= IFIDPC_i + 'd4;
+    is_branch_o          <= (IFIDop == BRANCH_OPCODE);
     IDEX_is_compressed_instruction_o <= IFID_is_compressed_instruction_i;
 
-    if(!rst_n || branch_flush_i || (is_jal_i && ~execute_stall_o)
-        || (is_jalr_o && ~execute_stall_o)) begin
+    if(!rst_n || branch_flush_i || (take_jal_i && ~execute_stall_o)
+        || (take_jalr_o && ~execute_stall_o)) begin
         IDEXIR_o <= NOP;
         previous_instruction_is_lw <= 1'b0;
 `ifdef ENABLE_MDU
@@ -203,7 +211,7 @@ MDU Mdu(
 `endif
 
 assign zero_o       = zero;
-assign takebranch_o = (zero && is_branch);
+assign takebranch_o = (zero && is_branch_o);
 assign IFIDop       = IFIDIR_i[6:0];
 assign IDEXop       = IDEXIR_o[6:0];
 assign IDEXrd       = IDEXIR_o[11:7];

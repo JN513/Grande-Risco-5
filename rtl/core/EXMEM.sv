@@ -7,6 +7,7 @@ module EXMEM (
     input logic execute_stall_i,
     input logic [31:0] immediate_i,
     input logic [31:0] IDEXIR_i,
+    input logic [31:0] IDEXPC_i,
     input logic [31:0] CSR_data_i,
     input logic [31:0] ALU_data_i,
     input logic [31:0] MDU_data_i,
@@ -15,14 +16,11 @@ module EXMEM (
     `endif
     input logic [31:0] forward_out_b_i,
 
-
     output logic memory_stall_o,
-    `ifdef ENABLE_MDU
-    //output logic EXMEMMDUop_o,
-    //output logic [31:0] EXMEMMDUOut_o,
-    `endif
+
     output logic [31:0] EXMEMALUOut_o,
     output logic [31:0] EXMEMIR_o,
+    output logic [31:0] EXMEMPC_o,
     output logic [31:0] IMMEDIATE_REG_o,
     output logic [31:0] Merged_Word_o,
     output logic memory_operation_o,
@@ -200,14 +198,13 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
             unaligned_access_in_progress <= |ALU_data_i[1:0] && (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
 
             EXMEMIR_o <= IDEXIR_i;
+            EXMEMPC_o <= IDEXPC_i;
 
             Data_Address <= ALU_data_i;
 
 
             `ifdef ENABLE_MDU
                 EXMEMALUOut_o  <= (IDEXop == CSR_OPCODE) ? CSR_data_i : (mdu_operation_i) ? MDU_data_i : ALU_data_i;
-                //EXMEMMDUOut_o <= MDU_data_i;
-                //EXMEMMDUop_o <= mdu_operation_i;
             `else
                 EXMEMALUOut_o  <= (IDEXop == CSR_OPCODE) ? CSR_data_i : ALU_data_i;
             `endif

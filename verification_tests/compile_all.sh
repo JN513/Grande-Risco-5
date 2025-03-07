@@ -2,6 +2,7 @@
 
 diretorio="code"
 march="rv32im_zca_zicsr"
+#wmarch="rv32im_zicsr"
 
 mkdir -p build
 

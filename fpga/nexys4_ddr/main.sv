@@ -10,14 +10,15 @@ module top (
 logic clk_o;
 
 Grande_Risco_5_SOC #(
-    .CLOCK_FREQ       (50000000),
-    .BAUD_RATE        (115200),
-    .MEMORY_SIZE      (16384),
-    .MEMORY_FILE      ("../../verification_tests/memory/led_test2.hex"),
-    .GPIO_WIDHT       (6),
-    .UART_BUFFER_SIZE (16),
-    .I_CACHE_SIZE     (1024),
-    .D_CACHE_SIZE     (512)
+    .CLOCK_FREQ             (50000000),
+    .BAUD_RATE              (115200),
+    .MEMORY_SIZE            (16384),
+    .MEMORY_FILE            ("../../verification_tests/memory/led_test2.hex"),
+    .GPIO_WIDHT             (6),
+    .UART_BUFFER_SIZE       (16),
+    .I_CACHE_SIZE           (2048),
+    .D_CACHE_SIZE           (1024),
+    .BRANCH_PREDICTION_SIZE (512)
 ) SOC (
     .clk   (clk_o),
     .rst_n (CPU_RESETN),

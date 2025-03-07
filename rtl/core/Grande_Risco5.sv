@@ -1,10 +1,11 @@
 module Grande_Risco5 #(
-    parameter BOOT_ADDRESS = 32'h00000000,
-    parameter I_CACHE_SIZE = 32'd32,
-    parameter D_CACHE_SIZE = 32'd32,
-    parameter DATA_WIDTH   = 32'd32,
-    parameter ADDR_WIDTH   = 32'd32,
-    parameter BAUD_RATE    = 32'd115200
+    parameter BOOT_ADDRESS           = 32'h00000000,
+    parameter I_CACHE_SIZE           = 32'd32,
+    parameter D_CACHE_SIZE           = 32'd32,
+    parameter DATA_WIDTH             = 32'd32,
+    parameter ADDR_WIDTH             = 32'd32,
+    parameter BAUD_RATE              = 32'd115200,
+    parameter BRANCH_PREDICTION_SIZE = 512
 ) (
     // Control signal
     input logic clk,
@@ -67,7 +68,8 @@ logic [31:0] d_cache_memory_write_data, d_cache_memory_read_data,
 logic [31:0] i_cache_memory_read_data, i_cache_memory_addr;
 
 Core #(
-    .BOOT_ADDRESS (BOOT_ADDRESS)
+    .BOOT_ADDRESS           (BOOT_ADDRESS),
+    .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
 ) Core(
     .clk                     (clk),
     .rst_n                   (rst_n),

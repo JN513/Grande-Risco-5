@@ -2,7 +2,7 @@ module Invalid_IR_Check (
     input  logic [31:0] instruction,
     output logic invalid_instruction_o,
     output logic is_incondicional_jump,
-    output logic is_condicional_jump,
+    output logic is_condicional_jump
 );
 
 // Importando os opcodes do pacote
@@ -63,6 +63,9 @@ always_comb begin : IR_INVALID_CHECKER
             invalid_instruction_o = 1'b0;
         end
         ATOMIC_OPCODE: begin
+            invalid_instruction_o = 1'b0;
+        end
+        LUI_OPCODE: begin
             invalid_instruction_o = 1'b0;
         end
         default: invalid_instruction_o = 1'b1;

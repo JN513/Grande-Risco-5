@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Fri Feb 28 10:58:20 2025
+| Date         : Fri Mar  7 00:51:30 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_control_sets -verbose -file reports/control_sets.rpt
 | Design       : top
@@ -23,11 +23,11 @@ Table of Contents
 +----------------------------------------------------------+-------+
 |                          Status                          | Count |
 +----------------------------------------------------------+-------+
-| Total control sets                                       |    85 |
-|    Minimum number of control sets                        |    85 |
+| Total control sets                                       |   103 |
+|    Minimum number of control sets                        |   103 |
 |    Addition due to synthesis replication                 |     0 |
 |    Addition due to physical synthesis replication        |     0 |
-| Unused register locations in slices containing registers |    63 |
+| Unused register locations in slices containing registers |    57 |
 +----------------------------------------------------------+-------+
 * Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
 ** Run report_qor_suggestions for automated merging and remapping suggestions
@@ -39,15 +39,15 @@ Table of Contents
 +--------------------+-------+
 |       Fanout       | Count |
 +--------------------+-------+
-| Total control sets |    85 |
+| Total control sets |   103 |
 | >= 0 to < 4        |     1 |
-| >= 4 to < 6        |     0 |
-| >= 6 to < 8        |     1 |
+| >= 4 to < 6        |     1 |
+| >= 6 to < 8        |     0 |
 | >= 8 to < 10       |     3 |
 | >= 10 to < 12      |     1 |
 | >= 12 to < 14      |     0 |
 | >= 14 to < 16      |     1 |
-| >= 16              |    78 |
+| >= 16              |    96 |
 +--------------------+-------+
 * Control sets can be remapped at either synth_design or opt_design
 
@@ -58,106 +58,124 @@ Table of Contents
 +--------------+-----------------------+------------------------+-----------------+--------------+
 | Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
 +--------------+-----------------------+------------------------+-----------------+--------------+
-| No           | No                    | No                     |             117 |           40 |
+| No           | No                    | No                     |             152 |           50 |
 | No           | No                    | Yes                    |               0 |            0 |
-| No           | Yes                   | No                     |             405 |          157 |
-| Yes          | No                    | No                     |            1619 |          669 |
+| No           | Yes                   | No                     |            1878 |          618 |
+| Yes          | No                    | No                     |            1727 |          745 |
 | Yes          | No                    | Yes                    |               0 |            0 |
-| Yes          | Yes                   | No                     |             500 |          174 |
+| Yes          | Yes                   | No                     |             770 |          282 |
 +--------------+-----------------------+------------------------+-----------------+--------------+
 
 
 4. Detailed Control Set Information
 -----------------------------------
 
-+----------------+------------------------------------------------------------------------------+---------------------------------------------------------------+------------------+----------------+--------------+
-|  Clock Signal  |                                 Enable Signal                                |                        Set/Reset Signal                       | Slice Load Count | Bel Load Count | Bels / Slice |
-+----------------+------------------------------------------------------------------------------+---------------------------------------------------------------+------------------+----------------+--------------+
-|  clk_IBUF_BUFG |                                                                              |                                                               |                1 |              1 |         1.00 |
-|  clk_o_BUFG    |                                                                              | SOC/Processor/Core/Third_Stage/memory_operation_o_reg_3[0]    |                3 |              7 |         2.33 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Merged_Word_o[15]_i_2_n_0                     | SOC/Processor/Core/Third_Stage/Merged_Word_o[15]_i_1_n_0      |                4 |              8 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Merged_Word_o[7]_i_1_n_0                      |                                                               |                4 |              8 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/is_different_branch_address_reg               |                                                               |                5 |              8 |         1.60 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/FSM_onehot_unaligned_access_state[10]_i_1_n_0 | SOC/Processor/ICache/CPU_RESETN                               |                3 |             11 |         3.67 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/EXMEMIR_o[14]_i_2_n_0                         | SOC/Processor/Core/Third_Stage/EXMEMIR_o[14]_i_1_n_0          |                6 |             15 |         2.50 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Merged_Word_o[31]_i_2_n_0                     | SOC/Processor/Core/Third_Stage/Merged_Word_o[31]_i_1_n_0      |                7 |             16 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/memory_operation_o_reg_2                      | SOC/Processor/Core/Second_Stage/Alu/SR[0]                     |               10 |             26 |         2.60 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/is_different_branch_address_reg               | SOC/Processor/Core/Third_Stage/is_jal_o_reg                   |               19 |             31 |         1.63 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_8[0]                         |                                                               |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_0[0]                         |                                                               |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/dividendo[31]_i_1_n_0                    |                                                               |               11 |             32 |         2.91 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/quociente[31]_i_1_n_0                    | SOC/Processor/ICache/CPU_RESETN                               |                7 |             32 |         4.57 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_29[0]                        |                                                               |               22 |             32 |         1.45 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/E[0]                                         |                                                               |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_18[0]                        |                                                               |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_3[0]                         |                                                               |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_28[0]                        |                                                               |               19 |             32 |         1.68 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_11[0]                        |                                                               |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_13[0]                        |                                                               |               19 |             32 |         1.68 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_6[0]                         |                                                               |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/M1/d_cache_read_data[31]_i_2_n_0                               | SOC/Processor/M1/d_cache_read_data[31]_i_1_n_0                |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/M1/i_cache_read_data[31]_i_2_n_0                               | SOC/Processor/M1/i_cache_read_data[31]_i_1_n_0                |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_12[0]                        |                                                               |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_data                                                  |                                                               |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_14[0]                        |                                                               |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_10[0]                        |                                                               |               11 |             32 |         2.91 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_5[0]                         |                                                               |               22 |             32 |         1.45 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_7[0]                         |                                                               |               20 |             32 |         1.60 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_9[0]                         |                                                               |               15 |             32 |         2.13 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_1[0]                         |                                                               |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/E[0]                                          | SOC/Processor/ICache/CPU_RESETN                               |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/First_Word[31]_i_1_n_0                        |                                                               |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Second_Word[31]_i_1_n_0                       |                                                               |                7 |             32 |         4.57 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/EXMEM_mem_data_value[31]_i_1_n_0              |                                                               |               15 |             32 |         2.13 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_20[0]                        |                                                               |               18 |             32 |         1.78 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_25[0]                        |                                                               |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_24[0]                        |                                                               |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_21[0]                        |                                                               |               22 |             32 |         1.45 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_22[0]                        |                                                               |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_23[0]                        |                                                               |               12 |             32 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/DIV_RD                                   |                                                               |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/memory_operation_o_reg_5[0]                   | SOC/Processor/Core/Third_Stage/SR[0]                          |                4 |             32 |         8.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_2[0]                         |                                                               |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_4[0]                         |                                                               |               19 |             32 |         1.68 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_27[0]                        |                                                               |                8 |             32 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_26[0]                        |                                                               |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_15[0]                        |                                                               |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_19[0]                        |                                                               |               12 |             32 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_17[0]                        |                                                               |               12 |             32 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/mul_ready_o                              | SOC/Processor/ICache/CPU_RESETN                               |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_16[0]                        |                                                               |               15 |             32 |         2.13 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/quociente_msk[31]_i_1_n_0                |                                                               |               10 |             33 |         3.30 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/acumulador[16]_i_1_n_0                   |                                                               |               11 |             34 |         3.09 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/E[0]                                     |                                                               |               13 |             36 |         2.77 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Data_Address[0]_i_1_n_0                       |                                                               |                9 |             43 |         4.78 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/finish_unaligned_pc_reg                       | SOC/Processor/ICache/CPU_RESETN                               |               20 |             46 |         2.30 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Alu/E[0]                                     |                                                               |               19 |             48 |         2.53 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/quociente_msk[31]_i_1_n_0                | SOC/Processor/Core/Second_Stage/Mdu/quociente_msk[30]_i_1_n_0 |               22 |             62 |         2.82 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/memory_operation_o_reg_4[0]                   |                                                               |               25 |             64 |         2.56 |
-|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/is_jalr_o_reg_0[0]                       |                                                               |               32 |             64 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/ICache/p_1_in                                                  |                                                               |               22 |             88 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr[13]_i_1_n_0                           | SOC/Processor/ICache/CPU_RESETN                               |               34 |             93 |         2.74 |
-|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/memory_operation_o_reg_0                      |                                                               |               30 |             97 |         3.23 |
-|  clk_o_BUFG    | SOC/Processor/M1/p_1_in__0                                                   |                                                               |               28 |            110 |         3.93 |
-|  clk_o_BUFG    |                                                                              |                                                               |               39 |            116 |         2.97 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[12]_2                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_0                                         |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_1                                         |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_2                                         |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_3                                         |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_4                                         |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[13]_0                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[12]_0                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/ICache/p_1_in__0                                               |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_5                                         |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[13]_1                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[11]_0                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[13]_2                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[10]_0                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[13]_3                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[12]_1                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[11]_1                             |                                                               |               32 |            128 |         4.00 |
-|  clk_o_BUFG    |                                                                              | SOC/Processor/ICache/CPU_RESETN                               |              154 |            398 |         2.58 |
-+----------------+------------------------------------------------------------------------------+---------------------------------------------------------------+------------------+----------------+--------------+
++----------------+------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------+----------------+--------------+
+|  Clock Signal  |                                 Enable Signal                                |                            Set/Reset Signal                            | Slice Load Count | Bel Load Count | Bels / Slice |
++----------------+------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------+----------------+--------------+
+|  clk_IBUF_BUFG |                                                                              |                                                                        |                1 |              1 |         1.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/flush_bus_o_reg_0                             | SOC/Processor/Core/i___100_n_0                                         |                3 |              4 |         1.33 |
+|  clk_o_BUFG    |                                                                              | SOC/Processor/Core/Third_Stage/unaligned_access_in_progress_reg_5      |                3 |              8 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Merged_Word_o[7]_i_1_n_0                      |                                                                        |                3 |              8 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Merged_Word_o[15]_i_2_n_0                     | SOC/Processor/Core/Third_Stage/Merged_Word_o[15]_i_1_n_0               |                3 |              8 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/FSM_onehot_unaligned_access_state[10]_i_1_n_0 | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |                2 |             11 |         5.50 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/EXMEMIR_o[14]_i_2_n_0                         | SOC/Processor/Core/Third_Stage/EXMEMIR_o[14]_i_1_n_0                   |                6 |             15 |         2.50 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Merged_Word_o[31]_i_2_n_0                     | SOC/Processor/Core/Third_Stage/Merged_Word_o[31]_i_1_n_0               |                7 |             16 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/flush_bus_o_reg                               | SOC/Processor/Core/i___98_n_0                                          |               19 |             28 |         1.47 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_18[0]                        |                                                                        |               11 |             32 |         2.91 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_19[0]                        |                                                                        |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_1[0]                         |                                                                        |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_17[0]                        |                                                                        |                8 |             32 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_16[0]                        |                                                                        |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_15[0]                        |                                                                        |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_13[0]                        |                                                                        |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_12[0]                        |                                                                        |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_10[0]                        |                                                                        |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_14[0]                        |                                                                        |                8 |             32 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_9[0]                         |                                                                        |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_8[0]                         |                                                                        |               10 |             32 |         3.20 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_11[0]                        |                                                                        |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_6[0]                         |                                                                        |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_5[0]                         |                                                                        |               22 |             32 |         1.45 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_4[0]                         |                                                                        |               21 |             32 |         1.52 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_2[0]                         |                                                                        |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_7[0]                         |                                                                        |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_28[0]                        |                                                                        |               18 |             32 |         1.78 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/First_Word[31]_i_1_n_0                        |                                                                        |               11 |             32 |         2.91 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Second_Word[31]_i_1_n_0                       |                                                                        |                8 |             32 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_data                                                  |                                                                        |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/M1/i_cache_read_data[31]_i_1_n_0                               |                                                                        |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/d_cache_read_data[31]_i_1_n_0                               |                                                                        |               11 |             32 |         2.91 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/DIV_RD                                   |                                                                        |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/mul_ready_o                              | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |               10 |             32 |         3.20 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_29[0]                        |                                                                        |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_20[0]                        |                                                                        |               20 |             32 |         1.60 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_27[0]                        |                                                                        |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_26[0]                        |                                                                        |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_25[0]                        |                                                                        |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_24[0]                        |                                                                        |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_23[0]                        |                                                                        |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_22[0]                        |                                                                        |                9 |             32 |         3.56 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_21[0]                        |                                                                        |               18 |             32 |         1.78 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_0[0]                         |                                                                        |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/flush_bus_o_reg_1[0]                          | SOC/Processor/Core/Third_Stage/SR[0]                                   |                7 |             32 |         4.57 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Data_Address_reg[31]_1[0]                     | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/EXMEM_mem_data_value[31]_i_1_n_0              |                                                                        |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/dividendo[31]_i_1_n_0                    |                                                                        |               10 |             32 |         3.20 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/quociente[31]_i_1_n_0                    | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |                6 |             32 |         5.33 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/IDEXIR_o_reg[26]_0[0]                        | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |               18 |             32 |         1.78 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/IDEXIR_o_reg[20]_0[0]                        | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |                7 |             32 |         4.57 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/IDEXIR_o_reg[22]_0[0]                        | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |                9 |             32 |         3.56 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/IDEXIR_o_reg[26]_1[0]                        | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/IDEXIR_o_reg[21]_0[0]                        | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |                9 |             32 |         3.56 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/reg_wr_en_o_reg_3[0]                         |                                                                        |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/E[0]                                         |                                                                        |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/E[0]                                         | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/IDEXIR_o_reg[23]_0[0]                        | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |                8 |             32 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/memory_operation_o_reg_3                      | SOC/Processor/Core/Second_Stage/Mdu/is_different_branch_address_reg[0] |               11 |             33 |         3.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/quociente_msk[31]_i_1_n_0                |                                                                        |               11 |             33 |         3.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/acumulador[16]_i_1_n_0                   |                                                                        |               14 |             34 |         2.43 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/E[0]                                          |                                                                        |               18 |             48 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/Data_Address[0]_i_1_n_0                       |                                                                        |               16 |             48 |         3.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/quociente_msk[31]_i_1_n_0                | SOC/Processor/Core/i___105_n_0                                         |               23 |             62 |         2.70 |
+|  clk_o_BUFG    | SOC/Processor/Core/Fourth_Stage/instruction_finished                         | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |               16 |             64 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/memory_operation_o_reg_4[0]                   |                                                                        |               22 |             64 |         2.91 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/Mdu/E[0]                                     |                                                                        |               31 |             64 |         2.06 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/memory_operation_o_reg_2                      |                                                                        |               34 |             72 |         2.12 |
+|  clk_o_BUFG    | SOC/Processor/ICache/cache_tag_reg_256_511_0_0_i_1_n_0                       |                                                                        |               21 |             84 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/ICache/cache_tag_reg_0_255_0_0_i_1_n_0                         |                                                                        |               21 |             84 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/unaligned_access_in_progress_reg_1            | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |               43 |             84 |         1.95 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr[13]_i_1_n_0                           | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |               34 |             93 |         2.74 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/EXMEMALUOut_o[31]_i_1_n_0                     |                                                                        |               55 |            108 |         1.96 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[13]_3                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[10]_0                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[13]_2                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[12]_1                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_5                                         |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[12]_2                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[11]_1                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/ICache/cache_data_reg_0_255_0_0_i_1__0_n_0                     |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/ICache/cache_data_reg_256_511_0_0_i_1_n_0                      |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[11]_0                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[13]_1                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_3                                         |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_0                                         |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_1                                         |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_2                                         |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/write_request_reg_4                                         |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[13]_0                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr_reg[12]_0                             |                                                                        |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/EXMEMPC_o_reg[9]_rep_2                       |                                                                        |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/EXMEMPC_o_reg[7]                             |                                                                        |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/EXMEMPC_o_reg[8]_0                           |                                                                        |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/EXMEMPC_o_reg[8]                             |                                                                        |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/EXMEMPC_o_reg[9]_rep_3                       |                                                                        |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/EXMEMPC_o_reg[9]_rep_1                       |                                                                        |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/EXMEMPC_o_reg[9]_rep_0                       |                                                                        |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/Core/Second_Stage/EXMEMPC_o_reg[9]_rep                         |                                                                        |               33 |            132 |         4.00 |
+|  clk_o_BUFG    |                                                                              |                                                                        |               49 |            151 |         3.08 |
+|  clk_o_BUFG    | SOC/Processor/Core/Third_Stage/p_1_in__0                                     |                                                                        |               54 |            216 |         4.00 |
+|  clk_o_BUFG    |                                                                              | SOC/Processor/Core/First_Stage/Branch_Prediction/CPU_RESETN            |              615 |           1870 |         3.04 |
++----------------+------------------------------------------------------------------------------+------------------------------------------------------------------------+------------------+----------------+--------------+
 
 

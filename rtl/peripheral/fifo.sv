@@ -4,41 +4,52 @@ module FIFO #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic write,
-    input  logic read,
-    input  logic [WIDTH-1:0] write_data,
-    output logic full,
-    output logic empty,
-    output logic [WIDTH-1:0] read_data
+
+    input  logic wr_en_i,
+    input  logic rd_en_i,
+    
+    input  logic [WIDTH - 1'b1:0] write_data,
+    output logic full_o,
+    output logic empty_o,
+    output logic [WIDTH - 1'b1:0] read_data
 );
 
-logic [WIDTH-1:0] memory[DEPTH-1:0];
-logic [5:0] read_ptr;
-logic [5:0] write_ptr;
+// Cálculo da largura do ponteiro
+localparam PTR_WIDTH = $clog2(DEPTH);
 
-always_ff @(posedge clk ) begin
-    if(!rst_n) begin
-        read_ptr <= 6'd0;
-    end else begin
-        if(read == 1'b1 && empty == 1'b0) begin
-            read_data <= memory[read_ptr];
-            read_ptr <= (read_ptr == DEPTH-1'b1) ? 'd0 : read_ptr + 1'b1;
-        end
+// Memória FIFO
+logic [WIDTH - 1'b1:0] memory[DEPTH - 1'b1:0];
+
+// Ponteiros de leitura e escrita
+logic [PTR_WIDTH:0] read_ptr;
+logic [PTR_WIDTH:0] write_ptr;
+
+// Leitura
+always_ff @(posedge clk) begin
+    if (!rst_n) begin
+        read_ptr  <= 'd0;
+        read_data <= 'd0;
+    end else if (rd_en_i && !empty_o) begin
+        read_data <= memory[read_ptr[PTR_WIDTH - 1'b1:0]]; // Usa apenas os bits necessários
+        read_ptr  <= read_ptr + 1'b1;
     end
 end
 
-always_ff @(posedge clk ) begin
-    if(!rst_n) begin
-        write_ptr <= 6'd0;
-    end else begin
-        if(write == 1'b1 && full == 1'b0) begin
-            memory[write_ptr] <= write_data;
-            write_ptr <= (write_ptr == DEPTH-1'b1) ? 'd0 : write_ptr + 1'b1;
-        end
+// Escrita
+always_ff @(posedge clk) begin
+    if (!rst_n) begin
+        write_ptr <= 'd0;
+    end else if (wr_en_i && !full_o) begin
+        memory[write_ptr[PTR_WIDTH - 1'b1:0]] <= write_data;
+        write_ptr                             <= write_ptr + 1'b1;
     end
 end
 
-assign full = ((write_ptr == read_ptr - 1) || (write_ptr == DEPTH-1 && read_ptr == 'd0)) ? 1'b1 : 1'b0;
-assign empty = (write_ptr == read_ptr) ? 1'b1 : 1'b0;
-    
+// FIFO cheia: ocorre quando o próximo `write_ptr` encontra `read_ptr`
+assign full_o = (write_ptr[PTR_WIDTH] != read_ptr[PTR_WIDTH]) && 
+              (write_ptr[PTR_WIDTH - 1'b1:0] == read_ptr[PTR_WIDTH - 1'b1:0]);
+
+// FIFO vazia: ocorre quando os ponteiros são iguais
+assign empty_o = (write_ptr == read_ptr);
+
 endmodule

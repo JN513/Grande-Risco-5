@@ -23,6 +23,12 @@ module CSR_Unit (
     input logic [31:0] memory_pc,
     input logic [31:0] writeback_pc,
 
+    // Trap signals
+    output logic IDEX_trap_flush_o,
+    output logic EXMEM_trap_flush_o,
+    output logic IFID_trap_flush_o,
+    output logic [31:0] trap_pc_o,
+
     input logic external_interruption_i
 );
 
@@ -38,15 +44,16 @@ localparam TIMECMP              = 12'hFFF; // Implementar depois
 
 // Address of Machine Information CSRs
 
+localparam MISA                 = 12'h301; // Informações sobre a arquitetura do processador.
 localparam MVENDORID            = 12'hF11; // Identificador do fabricante.
 localparam MARCHID              = 12'hF12; // Identificador da arquitetura.
 localparam MIMPID               = 12'hF13; // Identificador da implementação.
+localparam MHARTID              = 12'hF14; // Identificador do processador.
 
 // Address of Machine Trap Setup CSRs
 
 localparam MSTATUS              = 12'h300; // Status do processador (habilitação de interrupções, modos de execução, etc.).
 localparam MSTATUSH             = 12'h310; // Campo de extensão do registrador MSTATUS.
-localparam MISA                 = 12'h301; // Informações sobre a arquitetura do processador.
 localparam MIE                  = 12'h304; // Habilitação de interrupções.
 localparam MTVEC                = 12'h305; // Endereço base para tratamento de exceções.
 
@@ -103,11 +110,12 @@ always_comb begin : READ_CSR
         MINSTRETH: csr_read_data = MINSTRET_reg[63:32];
 
         // Machine Information
+        MISA:      csr_read_data = 32'b01_000000000000000001000100100111; // RV32IMABC_Zicsr
         MVENDORID: csr_read_data = 32'h00000000;
         MARCHID:   csr_read_data = 32'h00000000;
         MIMPID:    csr_read_data = 32'h00000000;
+        MHARTID:   csr_read_data = 32'h00000000;
         MSTATUSH:  csr_read_data = 32'h00000000;
-        MISA:      csr_read_data = 32'b01_000000000000000001000100100111; // RV32IMABC_Zicsr
 
         // Machine Trap Setup
         MSTATUS:   csr_read_data = MSTATUS_reg;
@@ -165,5 +173,10 @@ always_ff @(posedge clk ) begin : WRITE_CSR
         end
     end
 end
+
+assign IFID_trap_flush_o  = 1'b0;
+assign EXMEM_trap_flush_o = 1'b0;
+assign IDEX_trap_flush_o  = 1'b0;
+assign trap_pc_o          = 32'h00000000;
 
 endmodule

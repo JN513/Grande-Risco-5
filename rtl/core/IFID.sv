@@ -14,7 +14,9 @@ module IFID #(
 
     input logic memory_stall_i,
     input logic execute_stall_i,
+    input logic trap_flush_i,
 
+    input logic [31:0] trap_pc_i,
     input logic [31:0] BRANCH_ADDRESS_i,
     input logic [31:0] NON_BRANCH_ADDRESS_i,
 
@@ -27,7 +29,8 @@ module IFID #(
 
     output logic take_jal_o,
     output logic branch_flush_o,
-    output logic illegal_instruction_o,
+    output logic illegal_compressed_instruction_o,
+    output logic illegal_decode_instruction_o,
     output logic is_jal_o,
     output logic IFID_is_compressed_instruction_o,
 
@@ -54,14 +57,11 @@ logic [6:0] IFIDop;
 
 logic [31:0] PC;
 
-logic flush;
 logic prediction_taken;
 logic jump_is_predicted;
 
 logic is_different_branch_address, pc_is_unaligned, finish_unaligned_pc, is_different_no_branch_address;
 logic illegal_predicted_instruction;
-
-assign flush = branch_flush_o | is_jal_o;
 
 assign illegal_predicted_instruction = (is_different_no_branch_address & !takebranch_i & is_branch_i);
 assign branch_flush_o = (is_different_branch_address & takebranch_i) || illegal_predicted_instruction;
@@ -108,7 +108,13 @@ always @(posedge clk ) begin // IF/ID
             instruction_request_o <= 1'b1;
         end
         
-        if(take_jal_o) begin
+        if(trap_flush_i) begin
+            IFID_IR_o           <= NOP;
+            PC                  <= trap_pc_i;
+            IFID_PC_o           <= BOOT_ADDRESS;
+            pc_is_unaligned     <= trap_pc_i[1];
+            finish_unaligned_pc <= 1'b0;
+        end else if(take_jal_o) begin
             IFID_IR_o       <= NOP;
             PC              <= JAL_PC; // imediato
             IFID_PC_o       <= BOOT_ADDRESS;
@@ -151,7 +157,7 @@ always @(posedge clk ) begin // IF/ID
                     IFID_IR_o <= instr_d_o;
                     IFID_PC_o <= temp_pc;
 
-                    if(illegal_instruction_o) begin
+                    if(illegal_compressed_instruction_o) begin
                         IFID_IR_o <= NOP;
                         IFID_PC_o <= BOOT_ADDRESS;
                     end
@@ -186,7 +192,7 @@ always @(posedge clk ) begin // IF/ID
 
                     IFID_PC_o <= PC;
                     
-                    if(illegal_instruction_o) begin
+                    if(illegal_compressed_instruction_o) begin
                         IFID_IR_o <= NOP;
                         IFID_PC_o <= BOOT_ADDRESS;
                     end
@@ -196,19 +202,22 @@ always @(posedge clk ) begin // IF/ID
     end  
 end
 
-logic illegal_compressed_instruction, illegal_fetch_instruction;
-
-
-assign illegal_instruction_o = illegal_compressed_instruction | illegal_fetch_instruction;
-
 IR_Decompression IR_Decompression (
     .instr_c_i       (instr_c_i),
     .instr_is_c_o    (is_compressed_instruction),
     .instr_d_o       (instr_d_o),
-    .instr_illegal_o (illegal_compressed_instruction)
+    .instr_illegal_o (illegal_compressed_instruction_o)
 );
 
-logic is_condicional_jump, is_incondicional_jump;
+logic is_jump;
+
+always_comb begin : IS_JUMP_CHECK
+    is_jump = 1'b0;
+    unique case(instr_d_o[6:0])
+        JAL_OPCODE, JALR_OPCODE, BRANCH_OPCODE: is_jump = 1'b1;
+        default: is_jump = 1'b0;
+    endcase
+end
 
 Branch_Prediction #(
     .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
@@ -217,8 +226,7 @@ Branch_Prediction #(
     .rst_n                 (rst_n),
 
     .PC_i                  (PC),
-    .is_incondicional_jump (is_incondicional_jump),
-    .is_condicional_jump   (is_condicional_jump),
+    .is_jump               (is_jump),
 
     .branch_address_i      (IDEX_PC_i),
     .branch_taken_i        (takebranch_i),
@@ -237,10 +245,8 @@ Branch_Prediction #(
 );
 
 Invalid_IR_Check Invalid_IR_Check (
-    .instruction            (instr_d_o),
-    .invalid_instruction_o  (illegal_fetch_instruction),
-    .is_incondicional_jump  (is_incondicional_jump),
-    .is_condicional_jump    (is_condicional_jump)
+    .instruction            (IFID_IR_o),
+    .invalid_instruction_o  (illegal_decode_instruction_o)
 );
 
 assign IFIDop    = IFID_IR_o[6:0];

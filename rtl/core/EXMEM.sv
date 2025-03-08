@@ -4,6 +4,8 @@ module EXMEM (
     input logic clk,
     input logic rst_n,
 
+    input logic trap_flush_i,
+
     input logic execute_stall_i,
     input logic [31:0] immediate_i,
     input logic [31:0] IDEXIR_i,
@@ -78,10 +80,11 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
     memory_write <= 1'b0;
     memory_read  <= 1'b0;
 
-    if(!rst_n) begin
+    if(!rst_n || trap_flush_i) begin
         unaligned_access_in_progress <= 1'b0;
-        unaligned_access_state <= IDLE;
-        EXMEMIR_o <= NOP;
+        unaligned_access_state       <= IDLE;
+        EXMEMIR_o                    <= NOP;
+        EXMEMPC_o                    <= 'd0;
     end else if(unaligned_access_in_progress) begin 
         case (unaligned_access_state)
             IDLE: begin
@@ -189,6 +192,7 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
         endcase
     end else if((execute_stall_i & ~memory_stall_o)) begin
         EXMEMIR_o <= NOP;
+        EXMEMPC_o <= 32'd0;
     end else begin
         if(!execute_stall_i && !memory_stall_o)
             IMMEDIATE_REG_o <= immediate_i;

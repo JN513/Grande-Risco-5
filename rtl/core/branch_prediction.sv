@@ -5,8 +5,7 @@ module Branch_Prediction #(
     input  logic rst_n,
 
     // fetch
-    input  logic is_incondicional_jump,
-    input  logic is_condicional_jump,
+    input  logic is_jump,
     input  logic [31:0] PC_i,
 
     // solve branch
@@ -81,6 +80,6 @@ end
 
 // Saída baseada na tabela de predição
 assign address_o = address_to_jump[index];
-assign prediction_taken_o = prediction[index][1] && (is_condicional_jump || is_incondicional_jump);
+assign prediction_taken_o = prediction[index][1] & is_jump;
 
 endmodule

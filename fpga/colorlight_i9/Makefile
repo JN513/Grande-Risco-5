@@ -25,7 +25,10 @@ buildFolder:
 clean:
 	rm -rf build
 
-flash:
+load:
 	openFPGALoader -b colorlight-i9 ./build/out.bit
+
+flash:
+	openFPGALoader -b colorlight-i9 -f ./build/out.bit
 
 run_all: ./build/out.bit flash

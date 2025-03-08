@@ -1,8 +1,6 @@
 module Invalid_IR_Check (
     input  logic [31:0] instruction,
-    output logic invalid_instruction_o,
-    output logic is_incondicional_jump,
-    output logic is_condicional_jump
+    output logic invalid_instruction_o
 );
 
 // Importando os opcodes do pacote
@@ -15,9 +13,6 @@ logic [6:0] func7;
 logic [6:0] opcode;
 
 always_comb begin : IR_INVALID_CHECKER
-    is_incondicional_jump = 1'b0;
-    is_condicional_jump   = 1'b0;
-
     unique case (opcode)
         LW_OPCODE: begin
             unique case (func3)
@@ -32,7 +27,6 @@ always_comb begin : IR_INVALID_CHECKER
             endcase
         end
         JAL_OPCODE: begin
-            is_incondicional_jump = 1'b1;
             invalid_instruction_o = 1'b0;
         end
         CSR_OPCODE: begin
@@ -42,15 +36,12 @@ always_comb begin : IR_INVALID_CHECKER
             endcase
         end
         JALR_OPCODE: begin
-            is_condicional_jump   = 1'b1;
             invalid_instruction_o = (func3 == 3'b000) ? 1'b0 : 1'b1;
         end
         AUIPC_OPCODE: begin
             invalid_instruction_o = 1'b0;
         end
         BRANCH_OPCODE: begin
-            is_condicional_jump = 1'b1;
-
             unique case (func3)
                 3'b000, 3'b001, 3'b100, 3'b101, 3'b110, 3'b111: invalid_instruction_o = 1'b0;
                 default: invalid_instruction_o = 1'b1;

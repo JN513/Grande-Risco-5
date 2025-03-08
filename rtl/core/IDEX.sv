@@ -6,6 +6,8 @@ module IDEX (
 
     input logic [31:0] PC_i,
 
+    input logic trap_flush_i,
+
     input logic take_jal_i,
     input logic is_jal_i,
     input logic branch_flush_i,
@@ -83,7 +85,8 @@ always_ff @(posedge clk ) begin : IDEX_STAGE
     IDEX_is_compressed_instruction_o <= IFID_is_compressed_instruction_i;
 
     if(!rst_n || branch_flush_i || (take_jal_i && ~execute_stall_o)
-        || (take_jalr_o && ~execute_stall_o)) begin
+        || (take_jalr_o && ~execute_stall_o) || trap_flush_i) begin
+        IDEXPC_o <= 32'h0;
         IDEXIR_o <= NOP;
         previous_instruction_is_lw <= 1'b0;
 `ifdef ENABLE_MDU

@@ -62,6 +62,7 @@ logic take_jalr;
 logic take_jal;
 logic zero;
 logic invalid_fetch_instruction;
+logic invalid_decode_instruction;
 logic is_branch;
 logic is_jalr;
 logic is_compressed;
@@ -72,6 +73,11 @@ logic [6:0] EXMEMop;
 logic [4:0] EXMEM_RD;
 logic [4:0] IFIDrs1, IFIDrs2, IFIDrd;
 logic [4:0] MEMWBrd;
+
+logic IFID_trap_flush;
+logic [31:0] trap_pc;
+logic IDEX_trap_flush;
+logic EXMEM_trap_flush;
 
 `ifdef ENABLE_MDU
 logic mdu_operation;
@@ -93,6 +99,10 @@ IFID #(
     .takebranch_i                     (takebranch),
     .memory_stall_i                   (memory_stall),
     .execute_stall_i                  (execute_stall),
+
+    .trap_flush_i                     (IFID_trap_flush),
+    .trap_pc_i                        (trap_pc),
+
     .BRANCH_ADDRESS_i                 (BRANCH_ADDRESS),
     .NON_BRANCH_ADDRESS_i             (NON_BRANCH_ADDRESS),
     .IMMEDIATE_i                      (immediate),
@@ -104,7 +114,8 @@ IFID #(
     .branch_flush_o                   (branch_flush),
 
     .take_jal_o                       (take_jal),
-    .illegal_instruction_o            (invalid_fetch_instruction),
+    .illegal_compressed_instruction_o (invalid_fetch_instruction),
+    .illegal_decode_instruction_o     (invalid_decode_instruction),
     .is_jal_o                         (is_jal),
     .IFID_PC_o                        (IFID_PC),
     .IFID_IR_o                        (IFID_IR),
@@ -122,6 +133,8 @@ IDEX Second_Stage (
     .rst_n                             (rst_n),
 
     .PC_i                              (instr_addr_o),
+
+    .trap_flush_i                      (IDEX_trap_flush),
 
     .take_jal_i                        (take_jal),
     .is_branch_o                       (is_branch),
@@ -169,6 +182,8 @@ IDEX Second_Stage (
 EXMEM Third_Stage (
     .clk                   (clk),
     .rst_n                 (rst_n),
+
+    .trap_flush_i          (EXMEM_trap_flush),
 
     .execute_stall_i       (execute_stall),
     .immediate_i           (immediate),
@@ -249,7 +264,7 @@ CSR_Unit CSR(
     .csr_data_out               (CSR_data),
 
     .invalid_fetch_instruction  (invalid_fetch_instruction),
-    .invalid_decode_instruction (),
+    .invalid_decode_instruction (invalid_decode_instruction),
     .instruction_finished       (instruction_finished),
     
     .fetch_pc                   (instr_addr_o),
@@ -257,6 +272,11 @@ CSR_Unit CSR(
     .execute_pc                 (IDEX_PC),
     .memory_pc                  (EXMEM_PC),
     .writeback_pc               (MEMWB_PC),
+
+    .IDEX_trap_flush_o          (IDEX_trap_flush),
+    .EXMEM_trap_flush_o         (EXMEM_trap_flush),
+    .IFID_trap_flush_o          (IFID_trap_flush),
+    .trap_pc_o                  (trap_pc),
 
     .external_interruption_i    (external_interruption_i)
 );

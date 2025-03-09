@@ -8,10 +8,10 @@ module FIFO #(
     input  logic wr_en_i,
     input  logic rd_en_i,
     
-    input  logic [WIDTH - 1'b1:0] write_data,
+    input  logic [WIDTH - 1'b1:0] write_data_i,
     output logic full_o,
     output logic empty_o,
-    output logic [WIDTH - 1'b1:0] read_data
+    output logic [WIDTH - 1'b1:0] read_data_o
 );
 
 // Cálculo da largura do ponteiro
@@ -27,11 +27,11 @@ logic [PTR_WIDTH:0] write_ptr;
 // Leitura
 always_ff @(posedge clk) begin
     if (!rst_n) begin
-        read_ptr  <= 'd0;
-        read_data <= 'd0;
+        read_ptr    <= 'd0;
+        read_data_o <= 'd0;
     end else if (rd_en_i && !empty_o) begin
-        read_data <= memory[read_ptr[PTR_WIDTH - 1'b1:0]]; // Usa apenas os bits necessários
-        read_ptr  <= read_ptr + 1'b1;
+        read_data_o <= memory[read_ptr[PTR_WIDTH - 1'b1:0]]; // Usa apenas os bits necessários
+        read_ptr    <= read_ptr + 1'b1;
     end
 end
 
@@ -40,7 +40,7 @@ always_ff @(posedge clk) begin
     if (!rst_n) begin
         write_ptr <= 'd0;
     end else if (wr_en_i && !full_o) begin
-        memory[write_ptr[PTR_WIDTH - 1'b1:0]] <= write_data;
+        memory[write_ptr[PTR_WIDTH - 1'b1:0]] <= write_data_i;
         write_ptr                             <= write_ptr + 1'b1;
     end
 end

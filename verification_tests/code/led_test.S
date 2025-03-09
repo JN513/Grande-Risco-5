@@ -2,5 +2,5 @@
 
 _start:
     li a1, 0xF0000000
-    li a2, 0x000000AA
+    li a2, 0x0000AAAA
     sw a2, 0(a1)

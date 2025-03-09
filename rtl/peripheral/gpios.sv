@@ -7,12 +7,15 @@ module GPIOS #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic read,
-    input  logic write,
-    input  logic [31:0] address,
-    input  logic [31:0] write_data,
-    output logic [31:0] read_data,
-    output logic response,
+    
+    output logic response_o,
+    input  logic read_request_i,
+    input  logic write_request_i,
+
+    input  logic [31:0] address_i,
+    input  logic [31:0] write_data_i,
+    output logic [31:0] read_data_o,
+
     inout [WIDHT - 1:0] gpios
 );
 
@@ -30,8 +33,8 @@ localparam CONFIG_PWM        = 8'h08;
 localparam CONFIG_PERIOD     = 8'h0C;
 localparam CONFIG_DUTY_CYCLE = 8'h10;
 
-assign read_data = (read) ? gpio_out : 32'h00000000;
-assign response  = read | write;
+assign read_data_o = (read_request_i) ? gpio_out : 32'h00000000;
+assign response_o  = read_request_i | write_request_i;
 
 GPIO Gpios[WIDHT - 1:0](
     .gpio       (gpios),
@@ -62,13 +65,13 @@ always_ff @(posedge clk) begin
         is_pwm         <= 2'b00;
         gpio_direction <= 32'h00000000;
         gpio_value     <= 32'h00000000;
-    end else if(write) begin
-        case (address[7:0])
-            SET_DIRECTION:     gpio_direction             <= write_data[WIDHT - 1: 0];
-            WRITE_DATA:        gpio_value                 <= write_data[WIDHT - 1: 0];
-            CONFIG_PWM:        is_pwm                     <= write_data[1:0];
-            CONFIG_PERIOD:     period[write_data[16]]     <= write_data[15:0];
-            CONFIG_DUTY_CYCLE: duty_cycle[write_data[16]] <= write_data[15:0];
+    end else if(write_request_i) begin
+        case (address_i[7:0])
+            SET_DIRECTION:     gpio_direction               <= write_data_i[WIDHT - 1: 0];
+            WRITE_DATA:        gpio_value                   <= write_data_i[WIDHT - 1: 0];
+            CONFIG_PWM:        is_pwm                       <= write_data_i[1:0];
+            CONFIG_PERIOD:     period[write_data_i[16]]     <= write_data_i[15:0];
+            CONFIG_DUTY_CYCLE: duty_cycle[write_data_i[16]] <= write_data_i[15:0];
         endcase
     end
 end

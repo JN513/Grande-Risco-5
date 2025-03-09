@@ -15,7 +15,7 @@ module UART_RX #(
     output logic [7:0] uart_rx_data
 );
 
-localparam DEFAULT_BIT_PERIOD = (CLK_FREQ / BAUD_RATE) - 1;
+localparam DEFAULT_BIT_PERIOD = 16'((CLK_FREQ / BAUD_RATE) - 1);
 
 logic [3:0] bit_index;
 logic [15:0] counter;  
@@ -37,7 +37,6 @@ always_ff @(posedge clk) begin : UART_RX_FSM
         uart_rx_valid <= 1'b0;
         counter       <= 16'h0;
         bit_index     <= 4'h0;
-        bit_period    <= DEFAULT_BIT_PERIOD;
         state         <= IDLE; // Inicialização do estado
     end else if (uart_rx_en) begin
         unique case (state)
@@ -62,7 +61,7 @@ always_ff @(posedge clk) begin : UART_RX_FSM
                     counter <= counter - 1'b1;
                 end else begin
                     counter <= bit_period;
-                    buffer[bit_index] <= uart_rxd;
+                    buffer[bit_index[2:0]] <= uart_rxd;
                     if (bit_index < 'd7) begin
                         bit_index <= bit_index + 1'b1;
                     end else begin

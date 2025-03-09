@@ -14,9 +14,9 @@ module UART #(
     input  logic wr_en_i,
     output logic response_o,
 
-    input  logic [31:0] address,
-    input  logic [31:0] write_data,
-    output logic [31:0] read_data
+    input  logic [31:0] address_i,
+    input  logic [31:0] write_data_i,
+    output logic [31:0] read_data_o
 );
 
 typedef enum logic [4:0] { 
@@ -35,16 +35,16 @@ typedef enum logic [4:0] {
 
 uart_state_t state;
 
-// Write address:
-// address[3:2] = 00 -> UART_TX
-// address[3:2] = 01 -> SET RX STATE (0 - disable, 1 - enable)
-// address[3:2] = 10 -> SET BIT PERIOD
-// Read address:
-// address[4:2] = 000 -> Read UART_RX
-// address[4:2] = 001 -> Read RX FIFO EMPTY
-// address[4:2] = 010 -> Read RX FIFO FULL
-// address[4:2] = 011 -> Read TX FIFO EMPTY
-// address[4:2] = 100 -> Read TX FIFO FULL
+// Write address_i:
+// address_i[3:2] = 00 -> UART_TX
+// address_i[3:2] = 01 -> SET RX STATE (0 - disable, 1 - enable)
+// address_i[3:2] = 10 -> SET BIT PERIOD
+// Read address_i:
+// address_i[4:2] = 000 -> Read UART_RX
+// address_i[4:2] = 001 -> Read RX FIFO EMPTY
+// address_i[4:2] = 010 -> Read RX FIFO FULL
+// address_i[4:2] = 011 -> Read TX FIFO EMPTY
+// address_i[4:2] = 100 -> Read TX FIFO FULL
 
 
 logic uart_rx_fifo_read;
@@ -76,12 +76,12 @@ always_ff @(posedge clk) begin : UART_FSM
 
     if (!rst_n) begin
         state      <= IDLE;
-        bit_period <= (CLK_FREQ / BIT_RATE) - 1'b1;
+        bit_period <= 16'((CLK_FREQ / BIT_RATE) - 1'b1);
     end else begin
         unique case (state)
             IDLE: begin
                 if (rd_en_i) begin
-                    unique case (address[4:2])
+                    unique case (address_i[4:2])
                         3'b000: state  <= READ;
                         3'b001: state  <= READ_RX_FIFO_EMPTY;
                         3'b010: state  <= READ_RX_FIFO_FULL;
@@ -90,7 +90,7 @@ always_ff @(posedge clk) begin : UART_FSM
                         default: state <= READ;
                     endcase
                 end else if (wr_en_i) begin
-                    unique case (address[3:2])
+                    unique case (address_i[3:2])
                         2'b00: state   <= WRITE;
                         2'b01: state   <= RX_STATE;
                         2'b10: state   <= SET_BIT_PERIOD;
@@ -105,38 +105,38 @@ always_ff @(posedge clk) begin : UART_FSM
                 end
             end
             READ_WAIT: begin
-                read_data <= {24'h0, uart_rx_fifo_data_out};
+                read_data_o <= {24'h0, uart_rx_fifo_data_out};
                 state <= FINISH;
             end
             READ_RX_FIFO_EMPTY: begin
-                read_data <= uart_rx_fifo_empty;
+                read_data_o <= {31'h0, uart_rx_fifo_empty};
                 state     <= FINISH;
             end
             READ_RX_FIFO_FULL: begin
-                read_data <= uart_rx_fifo_full;
+                read_data_o <= {31'h0, uart_rx_fifo_full};
                 state     <= FINISH;
             end
             READ_TX_FIFO_EMPTY: begin
-                read_data <= uart_tx_fifo_empty;
+                read_data_o <= {31'h0, uart_tx_fifo_empty};
                 state     <= FINISH;
             end
             READ_TX_FIFO_FULL: begin
-                read_data <= uart_tx_fifo_full;
+                read_data_o <= {31'h0, uart_tx_fifo_full};
                 state     <= FINISH;
             end
             WRITE: begin
                 if(!uart_tx_fifo_full) begin
-                    uart_tx_fifo_data_in <= write_data[7:0];
+                    uart_tx_fifo_data_in <= write_data_i[7:0];
                     uart_tx_fifo_write   <= 1'b1;
                 end
                 state <= FINISH;
             end
             RX_STATE: begin
-                uart_rx_enable <= write_data[0];
+                uart_rx_enable <= write_data_i[0];
                 state          <= FINISH;
             end
             SET_BIT_PERIOD: begin
-                bit_period     <= write_data[15:0];
+                bit_period     <= write_data_i[15:0];
                 set_bit_period <= 1'b1;
                 state          <= FINISH;
             end
@@ -162,49 +162,67 @@ end
 
 logic uart_tx_en, uart_tx_busy;
 logic [7:0] uart_tx_data;
+typedef enum logic [1:0] { 
+    TX_FIFO_IDLE,
+    TX_FIFO_READ_FIFO,
+    TX_FIFO_WRITE_TX
+} tx_read_fifo_state_t;
+
+tx_read_fifo_state_t tx_read_fifo_state;
 
 always_ff @(posedge clk) begin : UART_TX_READ_FROM_FIFO
     uart_tx_en        <= 1'b0;
     uart_tx_fifo_read <= 1'b0;
 
-    if(!uart_tx_fifo_empty && !uart_tx_busy) begin
-        uart_tx_fifo_read <= 1'b1;
-    end else if(uart_tx_fifo_read) begin
-        uart_tx_data <= uart_tx_fifo_data_out;
-        uart_tx_en   <= 1'b1;
-    end
+    unique case (tx_read_fifo_state)
+        TX_FIFO_IDLE: begin
+            if(!uart_tx_fifo_empty && !uart_tx_busy) begin
+                tx_read_fifo_state <= TX_FIFO_READ_FIFO;
+                uart_tx_fifo_read  <= 1'b1;
+            end
+        end
+        TX_FIFO_READ_FIFO: begin
+            tx_read_fifo_state <= TX_FIFO_WRITE_TX;
+        end
+        TX_FIFO_WRITE_TX: begin
+            uart_tx_data <= uart_tx_fifo_data_out;
+            uart_tx_en   <= 1'b1;
+            tx_read_fifo_state <= TX_FIFO_IDLE;
+        end
+        default: tx_read_fifo_state <= TX_FIFO_IDLE;
+    endcase
 end
 
 FIFO #(
     .DEPTH      (BUFFER_SIZE),
     .WIDTH      (PAYLOAD_BITS)
 ) tx_fifo (
-    .clk        (clk),
-    .rst_n      (rst_n),
+    .clk          (clk),
+    .rst_n        (rst_n),
 
-    .wr_en_i    (uart_tx_fifo_write),
-    .rd_en_i    (uart_tx_fifo_read),
+    .wr_en_i      (uart_tx_fifo_write),
+    .rd_en_i      (uart_tx_fifo_read),
 
-    .write_data (uart_tx_fifo_data_in),
-    .full_o     (uart_tx_fifo_full),
-    .empty_o    (uart_tx_fifo_empty),
-    .read_data  (uart_tx_fifo_data_out)
+    .write_data_i (uart_tx_fifo_data_in),
+    .full_o       (uart_tx_fifo_full),
+    .empty_o      (uart_tx_fifo_empty),
+    .read_data_o  (uart_tx_fifo_data_out)
 );
 
 FIFO #(
-    .DEPTH      (BUFFER_SIZE),
-    .WIDTH      (PAYLOAD_BITS)
+    .DEPTH        (BUFFER_SIZE),
+    .WIDTH        (PAYLOAD_BITS)
 ) rx_fifo (
-    .clk        (clk),
-    .rst_n      (rst_n),
+    .clk          (clk),
+    .rst_n        (rst_n),
 
-    .wr_en_i    (uart_rx_fifo_write),
-    .rd_en_i    (uart_rx_fifo_read),
+    .wr_en_i      (uart_rx_fifo_write),
+    .rd_en_i      (uart_rx_fifo_read),
 
-    .write_data (uart_rx_fifo_data_in),
-    .full_o     (uart_rx_fifo_full),
-    .empty_o    (uart_rx_fifo_empty),
-    .read_data  (uart_rx_fifo_data_out)
+    .write_data_i (uart_rx_fifo_data_in),
+    .full_o       (uart_rx_fifo_full),
+    .empty_o      (uart_rx_fifo_empty),
+    .read_data_o  (uart_rx_fifo_data_out)
 );
 
 UART_TX #(

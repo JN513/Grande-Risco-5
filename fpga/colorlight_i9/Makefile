@@ -13,9 +13,7 @@ all: ./build/out.bit
 	yosys -m slang  -p " \
 		read_slang --error-limit=100 main.sv \
 			../../rtl/core/*.sv \
-			../../rtl/peripheral/memory.sv \
-			../../rtl/peripheral/leds.sv \
-			../../rtl/peripheral/soc.sv  -top top; \
+			../../rtl/peripheral/*.sv -top top; \
 		synth_ecp5 -json ./build/out.json -abc9 \
 	"
 

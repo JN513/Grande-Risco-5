@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Sat Mar  8 18:04:00 2025
+| Date         : Sun Mar  9 10:41:42 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_drc -file reports/drc.rpt
 | Design       : top
@@ -24,7 +24,7 @@ Table of Contents
       Design limits: <entire design considered>
            Ruledeck: default
              Max checks: <unlimited>
-             Checks found: 9
+             Checks found: 10
 +----------+----------+-----------------------------------------------------+--------+
 | Rule     | Severity | Description                                         | Checks |
 +----------+----------+-----------------------------------------------------+--------+
@@ -32,7 +32,7 @@ Table of Contents
 | DPOP-1   | Warning  | PREG Output pipelining                              | 2      |
 | DPOP-2   | Warning  | MREG Output pipelining                              | 4      |
 | PDRC-138 | Warning  | SLICE_PairEqSame_D6D5_WARN                          | 1      |
-| PDRC-146 | Warning  | SLICE_PairEqSame_D6D5_WARN                          | 1      |
+| RPBF-3   | Warning  | IO port buffering is incomplete                     | 2      |
 +----------+----------+-----------------------------------------------------+--------+
 
 2. REPORT DETAILS
@@ -82,12 +82,17 @@ Related violations: <none>
 
 PDRC-138#1 Warning
 SLICE_PairEqSame_D6D5_WARN  
-Luts D6LUT and D5LUT in use in site SLICE_X40Y103 with different equations without A6 pin connected to Global Logic High.
+Luts D6LUT and D5LUT in use in site SLICE_X71Y131 with different equations without A6 pin connected to Global Logic High.
 Related violations: <none>
 
-PDRC-146#1 Warning
-SLICE_PairEqSame_D6D5_WARN  
-Luts D6LUT and D5LUT in use in site SLICE_X60Y99 with different equations without A6 pin connected to Global Logic High.
+RPBF-3#1 Warning
+IO port buffering is incomplete  
+Device port JA[6] expects both input and output buffering but the buffers are incomplete.
+Related violations: <none>
+
+RPBF-3#2 Warning
+IO port buffering is incomplete  
+Device port JA[7] expects both input and output buffering but the buffers are incomplete.
 Related violations: <none>
 
 

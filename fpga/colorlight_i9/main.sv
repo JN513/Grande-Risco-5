@@ -17,11 +17,11 @@ Grande_Risco_5_SOC #(
 ) SOC (
     .clk   (clk),
     .rst_n (rst_n),
+    .halt  (1'b0),
     .leds  (led),
     .rx    (),
     .tx    (),
-    .gpios (),
-    .halt  ()
+    .gpios ()
 );
 
 

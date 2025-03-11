@@ -4,7 +4,6 @@ module Grande_Risco5 #(
     parameter D_CACHE_SIZE           = 32'd32,
     parameter DATA_WIDTH             = 32'd32,
     parameter ADDR_WIDTH             = 32'd32,
-    parameter BAUD_RATE              = 32'd115200,
     parameter BRANCH_PREDICTION_SIZE = 512
 ) (
     // Control signal
@@ -67,11 +66,15 @@ logic [31:0] d_cache_memory_write_data, d_cache_memory_read_data,
 
 logic [31:0] i_cache_memory_read_data, i_cache_memory_addr;
 
+logic core_clk;
+
+assign core_clk = clk & ~halt;
+
 Core #(
     .BOOT_ADDRESS           (BOOT_ADDRESS),
     .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
 ) Core(
-    .clk                     (clk),
+    .clk                     (core_clk),
     .rst_n                   (rst_n),
 
     .instr_flush_o           (flush_bus),
@@ -87,7 +90,7 @@ Core #(
     .data_write_o            (data_write_data),
     .data_read_i             (data_read_data),
 
-    .external_interruption_i ()
+    .external_interruption_i (interruption)
 );
 
 ICache #(

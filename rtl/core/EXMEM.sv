@@ -42,8 +42,9 @@ module EXMEM (
 // Importando os opcodes do pacote
 import opcodes_pkg::*;
 
+logic subword_store;
 logic memory_read, memory_write;
-logic [2:0] EXMEMfunc3;
+logic [2:0] EXMEMfunc3, IDEXfunc3;
 logic [4:0] EXMEMfunc5;
 logic [4:0] EXMEMrd;
 logic [6:0] EXMEMop, IDEXop;
@@ -51,7 +52,7 @@ logic [31:0] EXMEM_mem_data_value;
 
 // Unaligned logic
 
-logic unaligned_access_in_progress;
+logic unaligned_access_in_progress, subword;
 assign memory_stall_o = (memory_operation_o & ~data_memory_response) | unaligned_access_in_progress;
 
 
@@ -70,7 +71,12 @@ typedef enum logic [3:0] {
     READ_SECOND_WORD_TO_WRITE = 4'b0111,
     MODIFY_SECOND_WORD        = 4'b1000,
     WRITE_SECOND_WORD         = 4'b1001,
-    CUT_WORDS                 = 4'b1010
+    CUT_WORDS                 = 4'b1010,
+    READ_WORD_TO_SUBSW        = 4'b1011,
+    MODIFY_WORD_TO_SUBSW      = 4'b1100,
+    WRITE_SUBSW               = 4'b1101,
+    MODIFY_FIRST_WORD_SUB     = 4'b1110,
+    MODIFY_SECOND_WORD_SUB    = 4'b1111
 } unaligned_acess_state_t;
 
 unaligned_acess_state_t unaligned_access_state;
@@ -81,15 +87,19 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
     memory_read  <= 1'b0;
 
     if(!rst_n || trap_flush_i) begin
+        subword                      <= 1'b0;
+        subword_store                <= 1'b0;
         unaligned_access_in_progress <= 1'b0;
         unaligned_access_state       <= IDLE;
         EXMEMIR_o                    <= NOP;
         EXMEMPC_o                    <= 'd0;
-    end else if(unaligned_access_in_progress) begin 
+    end else if(unaligned_access_in_progress || subword_store) begin 
         case (unaligned_access_state)
             IDLE: begin
                 memory_operation_o <= 1'b0;
-                if(EXMEMop == LW_OPCODE) begin
+                if(subword_store) begin
+                    unaligned_access_state <= READ_WORD_TO_SUBSW;
+                end else if(EXMEMop == LW_OPCODE) begin
                     unaligned_access_state <= READ_FIRST_WORD;
                 end else if(EXMEMop == SW_OPCODE) begin
                     unaligned_access_state <= READ_FIRST_WORD_TO_WRITE;
@@ -101,16 +111,16 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
                 memory_read <= 1'b1;
                 if(data_memory_response) begin
                     unaligned_access_state <= READ_SECOND_WORD;
-                    First_Word <= read_data;
+                    First_Word             <= read_data;
                     unaligned_access_state <= READ_SECOND_WORD;
-                    Data_Address <= Data_Address + 'd4;
+                    Data_Address           <= Data_Address + 'd4;
                 end
             end
             READ_SECOND_WORD: begin
                 memory_read <= 1'b1;
                 if(data_memory_response) begin
                     unaligned_access_state <= MERGE_WORDS;
-                    Second_Word <= read_data;
+                    Second_Word            <= read_data;
                 end
             end
             MERGE_WORDS: begin
@@ -132,15 +142,15 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
                     default: Merged_Word_o <= Merged_Word_o;
                 endcase
 
-                unaligned_access_state <= IDLE;
+                unaligned_access_state       <= IDLE;
                 unaligned_access_in_progress <= 1'b0;
             end
             READ_FIRST_WORD_TO_WRITE: begin
                 memory_read  <= 1'b1;
                 if(data_memory_response) begin
-                    unaligned_access_state <= MODIFY_FIRST_WORD;
-                    First_Word <= read_data;
-                    memory_read <= 1'b0;
+                    unaligned_access_state <= (subword) ? MODIFY_FIRST_WORD_SUB : MODIFY_FIRST_WORD;
+                    First_Word             <= read_data;
+                    memory_read            <= 1'b0;
                 end
             end
             MODIFY_FIRST_WORD: begin
@@ -158,16 +168,16 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
             WRITE_FIRST_WORD: begin
                 if(data_memory_response) begin
                     unaligned_access_state <= READ_SECOND_WORD_TO_WRITE;
-                    Data_Address <= Data_Address + 'd4;
-                    memory_read  <= 1'b1;
+                    Data_Address           <= Data_Address + 'd4;
+                    memory_read            <= 1'b1;
                 end
             end
             READ_SECOND_WORD_TO_WRITE: begin
                 memory_read <= 1'b1;
                 if(data_memory_response) begin
-                    unaligned_access_state <= MODIFY_SECOND_WORD;
-                    Second_Word <= read_data;
-                    memory_read <= 1'b0;
+                    unaligned_access_state <= (subword) ? MODIFY_SECOND_WORD_SUB : MODIFY_SECOND_WORD;
+                    Second_Word            <= read_data;
+                    memory_read            <= 1'b0;
                 end
             end
             MODIFY_SECOND_WORD: begin
@@ -183,11 +193,59 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
             end
             WRITE_SECOND_WORD: begin
                 if(data_memory_response) begin
-                    unaligned_access_state <= IDLE;
+                    unaligned_access_state       <= IDLE;
                     unaligned_access_in_progress <= 1'b0;
-                    memory_write <= 1'b0;
+                    memory_write                 <= 1'b0;
                 end
             end
+            READ_WORD_TO_SUBSW: begin
+                memory_read <= 1'b1;
+                if(data_memory_response) begin
+                    unaligned_access_state <= MODIFY_WORD_TO_SUBSW;
+                    First_Word             <= read_data;
+                    memory_read            <= 1'b0;
+                end
+            end
+
+            MODIFY_WORD_TO_SUBSW: begin
+                memory_write <= 1'b1;
+                if(EXMEMfunc3[0]) begin
+                    EXMEM_mem_data_value <= {First_Word[31:16], EXMEM_mem_data_value[15:0]};
+                end else begin
+                    EXMEM_mem_data_value <= {First_Word[31:8], EXMEM_mem_data_value[7:0]};
+                end
+            end
+
+            WRITE_SUBSW: begin
+                if(data_memory_response) begin
+                    unaligned_access_state       <= IDLE;
+                    unaligned_access_in_progress <= 1'b0;
+                    subword_store                <= 1'b0;
+                    memory_write                 <= 1'b0;
+                end
+            end
+
+            MODIFY_FIRST_WORD_SUB: begin
+                memory_write <= 1'b1;
+                First_Word   <= EXMEM_mem_data_value;
+                case ({Data_Address[1:0], EXMEMfunc3[0]})
+                    3'b01_0: EXMEM_mem_data_value <= {First_Word[31:16], EXMEM_mem_data_value[7:0], First_Word[7:0]};
+                    3'b01_1: EXMEM_mem_data_value <= {First_Word[31:24], EXMEM_mem_data_value[15:0], First_Word[7:0]};
+                    3'b10_0: EXMEM_mem_data_value <= {First_Word[31:24], EXMEM_mem_data_value[7:0], First_Word[15:0]};
+                    3'b10_1: EXMEM_mem_data_value <= {EXMEM_mem_data_value[15:0], First_Word[15:0]};
+                    3'b11_0: EXMEM_mem_data_value <= {EXMEM_mem_data_value[7:0], First_Word[23:0]};
+                    3'b11_1: EXMEM_mem_data_value <= {EXMEM_mem_data_value[7:0], First_Word[23:0]};
+                    default: EXMEM_mem_data_value <= EXMEM_mem_data_value;
+                endcase
+                unaligned_access_state <= (&{Data_Address[1:0], EXMEMfunc3[0]}) ? WRITE_FIRST_WORD : WRITE_SUBSW;
+            end
+
+            MODIFY_SECOND_WORD_SUB: begin
+                EXMEM_mem_data_value   <= {EXMEM_mem_data_value[31:8], First_Word[15:8]};
+                unaligned_access_state <= WRITE_SECOND_WORD;
+                memory_write           <= 1'b1;
+            end
+
             default: unaligned_access_state <= IDLE;
         endcase
     end else if((execute_stall_i & ~memory_stall_o)) begin
@@ -198,8 +256,10 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
             IMMEDIATE_REG_o <= immediate_i;
         
         if(!memory_stall_o) begin
-            memory_operation_o <= (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
+            memory_operation_o           <= (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
             unaligned_access_in_progress <= |ALU_data_i[1:0] && (IDEXop == LW_OPCODE || IDEXop == SW_OPCODE);
+            subword_store                <= (IDEXop == SW_OPCODE && !IDEXfunc3[1] && ~|ALU_data_i[1:0]);
+            subword                      <= !IDEXfunc3[1];
 
             EXMEMIR_o <= IDEXIR_i;
             EXMEMPC_o <= IDEXPC_i;
@@ -231,6 +291,7 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
     end   
 end
 
+assign IDEXfunc3  = IDEXIR_i[14:12];
 assign IDEXop     = IDEXIR_i[6:0];
 assign EXMEMop    = EXMEMIR_o[6:0];
 assign EXMEMrd    = EXMEMIR_o[11:7];

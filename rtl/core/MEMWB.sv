@@ -30,6 +30,9 @@ logic [6:0] MEMWBop, EXMEMop;
 logic [31:0] MEMWB_mem_read_data, MEMWBALUOut, MEMWB_IR;
 logic is_unaligned_address;
 
+logic [2:0] MEMWB_func3, EXMEM_func3;
+logic [31:0] read_data_normalized;
+
 always_ff @(posedge clk ) begin : MEMWB_STAGE
     reg_wr_en_o            <= 1'b0;
     mem_to_reg             <= 1'b0;
@@ -41,7 +44,7 @@ always_ff @(posedge clk ) begin : MEMWB_STAGE
         instruction_finished_o <= 1'b1;
         MEMWB_IR               <= EXMEM_IR_i;
         MEMWB_PC_o             <= EXMEM_PC_i;
-        MEMWB_mem_read_data    <= (is_unaligned_address) ? Merged_word_i : read_data_i;
+        MEMWB_mem_read_data    <= (is_unaligned_address) ? Merged_word_i : read_data_normalized;
         
         MEMWBALUOut <= EXMEMALUOut_i;
 
@@ -66,6 +69,19 @@ always_ff @(posedge clk ) begin : MEMWB_STAGE
     end 
 end
 
+always_comb begin : NORMALIZE_WORLD
+    unique case (EXMEM_func3)
+        3'b000: read_data_normalized = {{24{read_data_i[7]}}, read_data_i[7:0]};
+        3'b001: read_data_normalized = {{16{read_data_i[15]}}, read_data_i[15:0]};
+        3'b010: read_data_normalized = read_data_i;
+        3'b100: read_data_normalized = {24'h0, read_data_i[7:0]};
+        3'b101: read_data_normalized = {16'h0, read_data_i[15:0]};
+        default: read_data_normalized = read_data_i; 
+    endcase
+end
+
+assign MEMWB_func3          = MEMWB_IR[14:12];
+assign EXMEM_func3          = EXMEM_IR_i[14:12];
 assign EXMEMop              = EXMEM_IR_i[6:0];
 assign EXMEMrd              = EXMEM_IR_i[11:7];
 assign MEMWBop              = MEMWB_IR[6:0];

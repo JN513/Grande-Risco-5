@@ -4,11 +4,14 @@ module top(
     input  logic clk_ref_p,
     input  logic clk_ref_n,
     input  logic sys_rst_i,
+
     input  logic button_center,
+
     input  logic RxD,
     output logic TxD,
-    input  logic [7:0] gpio_switch,
-    output logic [7:0] led
+    
+    output logic [7:0] led,
+    inout  logic [7:0] gpio_switch
 );
     
 logic clk_o;
@@ -26,21 +29,31 @@ IBUFDS #(
 );
 
 Grande_Risco_5_SOC #(
-    .CLOCK_FREQ       (100000000),
-    .BAUD_RATE        (115200),
-    .MEMORY_SIZE      (8192),
-    .MEMORY_FILE      ("../../verification_tests/memory/led_test2.hex"),
-    .GPIO_WIDHT       (6),
-    .UART_BUFFER_SIZE (16),
-    .I_CACHE_SIZE     (256),
-    .D_CACHE_SIZE     (256)
+    .CLOCK_FREQ             (100000000),
+    .BAUD_RATE              (115200),
+    .MEMORY_SIZE            (16384),
+    .MEMORY_FILE            ("../../verification_tests/memory/led_test2.hex"),
+    .GPIO_WIDTH             (8),
+    .UART_BUFFER_SIZE       (16),
+    .I_CACHE_SIZE           (2048),
+    .D_CACHE_SIZE           (2048),
+    .BRANCH_PREDICTION_SIZE (512),
+    .VGA_WIDTH              (640),
+    .VGA_HEIGHT             (480),
+    .VGA_COLOR_DEPTH        (4),
+    .LEDS_WIDTH             (8)
 ) SOC (
-    .clk   (clk_o),
-    .rst_n (!sys_rst_i),
-    .leds  (led),
-    .rx    (),
-    .tx    (),
-    .gpios ()
+    .clk    (clk_o),
+    .rst_n  (!sys_rst_i),
+    .leds   (led),
+    .rx     (RxD),
+    .tx     (TxD),
+    .gpios  (gpio_switch),
+    .VGA_R  (),
+    .VGA_G  (),
+    .VGA_B  (),
+    .VGA_HS (),
+    .VGA_VS ()
 );
 
 always_ff @(posedge clk_ref) begin : CLOCK_DIVIDER

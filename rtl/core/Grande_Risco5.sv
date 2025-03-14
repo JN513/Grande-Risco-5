@@ -12,22 +12,15 @@ module Grande_Risco5 #(
     input logic halt,
 
     // Memory BUS
-    input  logic memory_response,
-    output logic memory_read_request,
-    output logic memory_write_request,
+    output logic cyc_o,
+    output logic stb_o,
+    output logic we_o,
 
-    input  logic [31:0] memory_read_data,
-    output logic [31:0] memory_write_data,
-    output logic [31:0] memory_addr,
+    output logic [31:0] addr_o,
+    output logic [31:0] data_o,
 
-    // Peripheral Bus
-    input  logic peripheral_response,
-    output logic peripheral_read_request,
-    output logic peripheral_write_request,
-
-    input  logic [31:0] peripheral_read_data,
-    output logic [31:0] peripheral_write_data,
-    output logic [31:0] peripheral_addr,
+    input  logic ack_i,
+    input  logic [31:0] data_i,
 
     input logic interruption
 );
@@ -42,18 +35,6 @@ logic [31:0] data_read_data, data_write_data, data_address;
 logic d_cache_read_request, d_cache_write_request, d_cache_response;
 logic [31:0] d_cache_read_data;
 
-assign d_cache_read_request  = (!data_address[31]) ? data_read_request  : 1'b0;
-assign d_cache_write_request = (!data_address[31])  ? data_write_request : 1'b0;
-
-assign peripheral_read_request  = (data_address[31]) ? data_read_request  : 1'b0;
-assign peripheral_write_request = (data_address[31]) ? data_write_request : 1'b0;
-
-assign data_memory_response = (data_address[31]) ? peripheral_response : d_cache_response;
-
-assign peripheral_addr       = data_address;
-assign peripheral_write_data = data_write_data;
-
-assign data_read_data = (data_address[31]) ? peripheral_read_data : d_cache_read_data;
 
 // Bus logic for memory
 logic d_cache_memory_write_request, d_cache_memory_read_request, 
@@ -68,12 +49,23 @@ logic [31:0] i_cache_memory_read_data, i_cache_memory_addr;
 
 logic core_clk;
 
+logic processor_data_we, cache_data_we;
+logic processor_cyc, cache_cyc;
+
+logic memory_response;
+logic memory_read_request;
+logic memory_write_request;
+
+logic [31:0] memory_read_data;
+logic [31:0] memory_write_data;
+logic [31:0] memory_addr;
+
 assign core_clk = clk & ~halt;
 
 Core #(
     .BOOT_ADDRESS           (BOOT_ADDRESS),
     .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
-) Core(
+) N1 (
     .clk                     (core_clk),
     .rst_n                   (rst_n),
 
@@ -158,5 +150,25 @@ Cache_request_Multiplexer #(
     .memory_response       (memory_response),
     .memory_read_data      (memory_read_data)
 );
+
+
+assign processor_cyc     = (data_read_request | data_write_request) & data_address[31];
+assign cache_cyc         = memory_read_request | memory_write_request;
+assign processor_data_we = data_write_request;
+assign cache_data_we     = memory_write_request;
+
+assign stb_o                 = cyc_o;
+assign cyc_o                 = processor_cyc     | cache_cyc;
+assign we_o                  = processor_data_we | cache_data_we;
+assign addr_o                = (processor_cyc) ? data_address      : memory_addr;
+assign data_o                = (processor_cyc) ? data_write_data   : memory_write_data;
+assign memory_response       = ack_i;
+assign memory_read_data      = data_i;
+assign d_cache_read_request  = (!data_address[31]) ? data_read_request  : 1'b0;
+assign d_cache_write_request = (!data_address[31]) ? data_write_request : 1'b0;
+assign data_memory_response  = (data_address[31])  ? ack_i  : d_cache_response;
+assign data_read_data        = (data_address[31])  ? data_i : d_cache_read_data;
+
+
 
 endmodule

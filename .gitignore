@@ -24,3 +24,4 @@ fpga/nexys4_ddr/digilent_nexys4ddr_power.rpt
 fpga/nexys4_ddr/digilent_nexys4ddr_route_status.rpt
 fpga/nexys4_ddr/digilent_nexys4ddr_timing.rpt
 obj_dir
+slpp_all

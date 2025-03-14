@@ -3,24 +3,26 @@
 `ifdef GPIO_ENABLE
 
 module GPIOS #(
-    parameter WIDHT = 20
+    parameter WIDTH = 20
 ) (
     input  logic clk,
     input  logic rst_n,
     
-    output logic response_o,
-    input  logic read_request_i,
-    input  logic write_request_i,
-
-    input  logic [31:0] address_i,
-    input  logic [31:0] write_data_i,
-    output logic [31:0] read_data_o,
-
-    inout [WIDHT - 1:0] gpios
+    // Wishbone Interface
+    input  logic        cyc_i,          // Wishbone cycle indicator
+    input  logic        stb_i,          // Wishbone strobe (request)
+    input  logic        we_i,           // Write enable
+    input  logic [31:0] addr_i,         // Address input
+    input  logic [31:0] data_i,         // Data input (for write)
+    output logic [31:0] data_o,         // Data output (for read)
+    output logic        ack_o,          // Acknowledge output
+    
+    // GPIO Interface
+    inout [WIDTH - 1:0] gpios
 );
 
-logic [WIDHT - 1:0] gpio_direction, gpio_value;
-logic [WIDHT - 1:0] gpio_out;
+logic [WIDTH - 1:0] gpio_direction, gpio_value;
+logic [WIDTH - 1:0] gpio_out;
 logic [1:0] pwm_out;
 logic [1:0] is_pwm;
 
@@ -33,17 +35,19 @@ localparam CONFIG_PWM        = 8'h08;
 localparam CONFIG_PERIOD     = 8'h0C;
 localparam CONFIG_DUTY_CYCLE = 8'h10;
 
-assign read_data_o = (read_request_i) ? gpio_out : 32'h00000000;
-assign response_o  = read_request_i | write_request_i;
+assign data_o = (cyc_i && stb_i && !we_i) ? { {32-WIDTH{1'b0}}, gpio_out } : 32'h00000000;  // Read operation
+assign ack_o  = cyc_i && stb_i;  // Acknowledge if the transaction is active
 
-GPIO Gpios[WIDHT - 1:0](
+// GPIO Instance
+GPIO Gpios[WIDTH - 1:0](
     .gpio       (gpios),
-    .direction  ({gpio_direction[WIDHT - 1: 2], gpio_direction[1:0] & ~is_pwm}),
-    .data_in    ({gpio_value[WIDHT - 1: 2], 
+    .direction  ({gpio_direction[WIDTH - 1: 2], gpio_direction[1:0] & ~is_pwm}),
+    .data_in    ({gpio_value[WIDTH - 1: 2], 
                     (gpio_value[1:0] & ~is_pwm) | (pwm_out[1:0] & is_pwm)}),
     .data_out   (gpio_out)
 );
 
+// PWM Instances
 PWM Pwm0(
     .clk        (clk),
     .rst_n      (rst_n),
@@ -60,22 +64,26 @@ PWM Pwm1(
     .pwm_out    (pwm_out[1])
 );
 
+// Handle Wishbone Write Requests
 always_ff @(posedge clk) begin
-    if(!rst_n) begin
+    if (!rst_n) begin
         is_pwm         <= 2'b00;
-        gpio_direction <= 32'h00000000;
-        gpio_value     <= 32'h00000000;
-    end else if(write_request_i) begin
-        case (address_i[7:0])
-            SET_DIRECTION:     gpio_direction               <= write_data_i[WIDHT - 1: 0];
-            WRITE_DATA:        gpio_value                   <= write_data_i[WIDHT - 1: 0];
-            CONFIG_PWM:        is_pwm                       <= write_data_i[1:0];
-            CONFIG_PERIOD:     period[write_data_i[16]]     <= write_data_i[15:0];
-            CONFIG_DUTY_CYCLE: duty_cycle[write_data_i[16]] <= write_data_i[15:0];
+        gpio_direction <= 'h0;
+        gpio_value     <= 'h0;
+    end else if (cyc_i && stb_i && we_i) begin  // Write operation
+        case (addr_i[7:0])
+            SET_DIRECTION:     gpio_direction               <= data_i[WIDTH - 1:0];
+            WRITE_DATA:        gpio_value                   <= data_i[WIDTH - 1:0];
+            CONFIG_PWM:        is_pwm                       <= data_i[1:0];
+            CONFIG_PERIOD:     period[data_i[16]]           <= data_i[15:0];
+            CONFIG_DUTY_CYCLE: duty_cycle[data_i[16]]       <= data_i[15:0];
+            default: begin
+                // Do nothing
+            end
         endcase
     end
 end
-    
+
 endmodule
 
 `endif

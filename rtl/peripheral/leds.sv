@@ -1,34 +1,44 @@
+`include "config.vh"
+
+`ifdef LED_ENABLE
+
 module LEDs #(
     parameter LEDS_WIDTH = 8
 ) (
     input  logic clk,
     input  logic rst_n,
-
-    output logic response_o,
-    input  logic read_request_i,
-    input  logic write_request_i,
-
-    input  logic [31:0] address_i,
-    input  logic [31:0] write_data_i,
-    output logic [31:0] read_data_o,
-
+    
+    // Wishbone Interface
+    input  logic        cyc_i,          // Wishbone cycle indicator
+    input  logic        stb_i,          // Wishbone strobe (request)
+    input  logic        we_i,           // Write enable
+    input  logic [31:0] addr_i,          // Address input
+    input  logic [31:0] data_i,          // Data input (for write)
+    output logic [31:0] data_o,          // Data output (for read)
+    output logic        ack_o,          // Acknowledge output
+    
+    // LEDs Interface
     output logic [LEDS_WIDTH - 1:0] leds
 );
 
 logic [31:0] data;
 
-assign response_o = read_request_i | write_request_i;
+// Handle Read and Write for Wishbone Interface
+assign data_o = (cyc_i && stb_i && !we_i) ? data : 32'h00000000;  // Read operation
+assign ack_o  = cyc_i && stb_i;  // Acknowledge if the transaction is active
 
-assign read_data_o = (read_request_i == 1'b1) ? data : 32'h00000000;
-
-always_ff @(posedge clk ) begin : LEDS_LOGIC
-    if(!rst_n) begin
+// Handle Write operation
+always_ff @(posedge clk) begin
+    if (!rst_n) begin
         data <= 32'h0;
-    end else if(write_request_i) begin
-        data <= write_data_i;
+    end else if (cyc_i && stb_i && we_i) begin  // Write operation
+        data <= data_i;
     end
 end
 
-assign leds = data[LEDS_WIDTH - 1 :0];
-    
+// LED Output assignment
+assign leds = data[LEDS_WIDTH - 1:0];
+
 endmodule
+
+`endif

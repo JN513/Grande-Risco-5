@@ -24,6 +24,19 @@ read_verilog -sv ../../rtl/core/MEMWB.sv
 read_verilog -sv ../../rtl/core/invalid_ir_check.sv
 read_verilog -sv ../../rtl/peripheral/leds.sv
 read_verilog -sv ../../rtl/peripheral/memory.sv
+read_verilog -sv ../../rtl/peripheral/dram_controller.sv
+read_verilog -sv ../../rtl/peripheral/fifo.sv
+read_verilog -sv ../../rtl/peripheral/gpio.sv
+read_verilog -sv ../../rtl/peripheral/gpios.sv
+read_verilog -sv ../../rtl/peripheral/i2c_master.sv
+read_verilog -sv ../../rtl/peripheral/peripheral_bus.sv
+read_verilog -sv ../../rtl/peripheral/pwm.sv
+read_verilog -sv ../../rtl/peripheral/spi_master.sv
+read_verilog -sv ../../rtl/peripheral/timer.sv
+read_verilog -sv ../../rtl/peripheral/uart_rx.sv
+read_verilog -sv ../../rtl/peripheral/uart_tx.sv
+read_verilog -sv ../../rtl/peripheral/uart.sv
+read_verilog -sv ../../rtl/peripheral/vga.sv
 read_verilog -sv ../../rtl/peripheral/soc.sv
 
 read_xdc "pinout.xdc"

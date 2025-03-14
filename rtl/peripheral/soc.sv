@@ -6,7 +6,7 @@ module Grande_Risco_5_SOC #(
     parameter BOOT_ADDRESS           = 32'h00000000,
     parameter MEMORY_SIZE            = 4096,
     parameter MEMORY_FILE            = "verification_tests/memory/generic.hex",
-    parameter GPIO_WIDHT             = 5,
+    parameter GPIO_WIDTH             = 5,
     parameter I_CACHE_SIZE           = 256,
     parameter D_CACHE_SIZE           = 256,
     parameter DATA_WIDTH             = 32,
@@ -26,7 +26,7 @@ module Grande_Risco_5_SOC #(
     output logic tx,
 
     output logic [LEDS_WIDTH - 1:0] leds,
-    inout [GPIO_WIDHT-1:0] gpios,
+    inout        [GPIO_WIDTH-1:0]   gpios,
 
     output logic [VGA_COLOR_DEPTH - 1:0] VGA_R,
     output logic [VGA_COLOR_DEPTH - 1:0] VGA_G,
@@ -35,33 +35,22 @@ module Grande_Risco_5_SOC #(
     output logic VGA_VS
 );
 
-logic memory_response, memory_read_request,
-    memory_write_request;
+logic [31:0] master_addr_o, master_data_o;
 
-logic [DATA_WIDTH-1:0] memory_read_data,
-    memory_write_data, memory_addr;
+logic master_cyc, master_stb, master_we, master_ack;
 
-logic peripheral_read_request, peripheral_write_request,
-    peripheral_response;
-logic [31:0] peripheral_addr, peripheral_read_data,
-    peripheral_write_data;
+logic peripheral_cyc, peripheral_stb, peripheral_ack;
+logic memory_cyc, memory_stb, memory_ack;
+logic [31:0] peripheral_data, memory_data, master_data;
 
-logic peripheral_1_response, peripheral_2_response, peripheral_3_response, 
-      peripheral_4_response, peripheral_5_response, peripheral_6_response, 
-      peripheral_7_response, peripheral_8_response;
+assign master_data    = (master_addr_o[31]) ? peripheral_data : memory_data;
+assign master_ack     = (master_addr_o[31]) ? peripheral_ack : memory_ack;
+assign peripheral_cyc = (master_addr_o[31]) ? master_cyc : 1'b0;
+assign peripheral_stb = (master_addr_o[31]) ? master_stb : 1'b0;
+assign memory_cyc     = (master_addr_o[31]) ? 1'b0 : master_cyc;
+assign memory_stb     = (master_addr_o[31]) ? 1'b0 : master_stb;
 
-logic [31:0] peripheral_1_read_data, peripheral_2_read_data, peripheral_3_read_data,
-             peripheral_4_read_data, peripheral_5_read_data, peripheral_6_read_data,
-             peripheral_7_read_data, peripheral_8_read_data;
 
-logic peripheral_1_write_request, peripheral_1_read_request;
-logic peripheral_2_write_request, peripheral_2_read_request;
-logic peripheral_3_write_request, peripheral_3_read_request;
-logic peripheral_4_write_request, peripheral_4_read_request;
-logic peripheral_5_write_request, peripheral_5_read_request;
-logic peripheral_6_write_request, peripheral_6_read_request;
-logic peripheral_7_write_request, peripheral_7_read_request;
-logic peripheral_8_write_request, peripheral_8_read_request;
 
 Grande_Risco5 #(
     .BOOT_ADDRESS           (BOOT_ADDRESS),
@@ -75,19 +64,15 @@ Grande_Risco5 #(
     .rst_n (rst_n),
     .halt  (halt),
 
-    .memory_response      (memory_response),
-    .memory_read_request  (memory_read_request),
-    .memory_write_request (memory_write_request),
-    .memory_read_data     (memory_read_data),
-    .memory_write_data    (memory_write_data),
-    .memory_addr          (memory_addr),
+    .cyc_o  (master_cyc),
+    .stb_o  (master_stb),
+    .we_o   (master_we),
 
-    .peripheral_response      (peripheral_response),
-    .peripheral_read_request  (peripheral_read_request),
-    .peripheral_write_request (peripheral_write_request),
-    .peripheral_read_data     (peripheral_read_data),
-    .peripheral_write_data    (peripheral_write_data),
-    .peripheral_addr          (peripheral_addr),
+    .addr_o (master_addr_o),
+    .data_o (master_data_o),
+
+    .ack_i  (master_ack),
+    .data_i (master_data),
 
     .interruption (1'b0)
 );
@@ -95,80 +80,115 @@ Grande_Risco5 #(
 Memory #(
     .MEMORY_FILE (MEMORY_FILE),
     .MEMORY_SIZE (MEMORY_SIZE)
-) Memory(
-    .clk          (clk),
-    .address      (memory_addr),
-    .read_data    (memory_read_data),
-    .memory_read  (memory_read_request),
-    .memory_write (memory_write_request),
-    .write_data   (memory_write_data),
-    .response     (memory_response)
+) Memory (
+    .clk    (clk),
+    
+    .cyc_i  (memory_cyc),
+    .stb_i  (memory_stb),
+    .we_i   (master_we),
+
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (memory_data),
+
+    .ack_o  (memory_ack)
 );
 
-Peripheral_BUS u_peripheral_bus (
-    .addr_i                       (peripheral_addr),
-    .write_request_i              (peripheral_write_request),
-    .read_request_i               (peripheral_read_request),
-    .response_o                   (peripheral_response),
-    .read_data_o                  (peripheral_read_data),
+logic peripheral_1_cyc_o, peripheral_1_stb_o, peripheral_1_we_o, peripheral_1_ack_i;
+logic peripheral_2_cyc_o, peripheral_2_stb_o, peripheral_2_we_o, peripheral_2_ack_i;
+logic peripheral_3_cyc_o, peripheral_3_stb_o, peripheral_3_we_o, peripheral_3_ack_i;
+logic peripheral_4_cyc_o, peripheral_4_stb_o, peripheral_4_we_o, peripheral_4_ack_i;
+logic peripheral_5_cyc_o, peripheral_5_stb_o, peripheral_5_we_o, peripheral_5_ack_i;
+logic peripheral_6_cyc_o, peripheral_6_stb_o, peripheral_6_we_o, peripheral_6_ack_i;
+logic peripheral_7_cyc_o, peripheral_7_stb_o, peripheral_7_we_o, peripheral_7_ack_i;
+logic peripheral_8_cyc_o, peripheral_8_stb_o, peripheral_8_we_o, peripheral_8_ack_i;
 
-    .peripheral_1_write_request_o (peripheral_1_write_request),
-    .peripheral_1_read_request_o  (peripheral_1_read_request),
-    .peripheral_1_response_i      (peripheral_1_response),
-    .peripheral_1_read_data_i     (peripheral_1_read_data),
+logic [31:0] peripheral_1_data_i, peripheral_2_data_i, peripheral_3_data_i, peripheral_4_data_i;
+logic [31:0] peripheral_5_data_i, peripheral_6_data_i, peripheral_7_data_i, peripheral_8_data_i;
 
-    .peripheral_2_write_request_o (peripheral_2_write_request),
-    .peripheral_2_read_request_o  (peripheral_2_read_request),
-    .peripheral_2_response_i      (peripheral_2_response),
-    .peripheral_2_read_data_i     (peripheral_2_read_data),
+Peripheral_BUS peripheral_bus (
+    // Wishbone Master Interface
+    .clk    (clk),
+    .rst_n  (rst_n),
+    
+    .cyc_i  (peripheral_cyc),
+    .stb_i  (peripheral_stb),
+    .we_i   (master_we),
 
-    .peripheral_3_write_request_o (peripheral_3_write_request),
-    .peripheral_3_read_request_o  (peripheral_3_read_request),
-    .peripheral_3_response_i      (peripheral_3_response),
-    .peripheral_3_read_data_i     (peripheral_3_read_data),
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_data),
 
-    .peripheral_4_write_request_o (peripheral_4_write_request),
-    .peripheral_4_read_request_o  (peripheral_4_read_request),
-    .peripheral_4_response_i      (peripheral_4_response),
-    .peripheral_4_read_data_i     (peripheral_4_read_data),
+    .ack_o  (peripheral_ack),
 
-    .peripheral_5_write_request_o (peripheral_5_write_request),
-    .peripheral_5_read_request_o  (peripheral_5_read_request),
-    .peripheral_5_response_i      (peripheral_5_response),
-    .peripheral_5_read_data_i     (peripheral_5_read_data),
+    // Wishbone Peripheral Interface
+    .peripheral_1_cyc_o  (peripheral_1_cyc_o),
+    .peripheral_1_stb_o  (peripheral_1_stb_o),
+    .peripheral_1_we_o   (peripheral_1_we_o),
+    .peripheral_1_ack_i  (peripheral_1_ack_i),
+    .peripheral_1_data_i (peripheral_1_data_i),
 
-    .peripheral_6_write_request_o (peripheral_6_write_request),
-    .peripheral_6_read_request_o  (peripheral_6_read_request),
-    .peripheral_6_response_i      (peripheral_6_response),
-    .peripheral_6_read_data_i     (peripheral_6_read_data),
+    .peripheral_2_cyc_o  (peripheral_2_cyc_o),
+    .peripheral_2_stb_o  (peripheral_2_stb_o),
+    .peripheral_2_we_o   (peripheral_2_we_o),
+    .peripheral_2_ack_i  (peripheral_2_ack_i),
+    .peripheral_2_data_i (peripheral_2_data_i),
 
-    .peripheral_7_write_request_o (peripheral_7_write_request),
-    .peripheral_7_read_request_o  (peripheral_7_read_request),
-    .peripheral_7_response_i      (peripheral_7_response),
-    .peripheral_7_read_data_i     (peripheral_7_read_data),
+    .peripheral_3_cyc_o  (peripheral_3_cyc_o),
+    .peripheral_3_stb_o  (peripheral_3_stb_o),
+    .peripheral_3_we_o   (peripheral_3_we_o),
+    .peripheral_3_ack_i  (peripheral_3_ack_i),
+    .peripheral_3_data_i (peripheral_3_data_i),
 
-    .peripheral_8_write_request_o (peripheral_8_write_request),
-    .peripheral_8_read_request_o  (peripheral_8_read_request),
-    .peripheral_8_response_i      (peripheral_8_response),
-    .peripheral_8_read_data_i     (peripheral_8_read_data)
+    .peripheral_4_cyc_o  (peripheral_4_cyc_o),
+    .peripheral_4_stb_o  (peripheral_4_stb_o),
+    .peripheral_4_we_o   (peripheral_4_we_o),
+    .peripheral_4_ack_i  (peripheral_4_ack_i),
+    .peripheral_4_data_i (peripheral_4_data_i),
+
+    .peripheral_5_cyc_o  (peripheral_5_cyc_o),
+    .peripheral_5_stb_o  (peripheral_5_stb_o),
+    .peripheral_5_we_o   (peripheral_5_we_o),
+    .peripheral_5_ack_i  (peripheral_5_ack_i),
+    .peripheral_5_data_i (peripheral_5_data_i),
+
+    .peripheral_6_cyc_o  (peripheral_6_cyc_o),
+    .peripheral_6_stb_o  (peripheral_6_stb_o),
+    .peripheral_6_we_o   (peripheral_6_we_o),
+    .peripheral_6_ack_i  (peripheral_6_ack_i),
+    .peripheral_6_data_i (peripheral_6_data_i),
+
+    .peripheral_7_cyc_o  (peripheral_7_cyc_o),
+    .peripheral_7_stb_o  (peripheral_7_stb_o),
+    .peripheral_7_we_o   (peripheral_7_we_o),
+    .peripheral_7_ack_i  (peripheral_7_ack_i),
+    .peripheral_7_data_i (peripheral_7_data_i),
+
+    .peripheral_8_cyc_o  (peripheral_8_cyc_o),
+    .peripheral_8_stb_o  (peripheral_8_stb_o),
+    .peripheral_8_we_o   (peripheral_8_we_o),
+    .peripheral_8_ack_i  (peripheral_8_ack_i),
+    .peripheral_8_data_i (peripheral_8_data_i)
 );
 
 `ifdef LED_ENABLE
 LEDs #(
     .LEDS_WIDTH (LEDS_WIDTH)
 ) Leds (
-    .clk             (clk),
-    .rst_n           (rst_n),
+    .clk    (clk),
+    .rst_n  (rst_n),
 
-    .read_request_i  (peripheral_1_read_request),
-    .write_request_i (peripheral_1_write_request),
-    .response_o      (peripheral_1_response),
+    .cyc_i  (peripheral_1_cyc_o),
+    .stb_i  (peripheral_1_stb_o),
+    .we_i   (peripheral_1_we_o),
 
-    .address_i       (peripheral_addr),
-    .write_data_i    (peripheral_write_data),
-    .read_data_o     (peripheral_1_read_data),
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_1_data_i),
 
-    .leds            (leds)
+    .ack_o  (peripheral_1_ack_i),
+
+    .leds   (leds)
 );
 `endif
 
@@ -178,38 +198,42 @@ UART #(
     .BIT_RATE     (BAUD_RATE),
     .BUFFER_SIZE  (UART_BUFFER_SIZE)
 ) UART (
-    .clk          (clk),
-    .rst_n        (rst_n),
+    .clk    (clk),
+    .rst_n  (rst_n),
 
-    .rxd          (rx),
-    .txd          (tx),
+    .rxd    (rx),
+    .txd    (tx),
 
-    .response_o   (peripheral_2_response),
-    .rd_en_i      (peripheral_2_read_request),
-    .wr_en_i      (peripheral_2_write_request),
+    .cyc_i  (peripheral_2_cyc_o),
+    .stb_i  (peripheral_2_stb_o),
+    .we_i   (peripheral_2_we_o),
 
-    .address_i    (peripheral_addr),
-    .write_data_i (peripheral_write_data),
-    .read_data_o  (peripheral_2_read_data)
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_2_data_i),
+
+    .ack_o  (peripheral_2_ack_i)
 );
 `endif
 
 `ifdef GPIO_ENABLE
 GPIOS #(
-    .WIDHT (GPIO_WIDHT)
+    .WIDTH (GPIO_WIDTH)
 ) Gpios (
-    .clk             (clk),
-    .rst_n           (rst_n),
+    .clk    (clk),
+    .rst_n  (rst_n),
 
-    .response_o      (peripheral_3_response),
-    .read_request_i  (peripheral_3_read_request),
-    .write_request_i (peripheral_3_write_request),
+    .cyc_i  (peripheral_3_cyc_o),
+    .stb_i  (peripheral_3_stb_o),
+    .we_i   (peripheral_3_we_o),
 
-    .address_i       (peripheral_addr),
-    .write_data_i    (peripheral_write_data),
-    .read_data_o     (peripheral_3_read_data),
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_3_data_i),
 
-    .gpios           (gpios)
+    .ack_o  (peripheral_3_ack_i),
+
+    .gpios  (gpios)
 );
 `endif
 
@@ -220,22 +244,24 @@ VGA #(
     .VGA_HEIGHT      (VGA_HEIGHT),
     .VGA_COLOR_DEPTH (VGA_COLOR_DEPTH)
 ) VGA (
-    .clk             (clk),
-    .rst_n           (rst_n),
+    .clk    (clk),
+    .rst_n  (rst_n),
 
-    .response_o      (peripheral_4_response),
-    .read_request_i  (peripheral_4_read_request),
-    .write_request_i (peripheral_4_write_request),
+    .cyc_i  (peripheral_4_cyc_o),
+    .stb_i  (peripheral_4_stb_o),
+    .we_i   (peripheral_4_we_o),
 
-    .address_i       (peripheral_addr),
-    .write_data_i    (peripheral_write_data),
-    .read_data_o     (peripheral_4_read_data),
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_4_data_i),
 
-    .vga_r           (VGA_R),
-    .vga_g           (VGA_G),
-    .vga_b           (VGA_B),
-    .hsync           (VGA_HS),
-    .vsync           (VGA_VS)
+    .ack_o  (peripheral_4_ack_i),
+
+    .vga_r  (VGA_R),
+    .vga_g  (VGA_G),
+    .vga_b  (VGA_B),
+    .hsync  (VGA_HS),
+    .vsync  (VGA_VS)
 );
 `else
 
@@ -251,16 +277,18 @@ assign VGA_VS = 1'b0;
 SPI_Master #(
     .CLK_FREQ        (CLOCK_FREQ)
 ) SPI (
-    .clk             (clk),
-    .rst_n           (rst_n),
+    .clk    (clk),
+    .rst_n  (rst_n),
 
-    .response_o      (peripheral_5_response),
-    .read_request_i  (peripheral_5_read_request),
-    .write_request_i (peripheral_5_write_request),
+    .cyc_i  (peripheral_5_cyc_o),
+    .stb_i  (peripheral_5_stb_o),
+    .we_i   (peripheral_5_we_o),
 
-    .address_i       (peripheral_addr),
-    .write_data_i    (peripheral_write_data),
-    .read_data_o     (peripheral_5_read_data)
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_5_data_i),
+
+    .ack_o  (peripheral_5_ack_i)
 );
 `endif
 
@@ -268,33 +296,37 @@ SPI_Master #(
 I2C_Master #(
     .CLK_FREQ        (CLOCK_FREQ)
 ) I2C (
-    .clk             (clk),
-    .rst_n           (rst_n),
+    .clk    (clk),
+    .rst_n  (rst_n),
 
-    .response_o      (peripheral_6_response),
-    .read_request_i  (peripheral_6_read_request),
-    .write_request_i (peripheral_6_write_request),
+    .cyc_i  (peripheral_6_cyc_o),
+    .stb_i  (peripheral_6_stb_o),
+    .we_i   (peripheral_6_we_o),
 
-    .address_i       (peripheral_addr),
-    .write_data_i    (peripheral_write_data),
-    .read_data_o     (peripheral_6_read_data)
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_6_data_i),
+
+    .ack_o  (peripheral_6_ack_i)
 );
 `endif
 
 `ifdef TIMER_ENABLE
 Timer #(
-    .CLK_FREQ        (CLOCK_FREQ)
+    .CLK_FREQ (CLOCK_FREQ)
 ) Timer (
-    .clk             (clk),
-    .rst_n           (rst_n),
+    .clk    (clk),
+    .rst_n  (rst_n),
 
-    .response_o      (peripheral_7_response),
-    .read_request_i  (peripheral_7_read_request),
-    .write_request_i (peripheral_7_write_request),
+    .cyc_i  (peripheral_7_cyc_o),
+    .stb_i  (peripheral_7_stb_o),
+    .we_i   (peripheral_7_we_o),
 
-    .address_i       (peripheral_addr),
-    .write_data_i    (peripheral_write_data),
-    .read_data_o     (peripheral_7_read_data)
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_7_data_i),
+
+    .ack_o  (peripheral_7_ack_i)
 );
 `endif
 
@@ -302,16 +334,18 @@ Timer #(
 DRAM_Controller #(
     .CLK_FREQ (CLOCK_FREQ)
 ) DRAM (
-    .clk             (clk),
-    .rst_n           (rst_n),
+    .clk    (clk),
+    .rst_n  (rst_n),
 
-    .response_o      (peripheral_8_response),
-    .read_request_i  (peripheral_8_read_request),
-    .write_request_i (peripheral_8_write_request),
+    .cyc_i  (peripheral_8_cyc_o),
+    .stb_i  (peripheral_8_stb_o),
+    .we_i   (peripheral_8_we_o),
 
-    .address_i       (peripheral_addr),
-    .write_data_i    (peripheral_write_data),
-    .read_data_o     (peripheral_8_read_data)
+    .addr_i (master_addr_o),
+    .data_i (master_data_o),
+    .data_o (peripheral_8_data_i),
+
+    .ack_o  (peripheral_8_ack_i)
 );
 `endif
 

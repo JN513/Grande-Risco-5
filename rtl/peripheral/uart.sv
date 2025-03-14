@@ -10,13 +10,15 @@ module UART #(
     input  logic rxd,
     output logic txd,
 
-    input  logic rd_en_i,
-    input  logic wr_en_i,
-    output logic response_o,
+    input  logic        cyc_i,      // Indica uma transação ativa
+    input  logic        stb_i,      // Indica uma solicitação ativa
+    input  logic        we_i,       // 1 = Write, 0 = Read
 
-    input  logic [31:0] address_i,
-    input  logic [31:0] write_data_i,
-    output logic [31:0] read_data_o
+    input  logic [31:0] addr_i,     // Endereço
+    input  logic [31:0] data_i,     // Dados de entrada (para escrita)
+    output logic [31:0] data_o,     // Dados de saída (para leitura)
+    
+    output logic        ack_o       // Confirmação da transação (agora assíncrona)
 );
 
 typedef enum logic [4:0] { 
@@ -70,7 +72,7 @@ logic [15:0] bit_period;
 always_ff @(posedge clk) begin : UART_FSM
     uart_rx_fifo_read  <= 1'b0;
     uart_tx_fifo_write <= 1'b0;
-    response_o         <= 1'b0;
+    ack_o              <= 1'b0;
     uart_rx_enable     <= 1'b0;
     set_bit_period     <= 1'b0;
 
@@ -80,22 +82,24 @@ always_ff @(posedge clk) begin : UART_FSM
     end else begin
         unique case (state)
             IDLE: begin
-                if (rd_en_i) begin
-                    unique case (address_i[4:2])
-                        3'b000: state  <= READ;
-                        3'b001: state  <= READ_RX_FIFO_EMPTY;
-                        3'b010: state  <= READ_RX_FIFO_FULL;
-                        3'b011: state  <= READ_TX_FIFO_EMPTY;
-                        3'b100: state  <= READ_TX_FIFO_FULL;
-                        default: state <= READ;
-                    endcase
-                end else if (wr_en_i) begin
-                    unique case (address_i[3:2])
-                        2'b00: state   <= WRITE;
-                        2'b01: state   <= RX_STATE;
-                        2'b10: state   <= SET_BIT_PERIOD;
-                        default: state <= WRITE;
-                    endcase
+                if(stb_i && cyc_i) begin
+                    if (we_i) begin
+                        unique case (addr_i[3:2])
+                            2'b00: state   <= WRITE;
+                            2'b01: state   <= RX_STATE;
+                            2'b10: state   <= SET_BIT_PERIOD;
+                            default: state <= WRITE;
+                        endcase
+                    end else begin
+                        unique case (addr_i[4:2])
+                            3'b000: state  <= READ;
+                            3'b001: state  <= READ_RX_FIFO_EMPTY;
+                            3'b010: state  <= READ_RX_FIFO_FULL;
+                            3'b011: state  <= READ_TX_FIFO_EMPTY;
+                            3'b100: state  <= READ_TX_FIFO_FULL;
+                            default: state <= READ;
+                        endcase
+                    end
                 end
             end
             READ: begin
@@ -105,44 +109,44 @@ always_ff @(posedge clk) begin : UART_FSM
                 end
             end
             READ_WAIT: begin
-                read_data_o <= {24'h0, uart_rx_fifo_data_out};
-                state <= FINISH;
+                data_o <= {24'h0, uart_rx_fifo_data_out};
+                state  <= FINISH;
             end
             READ_RX_FIFO_EMPTY: begin
-                read_data_o <= {31'h0, uart_rx_fifo_empty};
-                state     <= FINISH;
+                data_o <= {31'h0, uart_rx_fifo_empty};
+                state  <= FINISH;
             end
             READ_RX_FIFO_FULL: begin
-                read_data_o <= {31'h0, uart_rx_fifo_full};
-                state     <= FINISH;
+                data_o <= {31'h0, uart_rx_fifo_full};
+                state  <= FINISH;
             end
             READ_TX_FIFO_EMPTY: begin
-                read_data_o <= {31'h0, uart_tx_fifo_empty};
-                state     <= FINISH;
+                data_o <= {31'h0, uart_tx_fifo_empty};
+                state  <= FINISH;
             end
             READ_TX_FIFO_FULL: begin
-                read_data_o <= {31'h0, uart_tx_fifo_full};
-                state     <= FINISH;
+                data_o <= {31'h0, uart_tx_fifo_full};
+                state <= FINISH;
             end
             WRITE: begin
                 if(!uart_tx_fifo_full) begin
-                    uart_tx_fifo_data_in <= write_data_i[7:0];
+                    uart_tx_fifo_data_in <= data_i[7:0];
                     uart_tx_fifo_write   <= 1'b1;
                 end
                 state <= FINISH;
             end
             RX_STATE: begin
-                uart_rx_enable <= write_data_i[0];
+                uart_rx_enable <= data_i[0];
                 state          <= FINISH;
             end
             SET_BIT_PERIOD: begin
-                bit_period     <= write_data_i[15:0];
+                bit_period     <= data_i[15:0];
                 set_bit_period <= 1'b1;
                 state          <= FINISH;
             end
             FINISH: begin
-                response_o <= 1'b1;
-                state      <= IDLE;
+                ack_o <= 1'b1;
+                state <= IDLE;
             end
         endcase
     end

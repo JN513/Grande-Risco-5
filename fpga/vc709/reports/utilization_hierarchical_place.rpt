@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Thu Feb 13 23:11:55 2025
+| Date         : Thu Mar 13 19:39:34 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_utilization -hierarchical -file reports/utilization_hierarchical_place.rpt
 | Design       : top
@@ -19,26 +19,42 @@ Table of Contents
 1. Utilization by Hierarchy
 ---------------------------
 
-+----------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
-|       Instance       |           Module          | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
-+----------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
-| top                  |                     (top) |       3695 |       2559 |    1136 |    0 | 2148 |      0 |      0 |          4 |
-|   (top)              |                     (top) |          1 |          1 |       0 |    0 |    1 |      0 |      0 |          0 |
-|   SOC                |        Grande_Risco_5_SOC |       3694 |       2558 |    1136 |    0 | 2147 |      0 |      0 |          4 |
-|     Memory           |                    Memory |       1088 |         64 |    1024 |    0 |    0 |      0 |      0 |          0 |
-|     P1               |                      LEDs |          7 |          7 |       0 |    0 |   32 |      0 |      0 |          0 |
-|     core             |             Grande_Risco5 |       2599 |       2487 |     112 |    0 | 2115 |      0 |      0 |          4 |
-|       (core)         |             Grande_Risco5 |          2 |          2 |       0 |    0 |    0 |      0 |      0 |          0 |
-|       Core           |                      Core |       2398 |       2398 |       0 |    0 | 1829 |      0 |      0 |          4 |
-|         (Core)       |                      Core |       1196 |       1196 |       0 |    0 |  571 |      0 |      0 |          0 |
-|         ForwardAMUX  |                       MUX |         34 |         34 |       0 |    0 |    0 |      0 |      0 |          0 |
-|         ForwardBMUX  |                     MUX_0 |         34 |         34 |       0 |    0 |    0 |      0 |      0 |          0 |
-|         Mdu          |                       MDU |        527 |        527 |       0 |    0 |  266 |      0 |      0 |          4 |
-|         RegisterBank |                 Registers |        607 |        607 |       0 |    0 |  992 |      0 |      0 |          0 |
-|       DCache         |                    DCache |         86 |         30 |      56 |    0 |   66 |      0 |      0 |          0 |
-|       ICache         |                    ICache |        102 |         46 |      56 |    0 |   67 |      0 |      0 |          0 |
-|       M1             | Cache_request_Multiplexer |         14 |         14 |       0 |    0 |  153 |      0 |      0 |          0 |
-+----------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
++-----------------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
+|           Instance          |           Module          | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
++-----------------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
+| top                         |                     (top) |      12100 |       8136 |    3964 |    0 | 5155 |      0 |      0 |          4 |
+|   (top)                     |                     (top) |          1 |          1 |       0 |    0 |    1 |      0 |      0 |          0 |
+|   SOC                       |        Grande_Risco_5_SOC |      12099 |       8135 |    3964 |    0 | 5154 |      0 |      0 |          4 |
+|     Gpios                   |                     GPIOS |        102 |        102 |       0 |    0 |  148 |      0 |      0 |          0 |
+|       (Gpios)               |                     GPIOS |          4 |          4 |       0 |    0 |   82 |      0 |      0 |          0 |
+|       Pwm0                  |                       PWM |         50 |         50 |       0 |    0 |   33 |      0 |      0 |          0 |
+|       Pwm1                  |                     PWM_1 |         50 |         50 |       0 |    0 |   33 |      0 |      0 |          0 |
+|     Leds                    |                      LEDs |          0 |          0 |       0 |    0 |   40 |      0 |      0 |          0 |
+|     Memory                  |                    Memory |       2176 |        128 |    2048 |    0 |    0 |      0 |      0 |          0 |
+|     Processor               |             Grande_Risco5 |       9674 |       7770 |    1904 |    0 | 4781 |      0 |      0 |          4 |
+|       Core                  |                      Core |       8421 |       7365 |    1056 |    0 | 3558 |      0 |      0 |          4 |
+|         (Core)              |                      Core |          1 |          1 |       0 |    0 |    0 |      0 |      0 |          0 |
+|         CSR                 |                  CSR_Unit |         41 |         41 |       0 |    0 |  352 |      0 |      0 |          0 |
+|         First_Stage         |                      IFID |       3753 |       2697 |    1056 |    0 | 1293 |      0 |      0 |          0 |
+|           (First_Stage)     |                      IFID |        997 |        997 |       0 |    0 |  269 |      0 |      0 |          0 |
+|           Branch_Prediction |         Branch_Prediction |       2756 |       1700 |    1056 |    0 | 1024 |      0 |      0 |          0 |
+|         Fourth_Stage        |                     MEMWB |        118 |        118 |       0 |    0 |   72 |      0 |      0 |          0 |
+|         RegisterBank        |                 Registers |        576 |        576 |       0 |    0 |  992 |      0 |      0 |          0 |
+|         Second_Stage        |                      IDEX |       2043 |       2043 |       0 |    0 |  507 |      0 |      0 |          4 |
+|           (Second_Stage)    |                      IDEX |       1239 |       1239 |       0 |    0 |  241 |      0 |      0 |          0 |
+|           Alu               |                       Alu |        290 |        290 |       0 |    0 |    0 |      0 |      0 |          0 |
+|           Mdu               |                       MDU |        516 |        516 |       0 |    0 |  266 |      0 |      0 |          4 |
+|         Third_Stage         |                     EXMEM |       1891 |       1891 |       0 |    0 |  342 |      0 |      0 |          0 |
+|       DCache                |                    DCache |        578 |        154 |     424 |    0 |  514 |      0 |      0 |          0 |
+|       ICache                |                    ICache |        629 |        205 |     424 |    0 |  515 |      0 |      0 |          0 |
+|       M1                    | Cache_request_Multiplexer |         47 |         47 |       0 |    0 |  194 |      0 |      0 |          0 |
+|     UART                    |                      UART |        147 |        135 |      12 |    0 |  185 |      0 |      0 |          0 |
+|       (UART)                |                      UART |          7 |          7 |       0 |    0 |   70 |      0 |      0 |          0 |
+|       rx_fifo               |                      FIFO |         19 |         13 |       6 |    0 |   18 |      0 |      0 |          0 |
+|       tx_fifo               |                    FIFO_0 |         18 |         12 |       6 |    0 |   18 |      0 |      0 |          0 |
+|       uart_rx               |                   UART_RX |         56 |         56 |       0 |    0 |   39 |      0 |      0 |          0 |
+|       uart_tx               |                   UART_TX |         47 |         47 |       0 |    0 |   40 |      0 |      0 |          0 |
++-----------------------------+---------------------------+------------+------------+---------+------+------+--------+--------+------------+
 * Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
 
 

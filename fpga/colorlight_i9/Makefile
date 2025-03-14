@@ -9,13 +9,8 @@ all: ./build/out.bit
 		--lpf pinout.lpf --textcfg ./build/out.config --package CABGA381 \
 		--speed 6 --lpf-allow-unconstrained
 
-./build/out.json: main.sv pinout.lpf buildFolder
-	yosys -m slang  -p " \
-		read_slang --error-limit=100 main.sv \
-			../../rtl/core/*.sv \
-			../../rtl/peripheral/*.sv -top top; \
-		synth_ecp5 -json ./build/out.json -abc9 \
-	"
+./build/out.json: main.sv pinout.lpf buildFolder run.tcl
+	synlig -c run.tcl
 
 buildFolder:
 	mkdir -p build

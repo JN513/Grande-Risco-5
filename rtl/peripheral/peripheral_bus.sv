@@ -1,99 +1,137 @@
 module Peripheral_BUS (
-    // master connection
-    input  logic [31:0] addr_i,
-    input  logic write_request_i,
-    input  logic read_request_i,
-    output logic response_o,
-    output logic [31:0] read_data_o,
+    // Wishbone Master Interface
+    input  logic        clk,
+    input  logic        rst_n,
 
-    // peripheral connection
-    output logic peripheral_1_write_request_o,
-    output logic peripheral_1_read_request_o,
-    input  logic peripheral_1_response_i,
-    input  logic [31:0] peripheral_1_read_data_i,
+    input  logic        cyc_i,      // Transação ativa
+    input  logic        stb_i,      // Requisição ativa
+    input  logic        we_i,       // 1 = Write, 0 = Read
+    input  logic [31:0] addr_i,     // Endereço de acesso
+    input  logic [31:0] data_i,      // Dados de escrita
+    output logic [31:0] data_o,      // Dados de leitura
+    output logic        ack_o,      // Confirmação da transação
 
-    output logic peripheral_2_write_request_o,
-    output logic peripheral_2_read_request_o,
-    input  logic peripheral_2_response_i,
-    input  logic [31:0] peripheral_2_read_data_i,
+    // Wishbone Peripheral Interface
+    output logic        peripheral_1_cyc_o,
+    output logic        peripheral_1_stb_o,
+    output logic        peripheral_1_we_o,
+    input  logic        peripheral_1_ack_i,
+    input  logic [31:0] peripheral_1_data_i,
 
-    output logic peripheral_3_write_request_o,
-    output logic peripheral_3_read_request_o,
-    input  logic peripheral_3_response_i,
-    input  logic [31:0] peripheral_3_read_data_i,
+    output logic        peripheral_2_cyc_o,
+    output logic        peripheral_2_stb_o,
+    output logic        peripheral_2_we_o,
+    input  logic        peripheral_2_ack_i,
+    input  logic [31:0] peripheral_2_data_i,
 
-    output logic peripheral_4_write_request_o,
-    output logic peripheral_4_read_request_o,
-    input  logic peripheral_4_response_i,
-    input  logic [31:0] peripheral_4_read_data_i,
+    output logic        peripheral_3_cyc_o,
+    output logic        peripheral_3_stb_o,
+    output logic        peripheral_3_we_o,
+    input  logic        peripheral_3_ack_i,
+    input  logic [31:0] peripheral_3_data_i,
 
-    output logic peripheral_5_write_request_o,
-    output logic peripheral_5_read_request_o,
-    input  logic peripheral_5_response_i,
-    input  logic [31:0] peripheral_5_read_data_i,
+    output logic        peripheral_4_cyc_o,
+    output logic        peripheral_4_stb_o,
+    output logic        peripheral_4_we_o,
+    input  logic        peripheral_4_ack_i,
+    input  logic [31:0] peripheral_4_data_i,
 
-    output logic peripheral_6_write_request_o,
-    output logic peripheral_6_read_request_o,
-    input  logic peripheral_6_response_i,
-    input  logic [31:0] peripheral_6_read_data_i,
+    output logic        peripheral_5_cyc_o,
+    output logic        peripheral_5_stb_o,
+    output logic        peripheral_5_we_o,
+    input  logic        peripheral_5_ack_i,
+    input  logic [31:0] peripheral_5_data_i,
 
-    output logic peripheral_7_write_request_o,
-    output logic peripheral_7_read_request_o,
-    input  logic peripheral_7_response_i,
-    input  logic [31:0] peripheral_7_read_data_i,
+    output logic        peripheral_6_cyc_o,
+    output logic        peripheral_6_stb_o,
+    output logic        peripheral_6_we_o,
+    input  logic        peripheral_6_ack_i,
+    input  logic [31:0] peripheral_6_data_i,
 
-    output logic peripheral_8_write_request_o,
-    output logic peripheral_8_read_request_o,
-    input  logic peripheral_8_response_i,
-    input  logic [31:0] peripheral_8_read_data_i
+    output logic        peripheral_7_cyc_o,
+    output logic        peripheral_7_stb_o,
+    output logic        peripheral_7_we_o,
+    input  logic        peripheral_7_ack_i,
+    input  logic [31:0] peripheral_7_data_i,
+
+    output logic        peripheral_8_cyc_o,
+    output logic        peripheral_8_stb_o,
+    output logic        peripheral_8_we_o,
+    input  logic        peripheral_8_ack_i,
+    input  logic [31:0] peripheral_8_data_i
 );
 
-always_comb begin : RESPONSE_MUX
-    unique case(addr_i[30:28])
-        3'b000: response_o = peripheral_1_response_i;
-        3'b001: response_o = peripheral_2_response_i;
-        3'b010: response_o = peripheral_3_response_i;
-        3'b011: response_o = peripheral_4_response_i;
-        3'b100: response_o = peripheral_5_response_i;
-        3'b101: response_o = peripheral_6_response_i;
-        3'b110: response_o = peripheral_7_response_i;
-        3'b111: response_o = peripheral_8_response_i;
-        default: response_o = 1'b0;
-    endcase
-end
+logic [2:0] sel;
+assign sel = addr_i[30:28];  // Seleciona qual periférico será ativado
 
+// Multiplexação dos sinais de resposta (ACK e Read Data)
 always_comb begin
-    unique case (addr_i[30:28])
-        3'b000: read_data_o = peripheral_1_read_data_i;
-        3'b001: read_data_o = peripheral_2_read_data_i;
-        3'b010: read_data_o = peripheral_3_read_data_i;
-        3'b011: read_data_o = peripheral_4_read_data_i;
-        3'b100: read_data_o = peripheral_5_read_data_i;
-        3'b101: read_data_o = peripheral_6_read_data_i;
-        3'b110: read_data_o = peripheral_7_read_data_i;
-        3'b111: read_data_o = peripheral_8_read_data_i;
-        default: read_data_o = 32'h00000000;
+    unique case (sel)
+        3'b000: begin
+            data_o = peripheral_1_data_i;
+            ack_o = peripheral_1_ack_i;
+        end
+        3'b001: begin
+            data_o = peripheral_2_data_i;
+            ack_o = peripheral_2_ack_i;
+        end
+        3'b010: begin
+            data_o = peripheral_3_data_i;
+            ack_o = peripheral_3_ack_i;
+        end
+        3'b011: begin
+            data_o = peripheral_4_data_i;
+            ack_o = peripheral_4_ack_i;
+        end
+        3'b100: begin
+            data_o = peripheral_5_data_i;
+            ack_o = peripheral_5_ack_i;
+        end
+        3'b101: begin
+            data_o = peripheral_6_data_i;
+            ack_o = peripheral_6_ack_i;
+        end
+        3'b110: begin
+            data_o = peripheral_7_data_i;
+            ack_o = peripheral_7_ack_i;
+        end
+        3'b111: begin
+            data_o = peripheral_8_data_i;
+            ack_o = peripheral_8_ack_i;
+        end
+        default: begin
+            data_o = 32'h00000000;
+            ack_o = 1'b0;
+        end
     endcase
 end
 
-// Write request assignment
-assign peripheral_1_write_request_o = (addr_i[30:28] == 3'b000) ? write_request_i : 1'b0;
-assign peripheral_2_write_request_o = (addr_i[30:28] == 3'b001) ? write_request_i : 1'b0;
-assign peripheral_3_write_request_o = (addr_i[30:28] == 3'b010) ? write_request_i : 1'b0;
-assign peripheral_4_write_request_o = (addr_i[30:28] == 3'b011) ? write_request_i : 1'b0;
-assign peripheral_5_write_request_o = (addr_i[30:28] == 3'b100) ? write_request_i : 1'b0;
-assign peripheral_6_write_request_o = (addr_i[30:28] == 3'b101) ? write_request_i : 1'b0;
-assign peripheral_7_write_request_o = (addr_i[30:28] == 3'b110) ? write_request_i : 1'b0;
-assign peripheral_8_write_request_o = (addr_i[30:28] == 3'b111) ? write_request_i : 1'b0;
+// Propagação das requisições para os periféricos
+assign peripheral_1_cyc_o = (sel == 3'b000) ? cyc_i : 1'b0;
+assign peripheral_2_cyc_o = (sel == 3'b001) ? cyc_i : 1'b0;
+assign peripheral_3_cyc_o = (sel == 3'b010) ? cyc_i : 1'b0;
+assign peripheral_4_cyc_o = (sel == 3'b011) ? cyc_i : 1'b0;
+assign peripheral_5_cyc_o = (sel == 3'b100) ? cyc_i : 1'b0;
+assign peripheral_6_cyc_o = (sel == 3'b101) ? cyc_i : 1'b0;
+assign peripheral_7_cyc_o = (sel == 3'b110) ? cyc_i : 1'b0;
+assign peripheral_8_cyc_o = (sel == 3'b111) ? cyc_i : 1'b0;
 
-// Read request assignment
-assign peripheral_1_read_request_o = (addr_i[30:28] == 3'b000) ? read_request_i : 1'b0;
-assign peripheral_2_read_request_o = (addr_i[30:28] == 3'b001) ? read_request_i : 1'b0;
-assign peripheral_3_read_request_o = (addr_i[30:28] == 3'b010) ? read_request_i : 1'b0;
-assign peripheral_4_read_request_o = (addr_i[30:28] == 3'b011) ? read_request_i : 1'b0;
-assign peripheral_5_read_request_o = (addr_i[30:28] == 3'b100) ? read_request_i : 1'b0;
-assign peripheral_6_read_request_o = (addr_i[30:28] == 3'b101) ? read_request_i : 1'b0;
-assign peripheral_7_read_request_o = (addr_i[30:28] == 3'b110) ? read_request_i : 1'b0;
-assign peripheral_8_read_request_o = (addr_i[30:28] == 3'b111) ? read_request_i : 1'b0;
+assign peripheral_1_stb_o = (sel == 3'b000) ? stb_i : 1'b0;
+assign peripheral_2_stb_o = (sel == 3'b001) ? stb_i : 1'b0;
+assign peripheral_3_stb_o = (sel == 3'b010) ? stb_i : 1'b0;
+assign peripheral_4_stb_o = (sel == 3'b011) ? stb_i : 1'b0;
+assign peripheral_5_stb_o = (sel == 3'b100) ? stb_i : 1'b0;
+assign peripheral_6_stb_o = (sel == 3'b101) ? stb_i : 1'b0;
+assign peripheral_7_stb_o = (sel == 3'b110) ? stb_i : 1'b0;
+assign peripheral_8_stb_o = (sel == 3'b111) ? stb_i : 1'b0;
+
+assign peripheral_1_we_o = (sel == 3'b000) ? we_i : 1'b0;
+assign peripheral_2_we_o = (sel == 3'b001) ? we_i : 1'b0;
+assign peripheral_3_we_o = (sel == 3'b010) ? we_i : 1'b0;
+assign peripheral_4_we_o = (sel == 3'b011) ? we_i : 1'b0;
+assign peripheral_5_we_o = (sel == 3'b100) ? we_i : 1'b0;
+assign peripheral_6_we_o = (sel == 3'b101) ? we_i : 1'b0;
+assign peripheral_7_we_o = (sel == 3'b110) ? we_i : 1'b0;
+assign peripheral_8_we_o = (sel == 3'b111) ? we_i : 1'b0;
 
 endmodule

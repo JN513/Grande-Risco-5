@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Thu Feb 13 23:12:25 2025
+| Date         : Thu Mar 13 19:40:08 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_timing_summary -datasheet -max_paths 10 -file reports/timing.rpt
 | Design       : top
@@ -49,12 +49,12 @@ check_timing report
 
 Table of Contents
 -----------------
-1. checking no_clock (3287)
+1. checking no_clock (9134)
 2. checking constant_clock (0)
 3. checking pulse_width_clock (0)
-4. checking unconstrained_internal_endpoints (15934)
-5. checking no_input_delay (1)
-6. checking no_output_delay (8)
+4. checking unconstrained_internal_endpoints (48690)
+5. checking no_input_delay (10)
+6. checking no_output_delay (17)
 7. checking multiple_clock (0)
 8. checking generated_clocks (0)
 9. checking loops (0)
@@ -62,9 +62,9 @@ Table of Contents
 11. checking partial_output_delay (0)
 12. checking latch_loops (0)
 
-1. checking no_clock (3287)
+1. checking no_clock (9134)
 ---------------------------
- There are 3287 register/latch pins with no clock driven by root clock pin: clk_o_reg/Q (HIGH)
+ There are 9134 register/latch pins with no clock driven by root clock pin: clk_o_reg/Q (HIGH)
 
 
 2. checking constant_clock (0)
@@ -77,23 +77,23 @@ Table of Contents
  There are 0 register/latch pins which need pulse_width check
 
 
-4. checking unconstrained_internal_endpoints (15934)
+4. checking unconstrained_internal_endpoints (48690)
 ----------------------------------------------------
- There are 15934 pins that are not constrained for maximum delay. (HIGH)
+ There are 48690 pins that are not constrained for maximum delay. (HIGH)
 
  There are 0 pins that are not constrained for maximum delay due to constant clock.
 
 
-5. checking no_input_delay (1)
-------------------------------
- There is 1 input port with no input delay specified. (HIGH)
+5. checking no_input_delay (10)
+-------------------------------
+ There are 10 input ports with no input delay specified. (HIGH)
 
  There are 0 input ports with no input delay but user has a false path constraint.
 
 
-6. checking no_output_delay (8)
--------------------------------
- There are 8 ports with no output delay specified. (HIGH)
+6. checking no_output_delay (17)
+--------------------------------
+ There are 17 ports with no output delay specified. (HIGH)
 
  There are 0 ports with no output delay but user has a false path constraint
 
@@ -234,7 +234,7 @@ Slack (MET) :             4.442ns  (required time - arrival time)
   -------------------------------------------------------------------    -------------------
     SLICE_X106Y246       FDRE (Prop_fdre_C_Q)         0.259     4.746 f  clk_o_reg/Q
                          net (fo=2, routed)           0.285     5.031    clk_o
-    SLICE_X106Y246       LUT2 (Prop_lut2_I0_O)        0.043     5.074 r  clk_o_i_1/O
+    SLICE_X106Y246       LUT2 (Prop_lut2_I1_O)        0.043     5.074 r  clk_o_i_1/O
                          net (fo=1, routed)           0.000     5.074    clk_o_i_1_n_0
     SLICE_X106Y246       FDRE                                         r  clk_o_reg/D
   -------------------------------------------------------------------    -------------------
@@ -292,7 +292,7 @@ Slack (MET) :             0.205ns  (arrival time - required time)
   -------------------------------------------------------------------    -------------------
     SLICE_X106Y246       FDRE (Prop_fdre_C_Q)         0.118     2.349 f  clk_o_reg/Q
                          net (fo=2, routed)           0.146     2.495    clk_o
-    SLICE_X106Y246       LUT2 (Prop_lut2_I0_O)        0.028     2.523 r  clk_o_i_1/O
+    SLICE_X106Y246       LUT2 (Prop_lut2_I1_O)        0.028     2.523 r  clk_o_i_1/O
                          net (fo=1, routed)           0.000     2.523    clk_o_i_1_n_0
     SLICE_X106Y246       FDRE                                         r  clk_o_reg/D
   -------------------------------------------------------------------    -------------------
@@ -346,7 +346,7 @@ Input Ports Setup/Hold
 Reference   | Input     | IO Reg  | Delay |     Setup(ns) | Process |      Hold(ns) | Process | Internal |
 Clock       | Port      | Type    | Type  | to Clk (Edge) | Corner  | to Clk (Edge) | Corner  | Clock    |
 ------------+-----------+---------+-------+---------------+---------+---------------+---------+----------+
-mcb_clk_ref | sys_rst_i | FDRE    | -     |     0.130 (r) | FAST    |     1.635 (r) | SLOW    |          |
+mcb_clk_ref | sys_rst_i | FDRE    | -     |     3.477 (r) | SLOW    |    -1.330 (r) | FAST    |          |
 ------------+-----------+---------+-------+---------------+---------+---------------+---------+----------+
 
 

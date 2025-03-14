@@ -73,11 +73,13 @@ logic [6:0] EXMEMop;
 logic [4:0] EXMEM_RD;
 logic [4:0] IFIDrs1, IFIDrs2, IFIDrd;
 logic [4:0] MEMWBrd;
+logic [2:0] IFIDfunc3;
 
 logic IFID_trap_flush;
 logic [31:0] trap_pc;
 logic IDEX_trap_flush;
 logic EXMEM_trap_flush;
+logic software_interruption;
 
 `ifdef ENABLE_MDU
 logic mdu_operation;
@@ -278,14 +280,20 @@ CSR_Unit CSR(
     .IFID_trap_flush_o          (IFID_trap_flush),
     .trap_pc_o                  (trap_pc),
 
-    .external_interruption_i    (external_interruption_i)
+    .external_interruption_i    (external_interruption_i),
+    .software_interruption_i    (software_interruption)
 );
 
+// Software Interruption logic, causes by ecalls and mret
+always_ff @(posedge clk) begin
+    software_interruption <= (IFIDop == CSR_OPCODE) && ~|IFIDfunc3;
+end
 
-assign IFIDop  = IFID_IR[6:0];
-assign IFIDrs1 = IFID_IR[19:15];
-assign IFIDrs2 = IFID_IR[24:20];
-assign IFIDrd  = IFID_IR[11:7];
-assign IDEXop  = IDEX_IR[6:0];
+assign IFIDfunc3 = IFID_IR[14:12];
+assign IFIDop    = IFID_IR[6:0];
+assign IFIDrs1   = IFID_IR[19:15];
+assign IFIDrs2   = IFID_IR[24:20];
+assign IFIDrd    = IFID_IR[11:7];
+assign IDEXop    = IDEX_IR[6:0];
 
 endmodule

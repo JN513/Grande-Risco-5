@@ -50,13 +50,13 @@ always_ff @(posedge clk ) begin : MEMWB_STAGE
 
         // wb stage - five stage
 
-        if ((EXMEMop == RTYPE_OPCODE    || 
-            EXMEMop == IMMEDIATE_OPCODE || 
-            EXMEMop == AUIPC_OPCODE     || 
-            EXMEMop == CSR_OPCODE       || 
-            EXMEMop == LUI_OPCODE       || 
-            EXMEMop == LW_OPCODE        ||
-            EXMEMop == JAL_OPCODE       ||
+        if ((EXMEMop == RTYPE_OPCODE                 || 
+            EXMEMop == IMMEDIATE_OPCODE              || 
+            EXMEMop == AUIPC_OPCODE                  || 
+            (EXMEMop == CSR_OPCODE && ~|EXMEM_func3) || 
+            EXMEMop == LUI_OPCODE                    || 
+            EXMEMop == LW_OPCODE                     ||
+            EXMEMop == JAL_OPCODE                    ||
             EXMEMop == JALR_OPCODE ) && (|EXMEMrd)) 
         begin
             // verifica se tem wb

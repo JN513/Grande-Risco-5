@@ -3,7 +3,7 @@ module CSR_Unit (
     input logic rst_n,
 
     // CSR read/write signals
-    input  logic csr_wr_en, // Fazer bypass na escrita dos registradores depois
+    input  logic csr_wr_en,
 
     input logic [2:0] func3_i,
     input logic [4:0] csr_imm_i,
@@ -29,7 +29,8 @@ module CSR_Unit (
     output logic IFID_trap_flush_o,
     output logic [31:0] trap_pc_o,
 
-    input logic external_interruption_i
+    input logic external_interruption_i,
+    input logic software_interruption_i
 );
 
 // Address of Performance Counters CSRs

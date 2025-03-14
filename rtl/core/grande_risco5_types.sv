@@ -17,6 +17,7 @@ package opcodes_pkg;
     localparam logic [6:0] IMMEDIATE_OPCODE = 7'b0010011;
     localparam logic [6:0] RTYPE_OPCODE     = 7'b0110011;
     localparam logic [6:0] ATOMIC_OPCODE    = 7'b0101111;
+    localparam logic [6:0] FENCE_OPCODE     = 7'b0001111;
 
 endpackage
 `endif

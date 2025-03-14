@@ -59,6 +59,9 @@ always_comb begin : IR_INVALID_CHECKER
         LUI_OPCODE: begin
             invalid_instruction_o = 1'b0;
         end
+        FENCE_OPCODE: begin
+            invalid_instruction_o = 1'b0;
+        end
         default: invalid_instruction_o = 1'b1;
     endcase
 end

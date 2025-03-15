@@ -1,8 +1,8 @@
 .global _start
 
 _start:
-    li a1, 0xFF0008FF
+    li a1, 0xFF08FFFF
 
     sw a1, 40(zero)
-    lb a2, 40(zero)
+    lhu a2, 40(zero)
     lw a3, 40(zero)

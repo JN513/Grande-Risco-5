@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Fri Mar 14 00:30:46 2025
+| Date         : Fri Mar 14 22:23:07 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_drc -file reports/drc.rpt
 | Design       : top
@@ -24,14 +24,14 @@ Table of Contents
       Design limits: <entire design considered>
            Ruledeck: default
              Max checks: <unlimited>
-             Checks found: 11
+             Checks found: 10
 +----------+----------+-----------------------------------------------------+--------+
 | Rule     | Severity | Description                                         | Checks |
 +----------+----------+-----------------------------------------------------+--------+
 | CFGBVS-1 | Warning  | Missing CFGBVS and CONFIG_VOLTAGE Design Properties | 1      |
 | DPOP-1   | Warning  | PREG Output pipelining                              | 2      |
 | DPOP-2   | Warning  | MREG Output pipelining                              | 4      |
-| PDRC-138 | Warning  | SLICE_PairEqSame_D6D5_WARN                          | 2      |
+| PDRC-138 | Warning  | SLICE_PairEqSame_D6D5_WARN                          | 1      |
 | RPBF-3   | Warning  | IO port buffering is incomplete                     | 2      |
 +----------+----------+-----------------------------------------------------+--------+
 
@@ -82,12 +82,7 @@ Related violations: <none>
 
 PDRC-138#1 Warning
 SLICE_PairEqSame_D6D5_WARN  
-Luts D6LUT and D5LUT in use in site SLICE_X11Y76 with different equations without A6 pin connected to Global Logic High.
-Related violations: <none>
-
-PDRC-138#2 Warning
-SLICE_PairEqSame_D6D5_WARN  
-Luts D6LUT and D5LUT in use in site SLICE_X4Y74 with different equations without A6 pin connected to Global Logic High.
+Luts D6LUT and D5LUT in use in site SLICE_X69Y106 with different equations without A6 pin connected to Global Logic High.
 Related violations: <none>
 
 RPBF-3#1 Warning

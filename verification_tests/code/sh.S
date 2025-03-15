@@ -1,11 +1,10 @@
 .global _start
 
 _start:
-    addi a1, zero, 2047      # Carrega o primeiro número (2047) em a1
+    li a1, 0x6C6F7665
 
-    slli a1, a1, 6
-    
-    sh a1, 48(zero)
+    sw zero, 80(zero)
+    sh a1, 80(zero)
+    lw a2, 80(zero)
 
-    lw a2, 48(zero)
-
+    li a3, 5

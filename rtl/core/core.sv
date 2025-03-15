@@ -80,6 +80,7 @@ logic [31:0] trap_pc;
 logic IDEX_trap_flush;
 logic EXMEM_trap_flush;
 logic software_interruption;
+logic unaligned_access;
 
 `ifdef ENABLE_MDU
 logic mdu_operation;
@@ -209,6 +210,7 @@ EXMEM Third_Stage (
     .memory_operation_o    (memory_operation),
     .EXMEMop_o             (EXMEMop),
     .EXMEMrd_o             (EXMEM_RD),
+    .unaligned_access_o    (unaligned_access),
 
     // Data BUS
     .data_memory_response  (data_mem_rsp_i),
@@ -230,6 +232,7 @@ MEMWB Fourth_Stage (
     .read_data_i            (data_read_i),
     .Merged_word_i          (Merged_Word),
     .memory_operation_i     (memory_operation),
+    .unaligned_access_i     (unaligned_access),
 
     .memory_stall_i         (memory_stall),
 

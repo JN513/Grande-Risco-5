@@ -158,8 +158,8 @@ assign processor_data_we = data_write_request;
 assign cache_data_we     = memory_write_request;
 
 assign stb_o                 = cyc_o;
-assign cyc_o                 = processor_cyc     | cache_cyc;
-assign we_o                  = processor_data_we | cache_data_we;
+assign cyc_o                 = (data_address[31]) ? processor_cyc     : cache_cyc;
+assign we_o                  = (data_address[31]) ? processor_data_we : cache_data_we;
 assign addr_o                = (processor_cyc) ? data_address      : memory_addr;
 assign data_o                = (processor_cyc) ? data_write_data   : memory_write_data;
 assign memory_response       = ack_i;

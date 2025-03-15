@@ -11,6 +11,7 @@ module MEMWB (
     input logic [31:0] read_data_i,
     input logic [31:0] Merged_word_i,
     input logic memory_operation_i,
+    input logic unaligned_access_i,
 
     input logic memory_stall_i,
 
@@ -44,7 +45,7 @@ always_ff @(posedge clk ) begin : MEMWB_STAGE
         instruction_finished_o <= 1'b1;
         MEMWB_IR               <= EXMEM_IR_i;
         MEMWB_PC_o             <= EXMEM_PC_i;
-        MEMWB_mem_read_data    <= (is_unaligned_address) ? Merged_word_i : read_data_normalized;
+        MEMWB_mem_read_data    <= (unaligned_access_i) ? Merged_word_i : read_data_normalized;
         
         MEMWBALUOut <= EXMEMALUOut_i;
 

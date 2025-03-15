@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Fri Mar 14 22:22:49 2025
+| Date         : Sat Mar 15 01:45:31 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_control_sets -verbose -file reports/control_sets.rpt
 | Design       : top
@@ -23,11 +23,11 @@ Table of Contents
 +----------------------------------------------------------+-------+
 |                          Status                          | Count |
 +----------------------------------------------------------+-------+
-| Total control sets                                       |   114 |
-|    Minimum number of control sets                        |   114 |
+| Total control sets                                       |   134 |
+|    Minimum number of control sets                        |   134 |
 |    Addition due to synthesis replication                 |     0 |
 |    Addition due to physical synthesis replication        |     0 |
-| Unused register locations in slices containing registers |    76 |
+| Unused register locations in slices containing registers |   109 |
 +----------------------------------------------------------+-------+
 * Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
 ** Run report_qor_suggestions for automated merging and remapping suggestions
@@ -39,15 +39,15 @@ Table of Contents
 +--------------------+-------+
 |       Fanout       | Count |
 +--------------------+-------+
-| Total control sets |   114 |
-| >= 0 to < 4        |     1 |
-| >= 4 to < 6        |     3 |
-| >= 6 to < 8        |     2 |
-| >= 8 to < 10       |     6 |
+| Total control sets |   134 |
+| >= 0 to < 4        |     2 |
+| >= 4 to < 6        |     5 |
+| >= 6 to < 8        |     5 |
+| >= 8 to < 10       |    10 |
 | >= 10 to < 12      |     0 |
-| >= 12 to < 14      |     0 |
-| >= 14 to < 16      |     0 |
-| >= 16              |   102 |
+| >= 12 to < 14      |     3 |
+| >= 14 to < 16      |     2 |
+| >= 16              |   107 |
 +--------------------+-------+
 * Control sets can be remapped at either synth_design or opt_design
 
@@ -58,12 +58,12 @@ Table of Contents
 +--------------+-----------------------+------------------------+-----------------+--------------+
 | Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
 +--------------+-----------------------+------------------------+-----------------+--------------+
-| No           | No                    | No                     |             156 |           57 |
+| No           | No                    | No                     |             173 |           59 |
 | No           | No                    | Yes                    |               0 |            0 |
-| No           | Yes                   | No                     |            1912 |          644 |
-| Yes          | No                    | No                     |            1689 |          649 |
+| No           | Yes                   | No                     |            1924 |          691 |
+| Yes          | No                    | No                     |            1746 |          828 |
 | Yes          | No                    | Yes                    |               0 |            0 |
-| Yes          | Yes                   | No                     |             815 |          311 |
+| Yes          | Yes                   | No                     |             920 |          355 |
 +--------------+-----------------------+------------------------+-----------------+--------------+
 
 
@@ -74,119 +74,139 @@ Table of Contents
 |  Clock Signal  |                                 Enable Signal                                 |                       Set/Reset Signal                      | Slice Load Count | Bel Load Count | Bels / Slice |
 +----------------+-------------------------------------------------------------------------------+-------------------------------------------------------------+------------------+----------------+--------------+
 |  clk_IBUF_BUFG |                                                                               |                                                             |                1 |              1 |         1.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/memory_operation_o_reg_1[0]                      |                                                             |                3 |              4 |         1.33 |
+|  clk_o_BUFG    | SOC/UART/uart_tx/uart_txd_i_1_n_0                                             | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                1 |              1 |         1.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Alu/flush_bus_o_reg                             | SOC/Processor/N1/First_Stage/IFID_IR_o[5]_i_1_n_0           |                1 |              4 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/FSM_sequential_unaligned_access_state[3]_i_1_n_0 | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                2 |              4 |         2.00 |
+|  clk_o_BUFG    | SOC/UART/uart_tx/bit_index                                                    | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                1 |              4 |         4.00 |
+|  clk_o_BUFG    | SOC/UART/uart_rx/bit_index[3]_i_2_n_0                                         | SOC/UART/uart_rx/bit_index[3]_i_1_n_0                       |                1 |              4 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/subword_store_reg_2[0]                           |                                                             |                2 |              4 |         2.00 |
+|  clk_o_BUFG    | SOC/UART/rx_fifo/write_ptr0                                                   | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                2 |              6 |         3.00 |
+|  clk_o_BUFG    | SOC/UART/tx_fifo/write_ptr0                                                   | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                2 |              6 |         3.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[2]_2[0]                         | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                3 |              6 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[2]_3[0]                         | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                3 |              6 |         2.00 |
-|  clk_o_BUFG    |                                                                               | SOC/Processor/N1/Third_Stage/memory_operation_o_reg_3       |                3 |              8 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/p_0_in[7]                                        |                                                             |                4 |              8 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/p_0_in[15]                                       |                                                             |                4 |              8 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Merged_Word_o[7]_i_1_n_0                         |                                                             |                2 |              8 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Merged_Word_o[15]_i_2_n_0                        | SOC/Processor/N1/Third_Stage/Merged_Word_o[15]_i_1_n_0      |                4 |              8 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Alu/flush_bus_o_reg                             |                                                             |                9 |              9 |         1.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[4]_1[0]                         |                                                             |                3 |             16 |         5.33 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/E[0]                                             |                                                             |                6 |             16 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[3]_rep_2[0]                     |                                                             |                5 |             16 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[4]_2[0]                         |                                                             |                4 |             16 |         4.00 |
-|  clk_o_BUFG    |                                                                               | SOC/Gpios/Pwm0/counter[0]_i_1_n_0                           |                4 |             16 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/p_0_in[31]                                       |                                                             |                9 |             16 |         1.78 |
-|  clk_o_BUFG    |                                                                               | SOC/Gpios/Pwm1/counter[0]_i_1__0_n_0                        |                4 |             16 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Merged_Word_o[31]_i_2_n_0                        | SOC/Processor/N1/Third_Stage/Merged_Word_o[31]_i_1_n_0      |                6 |             16 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr[31]_i_1_n_0                            | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                8 |             19 |         2.38 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Alu/flush_bus_o_reg                             | SOC/Processor/N1/First_Stage/i___85_n_0                     |               13 |             19 |         1.46 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[20]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_2[0]                            |                                                             |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_1[0]                            |                                                             |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/flush_bus_o_reg[0]                               | SOC/Processor/N1/First_Stage/IFID_PC_o[31]_i_1_n_0          |                7 |             32 |         4.57 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_3[0]                            |                                                             |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_0[0]                            |                                                             |               12 |             32 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/E[0]                                            |                                                             |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_11[0]                           |                                                             |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_6[0]                            |                                                             |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[4]_rep_1[0]                     | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                2 |              6 |         3.00 |
+|  clk_o_BUFG    | SOC/UART/data_o[7]_i_2_n_0                                                    | SOC/UART/data_o[7]_i_1_n_0                                  |                2 |              7 |         3.50 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Merged_Word_o[7]_i_1_n_0                         |                                                             |                4 |              8 |         2.00 |
+|  clk_o_BUFG    | SOC/UART/tx_fifo/E[0]                                                         |                                                             |                1 |              8 |         8.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Merged_Word_o[15]_i_1_n_0                        |                                                             |                5 |              8 |         1.60 |
+|  clk_o_BUFG    | SOC/UART/uart_rx/uart_rx_data[7]_i_1_n_0                                      |                                                             |                2 |              8 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/EXMEM_mem_data_value[7]_i_1_n_0                  |                                                             |                4 |              8 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/EXMEM_mem_data_value[15]_i_1_n_0                 |                                                             |                6 |              8 |         1.33 |
+|  clk_o_BUFG    | SOC/UART/uart_tx_en                                                           |                                                             |                1 |              8 |         8.00 |
+|  clk_o_BUFG    | SOC/UART/uart_rx/E[0]                                                         |                                                             |                1 |              8 |         8.00 |
+|  clk_o_BUFG    |                                                                               | SOC/Processor/N1/Third_Stage/subword_store_reg_5            |                5 |              8 |         1.60 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Alu/flush_bus_o_reg                             |                                                             |                8 |              9 |         1.12 |
+|  clk_o_BUFG    | SOC/UART/rx_fifo/E[0]                                                         | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                3 |             12 |         4.00 |
+|  clk_o_BUFG    | SOC/UART/tx_fifo/memory_reg_0_31_0_5_i_1_n_0                                  |                                                             |                2 |             12 |         6.00 |
+|  clk_o_BUFG    | SOC/UART/rx_fifo/memory_reg_0_31_0_5_i_1__0_n_0                               |                                                             |                2 |             12 |         6.00 |
+|  clk_o_BUFG    | SOC/UART/rx_fifo/read_data_o[7]_i_1__0_n_0                                    | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                4 |             14 |         3.50 |
+|  clk_o_BUFG    | SOC/UART/tx_fifo/read_data_o[7]_i_1_n_0                                       | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                3 |             14 |         4.67 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/E[0]                                             |                                                             |                5 |             16 |         3.20 |
+|  clk_o_BUFG    |                                                                               | SOC/Gpios/Pwm1/counter[0]_i_1__2_n_0                        |                4 |             16 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/CPU_RESETN_0[0]                                  |                                                             |                4 |             16 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/CPU_RESETN[0]                                    |                                                             |                4 |             16 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/CPU_RESETN_1[0]                                  |                                                             |                5 |             16 |         3.20 |
+|  clk_o_BUFG    | SOC/UART/uart_rx/counter[15]_i_1_n_0                                          | SOC/UART/uart_rx/bit_index[3]_i_1_n_0                       |                6 |             16 |         2.67 |
+|  clk_o_BUFG    | SOC/UART/set_bit_period                                                       | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                4 |             16 |         4.00 |
+|  clk_o_BUFG    | SOC/UART/set_bit_period_reg_n_0                                               | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                5 |             16 |         3.20 |
+|  clk_o_BUFG    | SOC/UART/uart_tx/counter_0                                                    | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                5 |             16 |         3.20 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Merged_Word_o[31]_i_1_n_0                        |                                                             |                8 |             16 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/EXMEM_mem_data_value[31]_i_1_n_0                 |                                                             |               11 |             16 |         1.45 |
+|  clk_o_BUFG    |                                                                               | SOC/Gpios/Pwm0/counter[0]_i_1__1_n_0                        |                4 |             16 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Alu/flush_bus_o_reg                             | SOC/Processor/N1/First_Stage/i___85_n_0                     |               12 |             19 |         1.58 |
+|  clk_o_BUFG    | SOC/Processor/M1/requested_memory_addr[31]_i_1_n_0                            | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                9 |             19 |         2.11 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_21[0]                           |                                                             |               21 |             32 |         1.52 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_22[0]                           |                                                             |               20 |             32 |         1.60 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_23[0]                           |                                                             |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_20[0]                           |                                                             |               14 |             32 |         2.29 |
 |  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[26]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[22]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[26]_1[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[21]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                6 |             32 |         5.33 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[23]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/E[0]                                            | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               12 |             32 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/First_Word[31]_i_1_n_0                           |                                                             |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_5[0]                            |                                                             |               22 |             32 |         1.45 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_4[0]                            |                                                             |               18 |             32 |         1.78 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/DIV_RD                                      |                                                             |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Second_Word[31]_i_1_n_0                          |                                                             |                8 |             32 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/mul_ready_o                                 | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               10 |             32 |         3.20 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_8[0]                            |                                                             |                8 |             32 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[20]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               12 |             32 |         2.67 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[22]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_24[0]                           |                                                             |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_19[0]                           |                                                             |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[26]_1[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[21]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/IDEXIR_o_reg[23]_0[0]                           | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/E[0]                                            | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               11 |             32 |         2.91 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/dividendo[31]_i_1_n_0                       |                                                             |               10 |             32 |         3.20 |
 |  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/quociente[31]_i_1_n_0                       | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |                6 |             32 |         5.33 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/dividendo[31]_i_1_n_0                       |                                                             |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_29[0]                           |                                                             |               24 |             32 |         1.33 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_28[0]                           |                                                             |               16 |             32 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_27[0]                           |                                                             |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_26[0]                           |                                                             |               10 |             32 |         3.20 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/First_Word[31]_i_1_n_0                           |                                                             |               11 |             32 |         2.91 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/EXMEMALUOut_o[31]_i_1_n_0                        |                                                             |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/IMMEDIATE_REG_o[31]_i_1_n_0                      |                                                             |               10 |             32 |         3.20 |
+|  clk_o_BUFG    | SOC/Processor/M1/d_cache_read_data[31]_i_1_n_0                                |                                                             |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/M1/i_cache_read_data[31]_i_1_n_0                                |                                                             |               23 |             32 |         1.39 |
 |  clk_o_BUFG    | SOC/Processor/M1/write_data                                                   |                                                             |               12 |             32 |         2.67 |
-|  clk_o_BUFG    | SOC/Processor/M1/i_cache_read_data[31]_i_1_n_0                                |                                                             |               17 |             32 |         1.88 |
-|  clk_o_BUFG    | SOC/Processor/M1/d_cache_read_data[31]_i_1_n_0                                |                                                             |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_25[0]                           |                                                             |                7 |             32 |         4.57 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_24[0]                           |                                                             |                7 |             32 |         4.57 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_23[0]                           |                                                             |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_22[0]                           |                                                             |                7 |             32 |         4.57 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_20[0]                           |                                                             |               18 |             32 |         1.78 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_7[0]                            |                                                             |               17 |             32 |         1.88 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_9[0]                            |                                                             |                8 |             32 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_14[0]                           |                                                             |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_10[0]                           |                                                             |                7 |             32 |         4.57 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_12[0]                           |                                                             |                8 |             32 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_13[0]                           |                                                             |               13 |             32 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_15[0]                           |                                                             |                8 |             32 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_16[0]                           |                                                             |               11 |             32 |         2.91 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_17[0]                           |                                                             |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_18[0]                           |                                                             |                9 |             32 |         3.56 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_19[0]                           |                                                             |               14 |             32 |         2.29 |
-|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_21[0]                           |                                                             |               24 |             32 |         1.33 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/DIV_RD                                      |                                                             |               11 |             32 |         2.91 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/mul_ready_o                                 | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               10 |             32 |         3.20 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/flush_bus_o_reg[0]                               | SOC/Processor/N1/First_Stage/IFID_PC_o[31]_i_1_n_0          |                7 |             32 |         4.57 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_5[0]                            |                                                             |               21 |             32 |         1.52 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_27[0]                           |                                                             |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_28[0]                           |                                                             |               20 |             32 |         1.60 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_29[0]                           |                                                             |               20 |             32 |         1.60 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_26[0]                           |                                                             |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/E[0]                                            |                                                             |               19 |             32 |         1.68 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_0[0]                            |                                                             |                9 |             32 |         3.56 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_3[0]                            |                                                             |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_1[0]                            |                                                             |               17 |             32 |         1.88 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_25[0]                           |                                                             |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Second_Word[31]_i_1_n_0                          |                                                             |               13 |             32 |         2.46 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_2[0]                            |                                                             |               19 |             32 |         1.68 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_4[0]                            |                                                             |               19 |             32 |         1.68 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_6[0]                            |                                                             |               20 |             32 |         1.60 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_14[0]                           |                                                             |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_17[0]                           |                                                             |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_16[0]                           |                                                             |               16 |             32 |         2.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_15[0]                           |                                                             |               19 |             32 |         1.68 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_13[0]                           |                                                             |               21 |             32 |         1.52 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_18[0]                           |                                                             |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_12[0]                           |                                                             |               22 |             32 |         1.45 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_10[0]                           |                                                             |               14 |             32 |         2.29 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_9[0]                            |                                                             |               15 |             32 |         2.13 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_8[0]                            |                                                             |               18 |             32 |         1.78 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_7[0]                            |                                                             |               18 |             32 |         1.78 |
+|  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/reg_wr_en_o_reg_11[0]                           |                                                             |               17 |             32 |         1.88 |
 |  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/quociente_msk[31]_i_1_n_0                   |                                                             |               10 |             33 |         3.30 |
 |  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/acumulador[16]_i_1_n_0                      |                                                             |               12 |             34 |         2.83 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/memory_write_reg_1[0]                            | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               36 |             48 |         1.33 |
-|  clk_o_BUFG    | SOC/Processor/N1/First_Stage/temp_instruction                                 |                                                             |               22 |             48 |         2.18 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address[0]_i_1_n_0                          |                                                             |               17 |             49 |         2.88 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/EXMEMIR_o[14]_i_2_n_0                            | SOC/Processor/N1/Third_Stage/EXMEMIR_o[14]_i_1_n_0          |               29 |             60 |         2.07 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/quociente_msk[31]_i_1_n_0                   | SOC/Processor/N1/Second_Stage/Mdu/quociente_msk[30]_i_1_n_0 |               15 |             62 |         4.13 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/E[0]                                        |                                                             |               32 |             64 |         2.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/EXMEMALUOut_o[31]_i_1_n_0                        |                                                             |               22 |             64 |         2.91 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/unaligned_access_in_progress_reg_2[0]            |                                                             |               25 |             64 |         2.56 |
+|  clk_o_BUFG    | SOC/Processor/N1/First_Stage/temp_instruction                                 |                                                             |               16 |             48 |         3.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/peripheral_access_lock_reg_0[0]                  | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               37 |             48 |         1.30 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address[0]_i_1_n_0                          |                                                             |               16 |             50 |         3.12 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/EXMEMIR_o[14]_i_2_n_0                            | SOC/Processor/N1/Third_Stage/EXMEMIR_o[14]_i_1_n_0          |               31 |             60 |         1.94 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/quociente_msk[31]_i_1_n_0                   | SOC/Processor/N1/Second_Stage/Mdu/quociente_msk[30]_i_1_n_0 |               16 |             62 |         3.88 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/memory_operation_o_reg_1[0]                      |                                                             |               23 |             64 |         2.78 |
 |  clk_o_BUFG    | SOC/Processor/N1/Fourth_Stage/instruction_finished                            | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               16 |             64 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/E[0]                                        |                                                             |               33 |             64 |         1.94 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/PC                                          | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               32 |             83 |         2.59 |
 |  clk_o_BUFG    | SOC/Processor/ICache/cache_tag_reg_0_255_0_0_i_1_n_0                          |                                                             |               21 |             84 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/ICache/cache_tag_reg_256_511_0_0_i_1_n_0                        |                                                             |               21 |             84 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/Mdu/PC                                          | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |               35 |             86 |         2.46 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/memory_operation_o_reg_0                         | SOC/Processor/N1/Second_Stage/Mdu/SS[0]                     |               41 |             93 |         2.27 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_0                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/ICache/cache_data_reg_0_255_0_0_i_1__0_n_0                      |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/ICache/cache_data_reg_256_511_0_0_i_1_n_0                       |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_2                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_3                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[12]_1                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[13]_0                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/subword_store_reg_1                              | SOC/Processor/N1/Second_Stage/Mdu/SS[0]                     |               39 |             93 |         2.38 |
 |  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[12]_3                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_4                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_6                           |                                                             |               32 |            128 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[13]_1                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_5                           |                                                             |               32 |            128 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[13]_2                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[12]_5                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[12]_2                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[10]_1                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[12]_0                           |                                                             |               32 |            128 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[13]_3                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/ICache/cache_data_reg_0_255_0_0_i_1__0_n_0                      |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[12]_1                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/ICache/cache_data_reg_256_511_0_0_i_1_n_0                       |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_0                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_5                           |                                                             |               32 |            128 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[12]_4                           |                                                             |               32 |            128 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]_3                              |                                                             |               33 |            132 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]                                |                                                             |               33 |            132 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]_0                              |                                                             |               33 |            132 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]_1                              |                                                             |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[10]_0                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_4                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_3                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[13]_4                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[12]_2                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_2                           |                                                             |               32 |            128 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/Data_Address_reg[11]_1                           |                                                             |               32 |            128 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]_2                              |                                                             |               33 |            132 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[8]                                |                                                             |               33 |            132 |         4.00 |
-|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[8]_0                              |                                                             |               33 |            132 |         4.00 |
 |  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[7]                                |                                                             |               33 |            132 |         4.00 |
-|  clk_o_BUFG    |                                                                               |                                                             |               56 |            155 |         2.77 |
-|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/p_1_in__1                                        |                                                             |               54 |            216 |         4.00 |
-|  clk_o_BUFG    |                                                                               | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |              633 |           1872 |         2.96 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[8]_0                              |                                                             |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[8]                                |                                                             |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]_3                              |                                                             |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]_1                              |                                                             |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]_0                              |                                                             |               33 |            132 |         4.00 |
+|  clk_o_BUFG    | SOC/Processor/N1/Second_Stage/EXMEMPC_o_reg[9]                                |                                                             |               33 |            132 |         4.00 |
+|  clk_o_BUFG    |                                                                               |                                                             |               58 |            172 |         2.97 |
+|  clk_o_BUFG    | SOC/Processor/N1/Third_Stage/p_1_in__0                                        |                                                             |               54 |            216 |         4.00 |
+|  clk_o_BUFG    |                                                                               | SOC/Processor/N1/First_Stage/Branch_Prediction/CPU_RESETN   |              678 |           1884 |         2.78 |
 +----------------+-------------------------------------------------------------------------------+-------------------------------------------------------------+------------------+----------------+--------------+
 
 

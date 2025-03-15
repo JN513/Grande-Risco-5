@@ -59,7 +59,7 @@ Grande_Risco5 #(
     .DATA_WIDTH             (DATA_WIDTH),
     .ADDR_WIDTH             (ADDR_WIDTH),
     .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
-) Processor(
+) Processor (
     .clk   (clk),
     .rst_n (rst_n),
     .halt  (halt),

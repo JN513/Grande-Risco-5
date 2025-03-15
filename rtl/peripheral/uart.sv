@@ -32,7 +32,8 @@ typedef enum logic [4:0] {
     WRITE,
     RX_STATE,
     SET_BIT_PERIOD,
-    FINISH
+    FINISH,
+    WAIT
 } uart_state_t;
 
 uart_state_t state;
@@ -146,8 +147,12 @@ always_ff @(posedge clk) begin : UART_FSM
             end
             FINISH: begin
                 ack_o <= 1'b1;
+                state <= WAIT;
+            end
+            WAIT: begin
                 state <= IDLE;
             end
+            default: state <= IDLE;
         endcase
     end
 end

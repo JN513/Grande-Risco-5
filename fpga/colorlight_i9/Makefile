@@ -17,6 +17,7 @@ buildFolder:
 
 clean:
 	rm -rf build
+	rm -rf slpp_all
 
 load:
 	openFPGALoader -b colorlight-i9 ./build/out.bit

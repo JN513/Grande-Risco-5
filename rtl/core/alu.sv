@@ -44,7 +44,7 @@ always_comb begin : ALU_LOGIC
         // Shifts
         SHIFT_LEFT:    ALU_RD_o = ALU_RS1_i << ALU_RS2_i[4:0];
         SHIFT_RIGHT:   ALU_RD_o = ALU_RS1_i >> ALU_RS2_i[4:0];
-        SHIFT_RIGHT_A: ALU_RD_o = ALU_RS1_i >>> ALU_RS2_i[4:0];
+        SHIFT_RIGHT_A: ALU_RD_o = $signed(ALU_RS1_i) >>> ALU_RS2_i[4:0];
 
         default: ALU_RD_o = ALU_RS1_i; // Operação padrão
     endcase

@@ -20,6 +20,7 @@ buildFolder:
 
 clean:
 	rm -rf build
+	rm -rf slpp_all
 
 load:
 	openFPGALoader -b nexys_a7_100 ./build/out.bit

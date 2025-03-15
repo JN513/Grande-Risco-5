@@ -1,0 +1,29 @@
+name: MDU Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar Icarus Verilog (iverilog)
+        run: sudo apt update && sudo apt install -y iverilog gtkwave
+
+      - name: Criar diretório de build
+        run: mkdir -p build
+
+      - name: Compilar o testbench
+        run: iverilog -o build/mdu_tb -s mdu_tb -g2005-sv -Irtl/core testbenchs/mdu_tb.sv rtl/core/mdu.sv
+
+      - name: Executar o testbench
+        run: vvp build/mdu_tb
+
+      - name: Salvar VCD como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdu_waveform
+          path: build/mdu_tb.vcd

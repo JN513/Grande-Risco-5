@@ -151,10 +151,26 @@ Cache_request_Multiplexer #(
     .memory_read_data      (memory_read_data)
 );
 
+logic peripheral_access_lock, peripheral_wr_through;
 
-assign processor_cyc     = (data_read_request | data_write_request) & data_address[31];
+always_ff @( posedge clk ) begin : BUS_LOGIC
+    if(!rst_n) begin
+        peripheral_access_lock <= 1'b0;
+        peripheral_wr_through  <= 1'b0;
+    end else begin
+        if((data_read_request || data_write_request) && data_address[31] && !ack_i) begin
+            peripheral_access_lock <= 1'b1;
+            peripheral_wr_through  <= data_write_request;
+        end else if(ack_i) begin
+            peripheral_access_lock <= 1'b0;
+            peripheral_wr_through  <= 1'b0;
+        end
+    end
+end
+
+assign processor_cyc     = (data_read_request | data_write_request | peripheral_access_lock ) & data_address[31];
 assign cache_cyc         = memory_read_request | memory_write_request;
-assign processor_data_we = data_write_request;
+assign processor_data_we = data_write_request | peripheral_wr_through;
 assign cache_data_we     = memory_write_request;
 
 assign stb_o                 = cyc_o;
@@ -162,7 +178,7 @@ assign cyc_o                 = (data_address[31]) ? processor_cyc     : cache_cy
 assign we_o                  = (data_address[31]) ? processor_data_we : cache_data_we;
 assign addr_o                = (processor_cyc) ? data_address      : memory_addr;
 assign data_o                = (processor_cyc) ? data_write_data   : memory_write_data;
-assign memory_response       = ack_i;
+assign memory_response       = (processor_cyc) ? 1'b0 : ack_i;
 assign memory_read_data      = data_i;
 assign d_cache_read_request  = (!data_address[31]) ? data_read_request  : 1'b0;
 assign d_cache_write_request = (!data_address[31]) ? data_write_request : 1'b0;

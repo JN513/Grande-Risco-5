@@ -31,7 +31,7 @@ int main(int argc, char **argv, char **env) {
     soc->rst_n = 1;
     
     // Simulação
-    for (; i < 4000; i++) {
+    for (; i < 40000; i++) {
         soc->clk = !soc->clk;
         soc->eval();
         trace->dump(i * CLOCK_PERIOD);

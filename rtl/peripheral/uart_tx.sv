@@ -15,8 +15,9 @@ module UART_TX #(
     output logic uart_tx_busy
 );
 
-localparam DEFAULT_BIT_PERIOD = 16'((CLK_FREQ / BAUD_RATE) - 1'b1);
+localparam DEFAULT_BIT_PERIOD = 16'((CLK_FREQ / BAUD_RATE) - 1);
 
+logic [7:0] uart_tx_data_internal;
 logic [3:0]  bit_index;
 logic [15:0] counter;   // Bit counter
 logic [15:0] bit_period;
@@ -44,6 +45,7 @@ always_ff @(posedge clk) begin : UART_TX_FSM
                 uart_txd     <= 1'b1;
                 uart_tx_busy <= 1'b0; // Desativa busy no estado IDLE
                 if (uart_tx_en) begin
+                    uart_tx_data_internal <= uart_tx_data;
                     counter      <= bit_period; // Usa bit_period atualizado
                     bit_index    <= 4'd0;
                     state        <= START;
@@ -56,7 +58,8 @@ always_ff @(posedge clk) begin : UART_TX_FSM
                     counter <= counter - 1'b1;
                 end else begin
                     counter   <= bit_period;
-                    uart_txd  <= uart_tx_data[bit_index[2:0]]; // Primeiro bit de dados
+                    uart_txd  <= uart_tx_data_internal[0]; // Primeiro bit de dados
+                    uart_tx_data_internal <= {1'b0, uart_tx_data_internal[7:1]};
                     bit_index <= bit_index + 1'b1;
                     state     <= SEND;
                 end
@@ -67,7 +70,8 @@ always_ff @(posedge clk) begin : UART_TX_FSM
                 end else begin
                     counter <= bit_period;
                     if (bit_index < 'd8) begin
-                        uart_txd  <= uart_tx_data[bit_index[2:0]];
+                        uart_txd  <= uart_tx_data_internal[0]; // Primeiro bit de dados
+                        uart_tx_data_internal <= {1'b0, uart_tx_data_internal[7:1]};
                         bit_index <= bit_index + 1'b1;
                     end else begin
                         uart_txd <= 1'b1; // Garante que a linha vá para alto (STOP bit)

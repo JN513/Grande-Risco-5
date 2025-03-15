@@ -174,7 +174,8 @@ logic [7:0] uart_tx_data;
 typedef enum logic [1:0] { 
     TX_FIFO_IDLE,
     TX_FIFO_READ_FIFO,
-    TX_FIFO_WRITE_TX
+    TX_FIFO_WRITE_TX,
+    TX_FIFO_WAIT
 } tx_read_fifo_state_t;
 
 tx_read_fifo_state_t tx_read_fifo_state;
@@ -194,8 +195,11 @@ always_ff @(posedge clk) begin : UART_TX_READ_FROM_FIFO
             tx_read_fifo_state <= TX_FIFO_WRITE_TX;
         end
         TX_FIFO_WRITE_TX: begin
-            uart_tx_data <= uart_tx_fifo_data_out;
-            uart_tx_en   <= 1'b1;
+            uart_tx_data       <= uart_tx_fifo_data_out;
+            uart_tx_en         <= 1'b1;
+            tx_read_fifo_state <= TX_FIFO_WAIT;
+        end
+        TX_FIFO_WAIT: begin
             tx_read_fifo_state <= TX_FIFO_IDLE;
         end
         default: tx_read_fifo_state <= TX_FIFO_IDLE;

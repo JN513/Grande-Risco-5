@@ -1,8 +1,8 @@
 `include "config.vh"
 
 module Grande_Risco_5_SOC #(
-    parameter CLOCK_FREQ             = 50000000,
-    parameter BAUD_RATE              = 115200,
+    parameter CLOCK_FREQ             = 50_000_000,
+    parameter BAUD_RATE              = 2_500_000,
     parameter BOOT_ADDRESS           = 32'h00000000,
     parameter MEMORY_SIZE            = 4096,
     parameter MEMORY_FILE            = "verification_tests/memory/generic.hex",

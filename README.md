@@ -1,45 +1,75 @@
 # Grande RISCO 5
 
 <p align="center">
-<img src="docs/imgs/risco5.jpeg" alt="Logo do processador" width="300px">
+<img src="docs/imgs/risco5.jpeg" alt="Processor Logo" width="300px">
 </p>
 
-Processador [RISC-V](https://riscv.org/) de multi ciclo RV32I com pipeline de 5 estagios construído em alguns dias de folga.
+**Grande RISCO 5** is a [RISC-V](https://riscv.org/) RV32IMBC_Zicsr processor with a 5-stage pipeline, developed in just a few days off.
+
+- **Não fala Inglês? [Clique aqui](https://github.com/JN513/Grande-Risco-5/blob/main/README_pt.md)**
+
+## Project Official Language
+
+The official language adopted by the project is Brazilian Portuguese; therefore, most of the documentation and commits are in this language.
 
 ## Processor CI
 
 [![Build Status](https://processorci.ic.unicamp.br/jenkins/buildStatus/icon?job=Grande-Risco-5/)](https://processorci.ic.unicamp.br/jenkins/blue/organizations/jenkins/Grande-Risco-5/activity)
 
-## Implementação
+## Implementation
 
-O processador foi implementado utilizando Verilog HDL e SystemVerilog.
+The processor was implemented using **SystemVerilog**.
 
-## Verification Tests
+## RISC-V Extension Support
 
-O diretório Verification_tests possui alguns exemplos e testes escritos em Assembly e os seus respectivos arquivos de memória, além disso está disponível um script para transformar Assembly em arquivo de memória.
+Grande RISCO 5 currently supports the following RISC-V extensions:
 
-## Testbenchs
+| Extension | Support |
+|-----------|---------|
+| I         | Complete |
+| M         | Complete |
+| C         | Complete |
+| B         | In progress |
+| A         | Speculative |
+| Zicsr     | In progress |
 
-O diretório Testbenchs possui alguns testbenchs construídos utilizando o [Iverilog](https://steveicarus.github.io/iverilog/), todos os testes lá disponíveis são compatíveis com o mesmo.
+## Testing and Verification
 
-## Família Risco 5:
+### Verification Tests
 
-- Baby Risco 5 - RV32E Implementação otimizada para o TinyTapeout: [https://github.com/JN513/Baby-Risco-5](https://github.com/JN513/Baby-Risco-5)
-- Pequeno Risco 5 - RV32I Implementação de ciclo único (Arquivada): [https://github.com/JN513/Pequeno-Risco-5/](https://github.com/JN513/Pequeno-Risco-5/)
-- Risco 5 - RV32I/E[M]: [https://github.com/JN513/Risco-5](https://github.com/JN513/Risco-5)
-- Grande Risco 5 - RV32I: [https://github.com/JN513/Grande-Risco-5](https://github.com/JN513/Grande-Risco-5)
-- Risco 5 Bodybuilder - RV64IMA: Ainda em fase especulativa
-- RISCO 5S - RV32IM Simulador escrito com a linguagem C: [https://github.com/JN513/Risco-5S](https://github.com/JN513/Risco-5S)
+The `Verification_tests` directory contains examples and tests written in Assembly, along with their respective memory files. Additionally, there is a script available to convert Assembly into memory files (.hex).
 
+### Testbenches
 
-## Dúvidas e Sugestões
+The `Testbenchs` directory contains testbenches developed using [Icarus Verilog (Iverilog)](https://steveicarus.github.io/iverilog/). Most tests are compatible with Iverilog, and some have been ported to [Verilator](https://verilator.org/).
 
-A documentação oficial está disponível em: [https://jn513.github.io/Grande-Risco-5/](https://jn513.github.io/Grande-Risco-5). Se tiver alguma dúvida ou sugestão, sinta-se à vontade para utilizar a seção de [ISSUES](https://github.com/JN513/Grande-Risco-5/issues) no GitHub. Contribuições são bem-vindas e todos os [Pull requests](https://github.com/JN513/Grande-Risco-5/pulls) serão revisados e, se possível, mesclados.
+## RISCO 5 Family
 
+**Grande RISCO 5** is part of a family of RISC-V processors developed for different purposes:
 
-## Licença
+- **[Baby Risco 5](https://github.com/JN513/Baby-Risco-5)** - RV32E, optimized for TinyTapeout.
+- **[Pequeno Risco 5](https://github.com/JN513/Pequeno-Risco-5/)** - RV32I, single-cycle implementation (Archived).
+- **[Risco 5](https://github.com/JN513/Risco-5)** - RV32I/E[M], multi-cycle implementation (Paused).
+- **[Grande Risco 5](https://github.com/JN513/Grande-Risco-5)** - RV32I, pipeline implementation.
+- **Risco 5 Bodybuilder** - RV64IMA, still speculative.
+- **[RISCO 5S](https://github.com/JN513/Risco-5S)** - RV32IM, simulator written in C.
 
-Este projeto é licenciado sob a licença [CERN-OHL-P-2.0](https://github.com/JN513/Grande-Risco-5/blob/main/LICENSE), que concede total liberdade para uso. O software é licenciado sob a [Licença MIT](https://github.com/JN513/Grande-Risco-5/blob/main/LICENSE-MIT), e a documentação sob [CC BY-SA 4.0](https://github.com/JN513/Grande-Risco-5/blob/main/LICENSE-CC).
+## Questions and Suggestions
 
+The official documentation is available at: [jn513.github.io/Grande-Risco-5](https://jn513.github.io/Grande-Risco-5). If you have any questions or suggestions, feel free to use the [ISSUES](https://github.com/JN513/Grande-Risco-5/issues) section on GitHub. Contributions are welcome, and all [Pull Requests](https://github.com/JN513/Grande-Risco-5/pulls) will be reviewed.
 
-Autor da logo: [Mateus luck](https://www.instagram.com/mateusluck/)
+## Contribution
+
+If you wish to contribute to the project, follow the instructions in the [CONTRIBUTING.md](https://github.com/Grande-Risco-5/Risco-5/blob/main/CONTRIBUTING.md) file.
+
+## License
+
+This project is licensed under **[CERN-OHL-P-2.0](https://github.com/JN513/Grande-Risco-5/blob/main/LICENSE)**, ensuring full usage freedom.
+
+- The software is under the **[MIT License](https://github.com/JN513/Grande-Risco-5/blob/main/LICENSE-MIT)**.
+- The documentation follows **[CC BY-SA 4.0](https://github.com/JN513/Grande-Risco-5/blob/main/LICENSE-CC)**.
+
+---
+
+**Logo author:** [Mateus Luck](https://www.instagram.com/mateusluck/)
+

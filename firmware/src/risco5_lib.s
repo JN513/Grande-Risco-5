@@ -1,4 +1,3 @@
-.globl _start   # Declara o ponto de entrada global
 .globl strlen   # Declara a função strlen global
 .globl strcpy   # Declara a função strcpy global
 .globl strcmp   # Declara a função strcmp global
@@ -8,14 +7,6 @@
 .extern main    # Declara a função main como externa
 
 .globl delay_ms # Declara a função delay_ms global
-
-_start:
-    li sp, 0x00004000 # Inicializa o ponteiro de pilha (SP) com 0x04000
-    li t0, 0x00000000 # Inicializa t0 com 0 (não utilizado posteriormente)
-    li s0, 0x00002000 # Inicializa o frame pointer (S0/FP) com 0x02000
-
-    jal main          # Salta e liga para a função main
-    jal exit          # Salta e liga para a função exit
 
 # Função strlen: calcula o comprimento de uma string
 strlen: # int strlen(char *str)
@@ -130,6 +121,4 @@ delay_1ms:
 delay_end:
     ret               # Retorna da função
 
-# Função exit: finaliza o programa
-exit:
-    j exit            # Loop infinito para simular a saída do programa
+

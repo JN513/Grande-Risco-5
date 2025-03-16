@@ -21,7 +21,7 @@ Grande_Risco_5_SOC #(
     .CLOCK_FREQ             (50000000),
     .BAUD_RATE              (115200),
     .MEMORY_SIZE            (16384),
-    .MEMORY_FILE            ("../../verification_tests/memory/teste_uart_rx.hex"),
+    .MEMORY_FILE            ("../../firmware/build/program.hex"),
     .GPIO_WIDTH             (6),
     .UART_BUFFER_SIZE       (32),
     .I_CACHE_SIZE           (2048),

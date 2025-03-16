@@ -1,4 +1,4 @@
-#include "../lib/gpio.h"
+#include "gpio.h"
 
 int get_pwm_period(int freq) {
     return CLK_FREQ / freq;

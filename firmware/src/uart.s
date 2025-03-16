@@ -1,4 +1,6 @@
 # Declarações globais das funções
+.set UART_BASE_ADDR, 0x90000000
+
 .globl uart_rx_empty
 .globl uart_tx_empty
 .globl uart_rx_full
@@ -10,48 +12,48 @@
 
 # Função para verificar se o buffer de recepção da UART está vazio
 uart_rx_empty:
-    li t1, 0x80000004   # Carrega o endereço do registrador de status de recepção vazia da UART em t1
-    lw a0, 0(t1)        # Carrega o valor do registrador t1 para a0 (retorno se o buffer de recepção está vazio)
+    li t1, UART_BASE_ADDR   # Carrega o endereço do registrador de status de recepção vazia da UART em t1
+    lw a0, 4(t1)        # Carrega o valor do registrador t1 para a0 (retorno se o buffer de recepção está vazio)
 
     ret                 # Retorna da função
 
 # Função para verificar se o buffer de transmissão da UART está vazio
 uart_tx_empty:
-    li t1, 0x80000008   # Carrega o endereço do registrador de status de transmissão vazia da UART em t1
-    lw a0, 0(t1)        # Carrega o valor do registrador t1 para a0 (retorno se o buffer de transmissão está vazio)
+    li t1, UART_BASE_ADDR   # Carrega o endereço do registrador de status de transmissão vazia da UART em t1
+    lw a0, 8(t1)        # Carrega o valor do registrador t1 para a0 (retorno se o buffer de transmissão está vazio)
 
     ret                 # Retorna da função
 
 # Função para verificar se o buffer de recepção da UART está cheio
 uart_rx_full:
-    li t1, 0x8000000C   # Carrega o endereço do registrador de status de recepção cheia da UART em t1
-    lw a0, 0(t1)        # Carrega o valor do registrador t1 para a0 (retorno se o buffer de recepção está cheio)
+    li t1, UART_BASE_ADDR   # Carrega o endereço do registrador de status de recepção cheia da UART em t1
+    lw a0, 12(t1)        # Carrega o valor do registrador t1 para a0 (retorno se o buffer de recepção está cheio)
 
     ret                 # Retorna da função
 
 # Função para verificar se o buffer de transmissão da UART está cheio
 uart_tx_full:
-    li t1, 0x80000010   # Carrega o endereço do registrador de status de transmissão cheia da UART em t1
-    lw a0, 0(t1)        # Carrega o valor do registrador t1 para a0 (retorno se o buffer de transmissão está cheio)
+    li t1, UART_BASE_ADDR   # Carrega o endereço do registrador de status de transmissão cheia da UART em t1
+    lw a0, 16(t1)        # Carrega o valor do registrador t1 para a0 (retorno se o buffer de transmissão está cheio)
 
     ret                 # Retorna da função
 
 # Função para ler um caractere da UART
 uart_read:
-    li t1, 0x80000000   # Carrega o endereço do registrador de leitura da UART em t1
+    li t1, UART_BASE_ADDR   # Carrega o endereço do registrador de leitura da UART em t1
     lw a0, 0(t1)        # Carrega o valor do registrador t1 para a0 (retorno do caractere lido da UART)
 
     ret                 # Retorna da função
 
 # Função para escrever um caractere na UART
 uart_write:
-    li t1, 0x80000000   # Carrega o endereço do registrador de escrita da UART em t1
+    li t1, UART_BASE_ADDR   # Carrega o endereço do registrador de escrita da UART em t1
     sw a0, 0(t1)        # Armazena o valor de a0 (caractere a ser escrito) no endereço t1 (escrita na UART)
 
     ret                 # Retorna da função
 
 uart_read_string:
-    li t1, 0x80000000   # t1 = 0x80000000 (uart address)
+    li t1, UART_BASE_ADDR   # t1 = 0x80000000 (uart address)
     li t0, 10           # t0 = 10 (\n)
     li t2, 0            # t2 = 0 (counter)
 
@@ -72,12 +74,12 @@ uart_read_string_end:
     ret         # return from function
 
 uart_write_string:
-    li t1, 0x80000000   # t1 = 0x80000000 (uart address)
-    li t2, 0x80000010   # t2 = 0x80000010 (buffer address)
+    li t1, UART_BASE_ADDR   # t1 = 0x90000000 (uart address)
+
     li t0, 10           # t0 = 10 (\n)
 
 uart_write_string_loop:
-    lw t3, 0(t2)        # t3 = load word from address t2 (buffer)
+    lw t3, 16(t1)        # t3 = load word from address t2 (buffer)
 
     bnez t3, uart_write_string_loop   # if t3 != 0, loop (skip if buffer is full)
 

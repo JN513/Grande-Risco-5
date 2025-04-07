@@ -81,7 +81,7 @@ assign instr_c_i = (finish_unaligned_pc) ? unaligned_instruction : instruction_d
 
 logic [31:0] JAL_PC, JALR_PC;
 
-always @(posedge clk ) begin // IF/ID
+always_ff @(posedge clk ) begin // IF/ID
     instruction_request_o <= 1'b1;
     flush_bus_o           <= 1'b0;
     jump_is_predicted     <= 1'b0;

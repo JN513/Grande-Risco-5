@@ -2,6 +2,16 @@
 
 _start:
     li a1, 0x90000000 # Uart base address
+
+    # enable rx
+
+    li a0, 1
+    sw a0, 4(a1)
+
+    li a0, 'J'
+
+    # write
+    sw a0, 0(a1)
     
     read_loop:
 

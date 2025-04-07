@@ -72,11 +72,11 @@ always_ff @(posedge clk) begin
         gpio_value     <= 'h0;
     end else if (cyc_i && stb_i && we_i) begin  // Write operation
         case (addr_i[7:0])
-            SET_DIRECTION:     gpio_direction               <= data_i[WIDTH - 1:0];
-            WRITE_DATA:        gpio_value                   <= data_i[WIDTH - 1:0];
-            CONFIG_PWM:        is_pwm                       <= data_i[1:0];
-            CONFIG_PERIOD:     period[data_i[16]]           <= data_i[15:0];
-            CONFIG_DUTY_CYCLE: duty_cycle[data_i[16]]       <= data_i[15:0];
+            SET_DIRECTION:     gpio_direction          <= data_i[WIDTH - 1:0];
+            WRITE_DATA:        gpio_value              <= data_i[WIDTH - 1:0];
+            CONFIG_PWM:        is_pwm                  <= data_i[1:0];
+            CONFIG_PERIOD:     period[data_i[16]]      <= data_i[15:0];
+            CONFIG_DUTY_CYCLE: duty_cycle[data_i[16]]  <= data_i[15:0];
             default: begin
                 // Do nothing
             end

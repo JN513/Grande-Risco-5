@@ -39,6 +39,8 @@ read_verilog -sv ../../rtl/peripheral/uart.sv
 read_verilog -sv ../../rtl/peripheral/vga.sv
 read_verilog -sv ../../rtl/peripheral/soc.sv
 
+set_param general.maxThreads 16
+
 read_xdc "pinout.xdc"
 set_property PROCESSING_ORDER EARLY [get_files pinout.xdc]
 

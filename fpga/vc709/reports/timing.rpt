@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
-| Date         : Thu Mar 13 19:40:08 2025
+| Date         : Thu Mar 27 16:40:38 2025
 | Host         : vader running 64-bit Arch Linux
 | Command      : report_timing_summary -datasheet -max_paths 10 -file reports/timing.rpt
 | Design       : top
@@ -49,10 +49,10 @@ check_timing report
 
 Table of Contents
 -----------------
-1. checking no_clock (9134)
+1. checking no_clock (9009)
 2. checking constant_clock (0)
 3. checking pulse_width_clock (0)
-4. checking unconstrained_internal_endpoints (48690)
+4. checking unconstrained_internal_endpoints (48339)
 5. checking no_input_delay (10)
 6. checking no_output_delay (17)
 7. checking multiple_clock (0)
@@ -62,9 +62,9 @@ Table of Contents
 11. checking partial_output_delay (0)
 12. checking latch_loops (0)
 
-1. checking no_clock (9134)
+1. checking no_clock (9009)
 ---------------------------
- There are 9134 register/latch pins with no clock driven by root clock pin: clk_o_reg/Q (HIGH)
+ There are 9009 register/latch pins with no clock driven by root clock pin: clk_o_reg/Q (HIGH)
 
 
 2. checking constant_clock (0)
@@ -77,9 +77,9 @@ Table of Contents
  There are 0 register/latch pins which need pulse_width check
 
 
-4. checking unconstrained_internal_endpoints (48690)
+4. checking unconstrained_internal_endpoints (48339)
 ----------------------------------------------------
- There are 48690 pins that are not constrained for maximum delay. (HIGH)
+ There are 48339 pins that are not constrained for maximum delay. (HIGH)
 
  There are 0 pins that are not constrained for maximum delay due to constant clock.
 
@@ -138,7 +138,7 @@ Table of Contents
 
     WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
     -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
-      4.442        0.000                      0                    1        0.205        0.000                      0                    1        2.150        0.000                       0                     2  
+      4.363        0.000                      0                    1        0.240        0.000                      0                    1        2.150        0.000                       0                     2  
 
 
 All user specified timing constraints are met.
@@ -161,7 +161,7 @@ mcb_clk_ref  {0.000 2.500}        5.000           200.000
 
 Clock             WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
 -----             -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
-mcb_clk_ref         4.442        0.000                      0                    1        0.205        0.000                      0                    1        2.150        0.000                       0                     2  
+mcb_clk_ref         4.363        0.000                      0                    1        0.240        0.000                      0                    1        2.150        0.000                       0                     2  
 
 
 ------------------------------------------------------------------------------------------------
@@ -192,15 +192,15 @@ Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing 
 From Clock:  mcb_clk_ref
   To Clock:  mcb_clk_ref
 
-Setup :            0  Failing Endpoints,  Worst Slack        4.442ns,  Total Violation        0.000ns
-Hold  :            0  Failing Endpoints,  Worst Slack        0.205ns,  Total Violation        0.000ns
+Setup :            0  Failing Endpoints,  Worst Slack        4.363ns,  Total Violation        0.000ns
+Hold  :            0  Failing Endpoints,  Worst Slack        0.240ns,  Total Violation        0.000ns
 PW    :            0  Failing Endpoints,  Worst Slack        2.150ns,  Total Violation        0.000ns
 ---------------------------------------------------------------------------------------------------
 
 
 Max Delay Paths
 --------------------------------------------------------------------------------------
-Slack (MET) :             4.442ns  (required time - arrival time)
+Slack (MET) :             4.363ns  (required time - arrival time)
   Source:                 clk_o_reg/C
                             (rising edge-triggered cell FDRE clocked by mcb_clk_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
   Destination:            clk_o_reg/D
@@ -208,7 +208,7 @@ Slack (MET) :             4.442ns  (required time - arrival time)
   Path Group:             mcb_clk_ref
   Path Type:              Setup (Max at Slow Process Corner)
   Requirement:            5.000ns  (mcb_clk_ref rise@5.000ns - mcb_clk_ref rise@0.000ns)
-  Data Path Delay:        0.587ns  (logic 0.302ns (51.453%)  route 0.285ns (48.547%))
+  Data Path Delay:        0.665ns  (logic 0.302ns (45.389%)  route 0.363ns (54.611%))
   Logic Levels:           1  (LUT2=1)
   Clock Path Skew:        0.000ns (DCD - SCD + CPR)
     Destination Clock Delay (DCD):    4.068ns = ( 9.068 - 5.000 ) 
@@ -233,9 +233,9 @@ Slack (MET) :             4.442ns  (required time - arrival time)
     SLICE_X106Y246       FDRE                                         r  clk_o_reg/C
   -------------------------------------------------------------------    -------------------
     SLICE_X106Y246       FDRE (Prop_fdre_C_Q)         0.259     4.746 f  clk_o_reg/Q
-                         net (fo=2, routed)           0.285     5.031    clk_o
-    SLICE_X106Y246       LUT2 (Prop_lut2_I1_O)        0.043     5.074 r  clk_o_i_1/O
-                         net (fo=1, routed)           0.000     5.074    clk_o_i_1_n_0
+                         net (fo=2, routed)           0.363     5.110    clk_o
+    SLICE_X106Y246       LUT2 (Prop_lut2_I1_O)        0.043     5.153 r  clk_o_i_1/O
+                         net (fo=1, routed)           0.000     5.153    clk_o_i_1_n_0
     SLICE_X106Y246       FDRE                                         r  clk_o_reg/D
   -------------------------------------------------------------------    -------------------
 
@@ -253,9 +253,9 @@ Slack (MET) :             4.442ns  (required time - arrival time)
     SLICE_X106Y246       FDRE (Setup_fdre_C_D)        0.064     9.516    clk_o_reg
   -------------------------------------------------------------------
                          required time                          9.516    
-                         arrival time                          -5.074    
+                         arrival time                          -5.153    
   -------------------------------------------------------------------
-                         slack                                  4.442    
+                         slack                                  4.363    
 
 
 
@@ -263,7 +263,7 @@ Slack (MET) :             4.442ns  (required time - arrival time)
 
 Min Delay Paths
 --------------------------------------------------------------------------------------
-Slack (MET) :             0.205ns  (arrival time - required time)
+Slack (MET) :             0.240ns  (arrival time - required time)
   Source:                 clk_o_reg/C
                             (rising edge-triggered cell FDRE clocked by mcb_clk_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
   Destination:            clk_o_reg/D
@@ -271,7 +271,7 @@ Slack (MET) :             0.205ns  (arrival time - required time)
   Path Group:             mcb_clk_ref
   Path Type:              Hold (Min at Fast Process Corner)
   Requirement:            0.000ns  (mcb_clk_ref rise@0.000ns - mcb_clk_ref rise@0.000ns)
-  Data Path Delay:        0.292ns  (logic 0.146ns (50.009%)  route 0.146ns (49.991%))
+  Data Path Delay:        0.327ns  (logic 0.146ns (44.600%)  route 0.181ns (55.400%))
   Logic Levels:           1  (LUT2=1)
   Clock Path Skew:        0.000ns (DCD - SCD - CPR)
     Destination Clock Delay (DCD):    2.593ns
@@ -291,9 +291,9 @@ Slack (MET) :             0.205ns  (arrival time - required time)
     SLICE_X106Y246       FDRE                                         r  clk_o_reg/C
   -------------------------------------------------------------------    -------------------
     SLICE_X106Y246       FDRE (Prop_fdre_C_Q)         0.118     2.349 f  clk_o_reg/Q
-                         net (fo=2, routed)           0.146     2.495    clk_o
-    SLICE_X106Y246       LUT2 (Prop_lut2_I1_O)        0.028     2.523 r  clk_o_i_1/O
-                         net (fo=1, routed)           0.000     2.523    clk_o_i_1_n_0
+                         net (fo=2, routed)           0.181     2.531    clk_o
+    SLICE_X106Y246       LUT2 (Prop_lut2_I1_O)        0.028     2.559 r  clk_o_i_1/O
+                         net (fo=1, routed)           0.000     2.559    clk_o_i_1_n_0
     SLICE_X106Y246       FDRE                                         r  clk_o_reg/D
   -------------------------------------------------------------------    -------------------
 
@@ -310,9 +310,9 @@ Slack (MET) :             0.205ns  (arrival time - required time)
     SLICE_X106Y246       FDRE (Hold_fdre_C_D)         0.087     2.318    clk_o_reg
   -------------------------------------------------------------------
                          required time                         -2.318    
-                         arrival time                           2.523    
+                         arrival time                           2.559    
   -------------------------------------------------------------------
-                         slack                                  0.205    
+                         slack                                  0.240    
 
 
 
@@ -346,7 +346,7 @@ Input Ports Setup/Hold
 Reference   | Input     | IO Reg  | Delay |     Setup(ns) | Process |      Hold(ns) | Process | Internal |
 Clock       | Port      | Type    | Type  | to Clk (Edge) | Corner  | to Clk (Edge) | Corner  | Clock    |
 ------------+-----------+---------+-------+---------------+---------+---------------+---------+----------+
-mcb_clk_ref | sys_rst_i | FDRE    | -     |     3.477 (r) | SLOW    |    -1.330 (r) | FAST    |          |
+mcb_clk_ref | sys_rst_i | FDRE    | -     |    15.857 (r) | SLOW    |    -8.544 (r) | FAST    |          |
 ------------+-----------+---------+-------+---------------+---------+---------------+---------+----------+
 
 
@@ -356,7 +356,7 @@ Setup between Clocks
 Source      | Destination |  Src:Rise     | Process |  Src:Rise     | Process |  Src:Fall     | Process |  Src:Fall     | Process |
 Clock       | Clock       | Dest:Rise(ns) | Corner  | Dest:Fall(ns) | Corner  | Dest:Rise(ns) | Corner  | Dest:Fall(ns) | Corner  |
 ------------+-------------+---------------+---------+---------------+---------+---------------+---------+---------------+---------+
-mcb_clk_ref | mcb_clk_ref |         0.558 | SLOW    |               |         |               |         |               |         |
+mcb_clk_ref | mcb_clk_ref |         0.637 | SLOW    |               |         |               |         |               |         |
 ------------+-------------+---------------+---------+---------------+---------+---------------+---------+---------------+---------+
 
 

@@ -60,7 +60,8 @@ typedef enum logic [1:0] {
 
 mul_state_t state_mul;
 
-logic [31:0] Data_X, Data_Y;
+logic [63:0] Data_X;
+logic [31:0] Data_Y;
 logic [63:0] acumulador;
 
 always_ff @(posedge clk) begin : MUL_FSM_FPGA
@@ -76,19 +77,37 @@ always_ff @(posedge clk) begin : MUL_FSM_FPGA
             MUL_IDLE: begin
                 if(valid_i & !MDU_op_i[2]) begin
                     state_mul <= MUL_OPERATE;
-                    if(MDU_op_i[1]) begin
-                        Data_X <= (MDU_op_i[0]) ? $unsigned(MDU_RS1_i) : $signed({MDU_RS1_i});
-                        Data_Y <= $unsigned(MDU_RS2_i);
-                    end else begin
-                        Data_X <= $signed(MDU_RS1_i);
-                        Data_Y <= $signed(MDU_RS2_i);
-                    end
+                    unique case (MDU_op_i[1:0])
+                        2'b00: begin // MUL
+                            Data_X <= $signed(MDU_RS1_i);
+                            Data_Y <= $signed(MDU_RS2_i);
+                        end
+                        2'b01: begin // MULH
+                            Data_X <= $signed(MDU_RS1_i);
+                            Data_Y <= $signed(MDU_RS2_i);
+                        end
+                        2'b10: begin // MULHSU
+                            Data_X <= $signed(MDU_RS1_i);
+                            Data_Y <= $unsigned(MDU_RS2_i);
+                        end
+                        2'b11: begin // MULHU
+                            Data_X <= $unsigned(MDU_RS1_i);
+                            Data_Y <= $unsigned(MDU_RS2_i);
+                        end
+                    endcase
                 end else begin
                     state_mul <= MUL_IDLE;
                 end
             end 
             MUL_OPERATE: begin
-                acumulador <= $signed(Data_X)*$signed(Data_Y);
+                unique case (MDU_op_i[1:0])
+                    2'b00, 2'b01: // MUL ou MULH (ambos signed)
+                        acumulador <= $signed(Data_X) * $signed(Data_Y);
+                    2'b10: // MULHSU
+                        acumulador <= $signed(Data_X) * $unsigned(Data_Y);
+                    2'b11: // MULHU
+                        acumulador <= $unsigned(Data_X) * $unsigned(Data_Y);
+                endcase
                 state_mul <= MUL_FINISH;
             end
 

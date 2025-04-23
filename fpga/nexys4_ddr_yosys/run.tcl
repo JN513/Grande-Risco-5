@@ -40,5 +40,5 @@ yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rt
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/soc.sv
 yosys read_systemverilog -link
 
-yosys synth_xilinx -flatten -nobram -iopad -abc9 -arch xc7
+yosys synth_xilinx -flatten -nobram -iopad -nodsp -abc9 -arch xc7
 yosys write_json ./build/out.json

@@ -25,3 +25,5 @@ fpga/nexys4_ddr/digilent_nexys4ddr_route_status.rpt
 fpga/nexys4_ddr/digilent_nexys4ddr_timing.rpt
 obj_dir
 slpp_all
+fpga/nexys4_ddr/tight_setup_hold_pins.txt
+fpga/nexys4_ddr_yosys/vgcore.332162

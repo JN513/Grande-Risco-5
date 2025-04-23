@@ -79,19 +79,19 @@ always_ff @(posedge clk) begin : MUL_FSM_FPGA
                     state_mul <= MUL_OPERATE;
                     unique case (MDU_op_i[1:0])
                         2'b00: begin // MUL
-                            Data_X <= $signed(MDU_RS1_i);
+                            Data_X <= {{32{MDU_RS1_i[31]}}, MDU_RS1_i};
                             Data_Y <= $signed(MDU_RS2_i);
                         end
                         2'b01: begin // MULH
-                            Data_X <= $signed(MDU_RS1_i);
+                            Data_X <= {{32{MDU_RS1_i[31]}}, MDU_RS1_i};
                             Data_Y <= $signed(MDU_RS2_i);
                         end
                         2'b10: begin // MULHSU
-                            Data_X <= $signed(MDU_RS1_i);
+                            Data_X <= {{32{MDU_RS1_i[31]}}, MDU_RS1_i};
                             Data_Y <= $unsigned(MDU_RS2_i);
                         end
                         2'b11: begin // MULHU
-                            Data_X <= $unsigned(MDU_RS1_i);
+                            Data_X <= {32'b0, MDU_RS1_i};
                             Data_Y <= $unsigned(MDU_RS2_i);
                         end
                     endcase

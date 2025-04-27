@@ -1,3 +1,6 @@
 [submodule "benchmarks/coremark"]
 	path = benchmarks/coremark
 	url = https://github.com/eembc/coremark.git
+[submodule "benchmarks/bringup-bench"]
+	path = benchmarks/bringup-bench
+	url = https://github.com/toddmaustin/bringup-bench.git

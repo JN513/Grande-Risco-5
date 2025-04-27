@@ -27,3 +27,4 @@ obj_dir
 slpp_all
 fpga/nexys4_ddr/tight_setup_hold_pins.txt
 fpga/nexys4_ddr_yosys/vgcore.332162
+reports/

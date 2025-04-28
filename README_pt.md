@@ -46,7 +46,7 @@ O **Grande RISCO 5** faz parte de uma família de processadores RISC-V desenvolv
 - **[Baby Risco 5](https://github.com/JN513/Baby-Risco-5)** - RV32E, implementação otimizada para o TinyTapeout.
 - **[Pequeno Risco 5](https://github.com/JN513/Pequeno-Risco-5/)** - RV32I, implementação de ciclo único (Arquivada).
 - **[Risco 5](https://github.com/JN513/Risco-5)** - RV32I/E[M], implementação multiciclo (Paralisada).
-- **[Grande Risco 5](https://github.com/JN513/Grande-Risco-5)** - RV32I, implementação com pipeline.
+- **[Grande Risco 5](https://github.com/JN513/Grande-Risco-5)** - RV32IMBC_Zicsr, implementação com pipeline.
 - **Risco 5 Bodybuilder** - RV64IMA, ainda em fase especulativa.
 - **[RISCO 5S](https://github.com/JN513/Risco-5S)** - RV32IM, simulador escrito em C.
 

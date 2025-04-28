@@ -50,7 +50,7 @@ The `Testbenchs` directory contains testbenches developed using [Icarus Verilog 
 - **[Baby Risco 5](https://github.com/JN513/Baby-Risco-5)** - RV32E, optimized for TinyTapeout.
 - **[Pequeno Risco 5](https://github.com/JN513/Pequeno-Risco-5/)** - RV32I, single-cycle implementation (Archived).
 - **[Risco 5](https://github.com/JN513/Risco-5)** - RV32I/E[M], multi-cycle implementation (Paused).
-- **[Grande Risco 5](https://github.com/JN513/Grande-Risco-5)** - RV32I, pipeline implementation.
+- **[Grande Risco 5](https://github.com/JN513/Grande-Risco-5)** - RV32IMBC_Zicsr, pipeline implementation.
 - **Risco 5 Bodybuilder** - RV64IMA, still speculative.
 - **[RISCO 5S](https://github.com/JN513/Risco-5S)** - RV32IM, simulator written in C.
 

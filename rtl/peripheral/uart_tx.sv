@@ -21,30 +21,34 @@ logic [7:0] uart_tx_data_internal;
 logic [3:0]  bit_index;
 logic [15:0] counter;   // Bit counter
 logic [15:0] bit_period;
+logic parity_bit;
 
-typedef enum logic [1:0] { 
+typedef enum logic [2:0] { 
     IDLE,
     START,
     SEND,
+    PARITY_BIT,
     STOP
 } uart_tx_state_t;
 
 uart_tx_state_t state;
 
 // FSM Principal
-always_ff @(posedge clk) begin : UART_TX_FSM
+always_ff @(posedge clk or negedge rst_n) begin : UART_TX_FSM
     if (!rst_n) begin
         uart_txd     <= 1'b1;
         uart_tx_busy <= 1'b0;
         counter      <= 16'd0;
         bit_index    <= 4'd0;
         state        <= IDLE;
+        parity_bit   <= 0;
     end else begin
         unique case (state)
             IDLE: begin
                 uart_txd     <= 1'b1;
                 uart_tx_busy <= 1'b0; // Desativa busy no estado IDLE
                 if (uart_tx_en) begin
+                    parity_bit            <= ^uart_tx_data;
                     uart_tx_data_internal <= uart_tx_data;
                     counter      <= bit_period; // Usa bit_period atualizado
                     bit_index    <= 4'd0;
@@ -74,9 +78,18 @@ always_ff @(posedge clk) begin : UART_TX_FSM
                         uart_tx_data_internal <= {1'b0, uart_tx_data_internal[7:1]};
                         bit_index <= bit_index + 1'b1;
                     end else begin
-                        uart_txd <= 1'b1; // Garante que a linha vá para alto (STOP bit)
-                        state    <= STOP;
+                        uart_txd <= parity_bit; // Garante que a linha vá para alto (STOP bit)
+                        state    <= PARITY_BIT;
                     end
+                end
+            end
+            PARITY_BIT: begin
+                if (counter > 0) begin
+                    counter <= counter - 1'b1;
+                end else begin
+                    counter   <= bit_period; 
+                    uart_txd  <= 1'b1; // Garante que a linha vá para alto (STOP bit)
+                    state     <= STOP;
                 end
             end
             STOP: begin

@@ -267,7 +267,8 @@ UART_RX #(
     .uart_rxd        (rxd),
     .uart_rx_en      (uart_rx_enable),
     .uart_rx_valid   (uart_rx_valid),
-    .uart_rx_data    (uart_rx_data)
+    .uart_rx_data    (uart_rx_data),
+    .uart_rx_parity_error ()
 );
 
 endmodule

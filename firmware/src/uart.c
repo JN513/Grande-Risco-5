@@ -5,9 +5,7 @@
 int uart_read_string(char *data, int size) {
     int i = 0;
     while (i < size) {
-        if (uart_rx_empty()) {
-            continue;
-        }
+        while (uart_rx_empty()) {}
         data[i] = uart_read();
         i++;
     }
@@ -16,10 +14,11 @@ int uart_read_string(char *data, int size) {
 
 void uart_write_string(char *data) {
     int size = strlen(data);
-    for (int i = 0; i < size; i++) {
-        if(uart_tx_full()) continue;
-
+    int i = 0;
+    while (i < size) {
+        while(uart_tx_full()){}
         uart_write(data[i]);
+        i++;
     }
 }
 

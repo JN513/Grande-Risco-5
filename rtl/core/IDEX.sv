@@ -79,9 +79,9 @@ always_ff @(posedge clk ) begin : IDEX_STAGE
 `ifdef ENABLE_MDU
     mdu_start <= 1'b0;
 `endif
-    BRANCH_ADDRESS_o     <= IFIDPC_i + immediate_o;
-    NON_BRANCH_ADDRESS_o <= IFIDPC_i + 'd4;
-    is_branch_o          <= (IFIDop == BRANCH_OPCODE);
+    //BRANCH_ADDRESS_o     <= IFIDPC_i + immediate_o;
+    //NON_BRANCH_ADDRESS_o <= IDEXPC_o + 'd4;
+    //is_branch_o          <= (IFIDop == BRANCH_OPCODE);
     IDEX_is_compressed_instruction_o <= IFID_is_compressed_instruction_i;
 
     if(!rst_n || branch_flush_i || (take_jal_i && ~execute_stall_o)
@@ -89,6 +89,7 @@ always_ff @(posedge clk ) begin : IDEX_STAGE
         IDEXPC_o <= 32'h0;
         IDEXIR_o <= NOP;
         previous_instruction_is_lw <= 1'b0;
+        take_jalr_o <= 0;
 `ifdef ENABLE_MDU
         mdu_operation_o <= 1'b0;
 `endif
@@ -213,6 +214,7 @@ MDU Mdu(
 
 `endif
 
+assign is_branch_o  = (IDEXop == BRANCH_OPCODE);
 assign zero_o       = zero;
 assign takebranch_o = (zero && is_branch_o);
 assign IFIDop       = IFIDIR_i[6:0];
@@ -223,7 +225,9 @@ assign IDEXrs2      = IDEXIR_o[24:20];
 assign IDEXfunc3    = IDEXIR_o[14:12];
 assign IDEXfunc5    = IDEXIR_o[31:27];
 `ifdef ENABLE_MDU
-assign func7_lsb   = IFIDIR_i[25];
+assign func7_lsb    = IFIDIR_i[25];
 `endif
 
+assign NON_BRANCH_ADDRESS_o = IDEXPC_o + 'd4;
+assign BRANCH_ADDRESS_o     = IDEXPC_o + IMMEDIATE_REG_i;
 endmodule

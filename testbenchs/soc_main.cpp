@@ -3,6 +3,7 @@
 #include "VGrande_Risco_5_SOC.h"
 
 #define CLOCK_PERIOD 20 // 25 MHz -> 40 ns por ciclo
+#define SIMULATION_CYCLES 40000 * 1/8
 
 int main(int argc, char **argv, char **env) {
     Verilated::commandArgs(argc, argv);
@@ -31,7 +32,7 @@ int main(int argc, char **argv, char **env) {
     soc->rst_n = 1;
     
     // Simulação
-    for (; i < 40000; i++) {
+    for (; i < SIMULATION_CYCLES; i++) {
         soc->clk = !soc->clk;
         soc->eval();
         trace->dump(i * CLOCK_PERIOD);

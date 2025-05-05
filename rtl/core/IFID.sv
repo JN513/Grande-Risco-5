@@ -63,7 +63,7 @@ logic jump_is_predicted;
 logic is_different_branch_address, pc_is_unaligned, finish_unaligned_pc, is_different_no_branch_address;
 logic illegal_predicted_instruction;
 
-assign illegal_predicted_instruction = (is_different_no_branch_address & !takebranch_i & is_branch_i);
+assign illegal_predicted_instruction = (is_different_no_branch_address & !takebranch_i & is_branch_i) && !execute_stall_i;
 assign branch_flush_o = (is_different_branch_address & takebranch_i) || illegal_predicted_instruction;
 
 // Unaligned instruction
@@ -81,19 +81,22 @@ assign instr_c_i = (finish_unaligned_pc) ? unaligned_instruction : instruction_d
 
 logic [31:0] JAL_PC, JALR_PC;
 
+assign is_different_branch_address    = PC != (IDEX_PC_i + IMMEDIATE_REG_i);
+assign is_different_no_branch_address = PC != (IDEX_PC_i + 'd4);
+
 always_ff @(posedge clk ) begin // IF/ID
     instruction_request_o <= 1'b1;
     flush_bus_o           <= 1'b0;
     jump_is_predicted     <= 1'b0;
 
-    is_jal_o   <= (IFIDop == JAL_OPCODE) && (~execute_stall_i);
-    take_jal_o <= (IFIDop == JAL_OPCODE) && (~execute_stall_i) && (PC != IFID_PC_o + IMMEDIATE_i);
+    is_jal_o   <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i);
+    take_jal_o <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i) && (PC != IFID_PC_o + IMMEDIATE_i) && (!branch_flush_o);
 
     JAL_PC  <= IFID_PC_o + IMMEDIATE_i;
     JALR_PC <= forward_out_a_i + IMMEDIATE_REG_i;
 
-    is_different_branch_address    <= PC != (IFID_PC_o + IMMEDIATE_i);
-    is_different_no_branch_address <= PC != (IFID_PC_o + 'd4);
+    //is_different_branch_address    <= PC != (IFID_PC_o + IMMEDIATE_i);
+    //is_different_no_branch_address <= PC != (IDEX_PC_i + 'd8);
 
     IFID_is_compressed_instruction_o <= 1'b0;
 
@@ -150,7 +153,7 @@ always_ff @(posedge clk ) begin // IF/ID
 
             if((!instruction_response_i && !memory_stall_i )) begin //instruction_response_i == 1'b0
                 IFID_IR_o <= NOP;
-                IFID_PC_o <= BOOT_ADDRESS;
+                //IFID_PC_o <= BOOT_ADDRESS;
             end else if (!memory_stall_i && !execute_stall_i && !flush_bus_o) begin
                 if(finish_unaligned_pc) begin
                     finish_unaligned_pc <= 1'b0;
@@ -164,7 +167,7 @@ always_ff @(posedge clk ) begin // IF/ID
                 end else if(pc_is_unaligned) begin
                     temp_instruction <= {16'h0, instruction_data_i[31:16]};
                     IFID_IR_o <= NOP;
-                    IFID_PC_o <= BOOT_ADDRESS;
+                    //IFID_PC_o <= BOOT_ADDRESS;
                     finish_unaligned_pc <= 1'b1;
                     temp_pc <= PC;
 

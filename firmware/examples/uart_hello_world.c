@@ -3,13 +3,10 @@
 
 
 int main() {
-    char msg[] = "Hello, World!\0";
     
-    int size = strlen(msg);
-
-    for(int i = 0; i < size; i++) {
-        uart_write(msg[i]);
-    }
+    char msg[] = "Hello, World!\n\0";
+    
+    uart_write_string(msg);
 
     return 0;
 }

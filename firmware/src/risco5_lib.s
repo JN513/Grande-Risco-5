@@ -8,19 +8,6 @@
 
 .globl delay_ms # Declara a função delay_ms global
 
-# Função strlen: calcula o comprimento de uma string
-strlen: # int strlen(char *str)
-    addi t0, zero, 0  # Inicializa t0 (contador de comprimento) com 0
-strlen_loop:
-    lbu t1, 0(a0)     # Carrega um byte da string em t1
-    beq t1, zero, strlen_end # Se o byte for nulo (fim da string), termina
-    addi t0, t0, 1    # Incrementa o contador de comprimento
-    addi a0, a0, 1    # Avança para o próximo byte da string
-    j strlen_loop     # Repete o loop
-strlen_end:
-    mv a0, t0         # Move o comprimento da string para a0 (valor de retorno)
-    ret               # Retorna da função
-
 # Função strcpy: copia uma string de source para destination
 strcpy: # char *strcpy(char *destination, const char *source)
     addi t0, a0, 0    # Salva o ponteiro inicial de destination em t0

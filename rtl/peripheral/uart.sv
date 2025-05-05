@@ -33,7 +33,8 @@ typedef enum logic [4:0] {
     RX_STATE,
     SET_BIT_PERIOD,
     FINISH,
-    WAIT
+    WAIT,
+    SET_PARITY_TYPE
 } uart_state_t;
 
 uart_state_t state;
@@ -42,6 +43,7 @@ uart_state_t state;
 // address_i[3:2] = 00 -> UART_TX
 // address_i[3:2] = 01 -> SET RX STATE (0 - disable, 1 - enable)
 // address_i[3:2] = 10 -> SET BIT PERIOD
+// address_i[3:2] = 11 -> SET PARITY TYPE (1 - impar, 0 - par)
 // Read address_i:
 // address_i[4:2] = 000 -> Read UART_RX
 // address_i[4:2] = 001 -> Read RX FIFO EMPTY
@@ -49,6 +51,7 @@ uart_state_t state;
 // address_i[4:2] = 011 -> Read TX FIFO EMPTY
 // address_i[4:2] = 100 -> Read TX FIFO FULL
 
+logic parity_type; // 1 - impar, 0 - par
 
 logic uart_rx_fifo_read;
 logic uart_rx_fifo_write;
@@ -74,12 +77,13 @@ always_ff @(posedge clk) begin : UART_FSM
     uart_rx_fifo_read  <= 1'b0;
     uart_tx_fifo_write <= 1'b0;
     ack_o              <= 1'b0;
-    uart_rx_enable     <= 1'b0;
     set_bit_period     <= 1'b0;
 
     if (!rst_n) begin
-        state      <= IDLE;
-        bit_period <= 16'((CLK_FREQ / BIT_RATE) - 1'b1);
+        parity_type    <= 1'b1;
+        uart_rx_enable <= 1'b0;
+        state          <= IDLE;
+        bit_period     <= 16'((CLK_FREQ / BIT_RATE) - 1'b1);
     end else begin
         unique case (state)
             IDLE: begin
@@ -89,6 +93,7 @@ always_ff @(posedge clk) begin : UART_FSM
                             2'b00: state   <= WRITE;
                             2'b01: state   <= RX_STATE;
                             2'b10: state   <= SET_BIT_PERIOD;
+                            2'b11: state   <= SET_PARITY_TYPE;
                             default: state <= WRITE;
                         endcase
                     end else begin
@@ -144,6 +149,10 @@ always_ff @(posedge clk) begin : UART_FSM
                 bit_period     <= data_i[15:0];
                 set_bit_period <= 1'b1;
                 state          <= FINISH;
+            end
+            SET_PARITY_TYPE: begin
+                parity_type <= data_i[0];
+                state       <= FINISH;
             end
             FINISH: begin
                 ack_o <= 1'b1;
@@ -248,6 +257,7 @@ UART_TX #(
     .wr_bit_period_i (set_bit_period),
     .bit_period_i    (bit_period),
 
+    .parity_type_i   (parity_type),
     .uart_tx_en      (uart_tx_en),
     .uart_tx_data    (uart_tx_data),
     .uart_txd        (txd),
@@ -255,20 +265,21 @@ UART_TX #(
 );
 
 UART_RX #(
-    .BAUD_RATE       (BIT_RATE),
-    .CLK_FREQ        (CLK_FREQ)
+    .BAUD_RATE              (BIT_RATE),
+    .CLK_FREQ               (CLK_FREQ)
 ) uart_rx (
-    .clk             (clk),
-    .rst_n           (rst_n),
+    .clk                    (clk),
+    .rst_n                  (rst_n),
 
-    .wr_bit_period_i (set_bit_period),
-    .bit_period_i    (bit_period),
+    .wr_bit_period_i        (set_bit_period),
+    .bit_period_i           (bit_period),
 
-    .uart_rxd        (rxd),
-    .uart_rx_en      (uart_rx_enable),
-    .uart_rx_valid   (uart_rx_valid),
-    .uart_rx_data    (uart_rx_data),
-    .uart_rx_parity_error ()
+    .parity_type_i          (parity_type),
+    .uart_rxd               (rxd),
+    .uart_rx_en             (uart_rx_enable),
+    .uart_rx_valid_o        (uart_rx_valid),
+    .uart_rx_data           (uart_rx_data),
+    .uart_rx_parity_error_o ()
 );
 
 endmodule

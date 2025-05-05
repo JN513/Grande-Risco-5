@@ -8,6 +8,7 @@ module UART_TX #(
     input logic wr_bit_period_i,
     input logic [15:0] bit_period_i,
 
+    input logic parity_type_i, // 1 - impar , 0 - par
     input logic uart_tx_en,
     input logic [7:0] uart_tx_data,
 
@@ -48,7 +49,8 @@ always_ff @(posedge clk or negedge rst_n) begin : UART_TX_FSM
                 uart_txd     <= 1'b1;
                 uart_tx_busy <= 1'b0; // Desativa busy no estado IDLE
                 if (uart_tx_en) begin
-                    parity_bit            <= ^uart_tx_data;
+                    parity_bit   <= (parity_type_i) ? ^uart_tx_data : 
+                        ~(^uart_tx_data);
                     uart_tx_data_internal <= uart_tx_data;
                     counter      <= bit_period; // Usa bit_period atualizado
                     bit_index    <= 4'd0;

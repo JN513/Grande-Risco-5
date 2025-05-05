@@ -16,7 +16,7 @@ void uart_write_string(char *data) {
     int size = strlen(data);
     int i = 0;
     while (i < size) {
-        while(uart_tx_full()){}
+        while(uart_tx_full()) {}
         uart_write(data[i]);
         i++;
     }

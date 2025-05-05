@@ -24,7 +24,6 @@ clk_wiz_0 clk_wiz_inst (
     .locked   ()
 );
 
-
 Grande_Risco_5_SOC #(
     .CLOCK_FREQ             (50000000),
     .BAUD_RATE              (115200),

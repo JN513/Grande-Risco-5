@@ -52,7 +52,7 @@ $(BUILD_DIR)/program.hex: $(BUILD_DIR)/program.bin
 	@printf "$(BLUE)[HEX]$(NC) Gerando dump hexadecimal\n"
 	$(HEXDUMP) -v -e '1/4 "%08x\n"' $< > $@
 
-$(BUILD_DIR)/program.bin: $(BUILD_DIR)/program.elf
+$(BUILD_DIR)/program.bin: $(BUILD_DIR)/program.elf $(BUILD_DIR)/program.s
 	@printf "$(BLUE)[BIN]$(NC) Convertendo ELF para binário\n"
 	$(OBJCOPY) -O binary $< $@
 

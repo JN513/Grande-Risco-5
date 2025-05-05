@@ -10,6 +10,7 @@
 .globl enable_uart_rx
 .globl disable_uart_rx
 .globl set_uart_bit_period
+.globl set_uart_parity_type
 
 # Função para verificar se o buffer de recepção da UART está vazio
 uart_rx_empty:
@@ -72,3 +73,9 @@ set_uart_bit_period:
     sw a0, 8(t1)        # Armazena o valor de a0 no endereço t1 (configura a taxa de bits da UART)
 
     ret                 # Retorna da função
+
+set_uart_parity_type:
+    li t1, UART_BASE_ADDR
+    sw a0, 12(t1)
+
+    ret

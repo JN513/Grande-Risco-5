@@ -1,6 +1,14 @@
 #include "risco5.h"
 
 
+int strlen(const char *str){
+    int i = 0;
+
+    while(str[i] != '\0') i++;
+
+    return i;
+}
+
 uint64_t get_cycle_value()
 {
     uint64_t cycle;

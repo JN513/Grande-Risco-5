@@ -23,6 +23,7 @@ void uart_write_int(int data);
 void enable_uart_rx();
 void disable_uart_rx();
 void set_uart_bit_period(int period);
+void set_uart_parity_type(int parity);
 
 void uart_set_baud_rate(int baud_rate);
 void uart_init();

@@ -28,8 +28,15 @@ IBUFDS #(
     .IB (clk_ref_n)  // Entrada diferencial negativa
 );
 
+clk_wiz_0 clk_wiz_inst (
+    .clk_in1  (clk_ref),
+    .resetn   (!sys_rst_i),
+    .clk_out1 (clk_o),
+    .locked   ()
+);
+
 Grande_Risco_5_SOC #(
-    .CLOCK_FREQ             (100000000),
+    .CLOCK_FREQ             (100_000_000),
     .BAUD_RATE              (115200),
     .MEMORY_SIZE            (16384),
     .MEMORY_FILE            ("../../verification_tests/memory/led_test2.hex"),
@@ -55,13 +62,5 @@ Grande_Risco_5_SOC #(
     .VGA_HS (),
     .VGA_VS ()
 );
-
-always_ff @(posedge clk_ref) begin : CLOCK_DIVIDER
-    if(sys_rst_i) begin
-        clk_o <= 1'b0;
-    end else begin
-        clk_o <= ~clk_o;
-    end
-end
 
 endmodule

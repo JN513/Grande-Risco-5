@@ -17,6 +17,14 @@ module top (
 
 logic clk_o;
 
+clk_wiz_0 clk_wiz_inst (
+    .clk_in1  (clk),
+    .resetn   (CPU_RESETN),
+    .clk_out1 (clk_o),
+    .locked   ()
+);
+
+
 Grande_Risco_5_SOC #(
     .CLOCK_FREQ             (50000000),
     .BAUD_RATE              (115200),
@@ -45,12 +53,5 @@ Grande_Risco_5_SOC #(
     .VGA_HS (VGA_HS),
     .VGA_VS (VGA_VS)
 );
-
-always_ff @(posedge clk) begin : CLOCK_DIVIDER
-    if(!CPU_RESETN)
-        clk_o <= 1'b0;
-    else
-        clk_o <= ~clk_o;
-end
 
 endmodule

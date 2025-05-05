@@ -7,12 +7,21 @@ module top (
     inout [5:0]gpios
 );
 
-logic [7:0] leds;
+logic clk_o;
 
+logic [7:0] leds;
 assign led = leds[3:0];
 
+clk_wiz_0 clk_wiz_inst (
+    .clk_in1  (clk),
+    .resetn   (!reset),
+    .clk_out1 (clk_o),
+    .locked   ()
+);
+
+
 Grande_Risco_5_SOC #(
-    .CLOCK_FREQ             (100000000),
+    .CLOCK_FREQ             (50_000_000),
     .BAUD_RATE              (115200),
     .MEMORY_SIZE            (4096),
     .MEMORY_FILE            ("../../verification_tests/memory/led_test2.hex"),
@@ -26,7 +35,7 @@ Grande_Risco_5_SOC #(
     .VGA_COLOR_DEPTH        (4),
     .LEDS_WIDTH             (16)
 ) SOC (
-    .clk    (clk),
+    .clk    (clk_o),
     .rst_n  (!reset),
     .leds   (leds),
     .rx     (rx),

@@ -28,3 +28,18 @@ slpp_all
 fpga/nexys4_ddr/tight_setup_hold_pins.txt
 fpga/nexys4_ddr_yosys/vgcore.332162
 reports/
+ip_project
+# Vivado IP build artifacts
+*.bmj
+*_bmstub.v
+*_board.xdc
+*_ooc.xdc
+*.veo
+*.xml
+doc/
+mmcm_pll_drp_func_*.vh
+fpga/artyA7_100t/clockInfo.txt
+fpga/artyA7_100t/clockInfo.txt
+fpga/vc709/clockInfo.txt
+.Xil
+clockInfo.txt

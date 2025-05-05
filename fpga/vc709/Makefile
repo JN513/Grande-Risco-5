@@ -43,14 +43,20 @@ remote:
 	./upload_remote.sh $(BISTREAM)
 	@echo "Bitstream uploaded to remote server"
 
+generate_ips:
+	@echo "Generating IPs using vivado"
+	mkdir -p ip
+	$(VIVADO) -mode batch -nolog -nojournal -source generate_ip.tcl
+
 help:
 	@echo "Usage: make [target]"
 	@echo "Targets:"
-	@echo "  all        - Build the project and generate the bitstream"
-	@echo "  clean      - Remove build artifacts"
-	@echo "  load       - Load the bitstream onto the FPGA"
-	@echo "  flash      - Flash the bitstream onto the FPGA"
-	@echo "  remote     - Upload the bitstream to a remote server"
-	@echo "  help       - Show this help message"
+	@echo "  all         - Build the project and generate the bitstream"
+	@echo "  clean       - Remove build artifacts"
+	@echo "  load        - Load the bitstream onto the FPGA"
+	@echo "  flash       - Flash the bitstream onto the FPGA"
+	@echo "  remote      - Upload the bitstream to a remote server"
+	@echo "  generate_ip - Generate IPs used in project"
+	@echo "  help        - Show this help message"
 
 run_all: $(BISTREAM) load

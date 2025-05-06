@@ -1,6 +1,7 @@
 #ifndef __RISCO_5_H__
 #define __RISCO_5_H__
 
+#define NULL           0
 #define MEM_SIZE       0x00008004
 #define STACK_INIT     MEM_SIZE - 4
 #define FRAME_POINTER  STACK_INIT
@@ -47,8 +48,8 @@ char *strcat(char *destination, const char *source);
 
 void delay_ms(int time);
 
-uint64_t get_cycle_value();
+uint32_t get_cycle_value();
 
-void busy_wait(uint32_t us);
+void busy_wait(uint32_t ms);
 
 #endif // __RISCO_5_H__

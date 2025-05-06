@@ -1,18 +1,11 @@
 module top (
     input  logic clk,
-    input  logic CPU_RESETN,
+    input  logic rst_n,
 
-    input  logic rx,
-    output logic tx,
+    input  logic rxd,
+    output logic txd,
 
-    output logic [15:0]LED,
-    inout  logic [7:0] JA,
-
-    output logic [3:0] VGA_R,
-    output logic [3:0] VGA_G,
-    output logic [3:0] VGA_B,
-    output logic VGA_HS,
-    output logic VGA_VS
+    output logic [7:0]led
 );
 
 
@@ -29,20 +22,20 @@ Grande_Risco_5_SOC #(
     .VGA_WIDTH              (640),
     .VGA_HEIGHT             (480),
     .VGA_COLOR_DEPTH        (4),
-    .LEDS_WIDTH             (16)
+    .LEDS_WIDTH             (8)
 ) SOC (
     .clk    (clk),
-    .rst_n  (CPU_RESETN),
+    .rst_n  (rst_n),
     .halt   (1'b0),
-    .leds   (LED),
-    .rx     (rx),
-    .tx     (tx),
-    .gpios  (JA),
-    .VGA_R  (VGA_R),
-    .VGA_G  (VGA_G),
-    .VGA_B  (VGA_B),
-    .VGA_HS (VGA_HS),
-    .VGA_VS (VGA_VS)
+    .leds   (led),
+    .rx     (rxd),
+    .tx     (txd),
+    .gpios  (),
+    .VGA_R  (),
+    .VGA_G  (),
+    .VGA_B  (),
+    .VGA_HS (),
+    .VGA_VS ()
 );
 
 endmodule

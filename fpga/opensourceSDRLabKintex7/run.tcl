@@ -43,7 +43,7 @@ read_xdc "pinout.xdc"
 set_property PROCESSING_ORDER EARLY [get_files pinout.xdc]
 
 # synth
-synth_design -top "top" -part "xc7k325tffg676i-2"
+synth_design -top "top" -part "xc7k325tffg676-2"
 
 # place and route
 opt_design

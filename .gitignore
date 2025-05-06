@@ -43,3 +43,5 @@ fpga/artyA7_100t/clockInfo.txt
 fpga/vc709/clockInfo.txt
 .Xil
 clockInfo.txt
+.vscode/settings.json
+firmware/utils/a.out

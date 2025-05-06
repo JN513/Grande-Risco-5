@@ -3,12 +3,15 @@
 
 
 int main() {
-    enable_uart_rx();
-    set_uart_parity_type(1);
+    char c;
+
+    uart_init();
     
     while (1) {
         while (uart_rx_empty()) {}
-        char c = uart_read();
+        
+        c = uart_read();
+        
         uart_write(c);
     }
 

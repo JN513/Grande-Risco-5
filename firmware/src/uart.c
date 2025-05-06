@@ -13,8 +13,11 @@ int uart_read_string(char *data, int size) {
 }
 
 void uart_write_string(char *data) {
+    if (data == NULL) return; // Verifica se o ponteiro é válido
+
     int size = strlen(data);
     int i = 0;
+    
     while (i < size) {
         while(uart_tx_full()) {}
         uart_write(data[i]);
@@ -36,4 +39,5 @@ void uart_set_baud_rate(int baud_rate){
 void uart_init(){
     uart_set_baud_rate(115200);
     enable_uart_rx();
+    set_uart_parity_type(1);
 }

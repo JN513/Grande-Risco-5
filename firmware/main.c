@@ -18,7 +18,7 @@ void led_shift(){
 int main() {
     uart_init();
 
-    char msg[] = "Grade Risco 5!\nA Open Source RISC-V Core\n\n";
+    char msg[] = "Grade Risco 5!\nAn Open Source RISC-V Core\n\n";
     
     uart_write_string(msg, 43);
     

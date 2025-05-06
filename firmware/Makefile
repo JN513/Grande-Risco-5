@@ -12,7 +12,7 @@ HEXDUMP = hexdump
 # Configuração de arquitetura
 MARCH = rv32im_zicsr
 MABI = ilp32
-BUILD_FLAGS = -nostartfiles -nostdinc -nostdlib -mstrict-align -Wimplicit-function-declaration
+BUILD_FLAGS = -nostartfiles -nostdinc -nostdlib -mstrict-align -static
 INCLUDES = -Ilib
 
 # Diretórios

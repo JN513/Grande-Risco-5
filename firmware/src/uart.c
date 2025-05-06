@@ -12,10 +12,7 @@ int uart_read_string(char *data, int size) {
     return i;
 }
 
-void uart_write_string(char *data) {
-    if (data == NULL) return; // Verifica se o ponteiro é válido
-
-    int size = strlen(data);
+void uart_write_string(char *data, int size) {
     int i = 0;
     
     while (i < size) {
@@ -28,7 +25,8 @@ void uart_write_string(char *data) {
 void uart_write_int(int data) {
     char buffer[10];
     itoa(data, buffer, 10);
-    uart_write_string(buffer);
+    int size = strlen(buffer);
+    uart_write_string(buffer, size);
 }
 
 void uart_set_baud_rate(int baud_rate){

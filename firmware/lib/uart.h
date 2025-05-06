@@ -17,7 +17,7 @@ char uart_read();
 void uart_write(char data);
 
 int uart_read_string(char *data, int size);
-void uart_write_string(char *data);
+void uart_write_string(char *data, int size);
 void uart_write_int(int data);
 
 void enable_uart_rx();

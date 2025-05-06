@@ -5,9 +5,9 @@
 int main() {
     uart_init();
     
-    char msg[] = "Hello, World!\n\0";
+    char msg[] = "Hello, World!\n";
     
-    uart_write_string(msg);
+    uart_write_string(msg, 15);
 
     return 0;
 }

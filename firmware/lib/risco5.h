@@ -23,6 +23,8 @@ typedef int       int32_t;
 typedef short     int16_t;
 typedef char      int8_t;
 
+typedef unsigned int size_t;
+
 #define read_csr(reg) ({ unsigned long __tmp; \
     asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \
     __tmp; })
@@ -34,9 +36,9 @@ else \
     asm volatile ("csrw " #reg ", %0" :: "r"(val)); })
 
 
-void *memset (void *dest, int val, int len);
+void *memset (void *dest, int val, size_t len);
 
-void *memcpy (void *out, const void *in, int length);
+void *memcpy (void *out, const void *in, size_t length);
 
 int strlen(const char *str);
 
@@ -45,6 +47,8 @@ char *strcpy(char *destination, const char *source);
 int strcmp(const char *str1, const char *str2);
 
 char *strcat(char *destination, const char *source);
+
+char *strncpy(char *destination, const char *source, size_t n);
 
 void delay_ms(int time);
 

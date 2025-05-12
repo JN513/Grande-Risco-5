@@ -39,7 +39,7 @@ always_comb begin : ALU_CONTROL
 
         2'b10: // Operações de ALU
             unique case (FUNC3_i)
-                3'b000: ALU_OP_o = (is_immediate_i || !FUNC7_i[5]) ? SUM : SUB; // ADD/SUB
+                3'b000: ALU_OP_o = (!is_immediate_i && FUNC7_i[5]) ? SUB : SUM; // ADD/SUB
                 3'b001: ALU_OP_o = SHIFT_LEFT;   // SLLI / SLL
                 3'b010: ALU_OP_o = SLT;          // SLTI / SLT
                 3'b011: ALU_OP_o = SLT_U;        // SLTIU / SLTU

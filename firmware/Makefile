@@ -12,14 +12,14 @@ HEXDUMP = hexdump
 # Configuração de arquitetura
 MARCH = rv32im_zicsr
 MABI = ilp32
-BUILD_FLAGS = -nostartfiles -nostdinc -nostdlib -mstrict-align -static
+BUILD_FLAGS = -nostartfiles -nostdinc -nostdlib -mstrict-align -O2
 INCLUDES = -Ilib
 
 # Diretórios
 BUILD_DIR = build
 SRC_DIR = src
 
-LD_FILE = utils/link.ld
+LD_FILE = utils/link64k.ld
 
 # Definição dos arquivos-fonte
 C_SOURCES = main.c $(SRC_DIR)/pwm.c $(SRC_DIR)/risco5.c $(SRC_DIR)/uart.c $(SRC_DIR)/conversion.c

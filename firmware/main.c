@@ -40,6 +40,17 @@ int main() {
 
     uart_write_string(msg2, 46);
 
+    delay_ms(100);
+
+    uart_write_int(0xABCD, 16);
+    uart_write_string("\n\n", 2);
+
+    delay_ms(100);
+
+    char msg3[] = "To my dear platonic passion: Even though you probably never know this, since I met you, your beautiful smile and all your perfection have encouraged me to be a better person every day.\n\n";
+
+    uart_write_string(msg3, 187);
+
     led_shift();
 
     return 0;

@@ -32,11 +32,11 @@ clean:
 
 load:
 	@echo "Loading the bitstream onto the FPGA..."
-	openFPGALoader -b opensourceSDRLabKintex7 $(BISTREAM)
+	./openFPGALoader -b opensourceSDRLabKintex7 $(BISTREAM)
 
 flash:
 	@echo "Flashing the bitstream onto the FPGA..."
-	openFPGALoader -b opensourceSDRLabKintex7 -f $(BISTREAM)
+	./openFPGALoader -b opensourceSDRLabKintex7 -f $(BISTREAM)
 
 remote:
 	@echo "Uploading the bitstream to a remote server..."

@@ -45,3 +45,5 @@ fpga/vc709/clockInfo.txt
 clockInfo.txt
 .vscode/settings.json
 firmware/utils/a.out
+fpga/opensourceSDRLabKintex7/openFPGALoader
+a.out

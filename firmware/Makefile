@@ -22,8 +22,8 @@ SRC_DIR = src
 LD_FILE = utils/link.ld
 
 # Definição dos arquivos-fonte
-C_SOURCES = main.c $(SRC_DIR)/pwm.c $(SRC_DIR)/risco5.c $(SRC_DIR)/uart.c
-ASM_SOURCES = $(SRC_DIR)/boot.s $(SRC_DIR)/risco5_lib.s $(SRC_DIR)/uart_primitives.s $(SRC_DIR)/gpio.s $(SRC_DIR)/conversion.s $(SRC_DIR)/interruption.s
+C_SOURCES = main.c $(SRC_DIR)/pwm.c $(SRC_DIR)/risco5.c $(SRC_DIR)/uart.c $(SRC_DIR)/conversion.c
+ASM_SOURCES = $(SRC_DIR)/boot.s $(SRC_DIR)/risco5_lib.s $(SRC_DIR)/uart_primitives.s $(SRC_DIR)/gpio.s $(SRC_DIR)/interruption.s
 
 # Geração dos arquivos-objeto correspondentes
 C_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(C_SOURCES)))

@@ -22,10 +22,12 @@ void uart_write_string(char *data, int size) {
     }
 }
 
-void uart_write_int(int data) {
-    char buffer[10];
-    itoa(data, buffer, 10);
+void uart_write_int(int data, int base) {
+    char buffer[16];
+
+    itoa(data, buffer, base);
     int size = strlen(buffer);
+    
     uart_write_string(buffer, size);
 }
 

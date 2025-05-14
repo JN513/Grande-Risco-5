@@ -48,6 +48,10 @@ generate_ips:
 	mkdir -p ip
 	$(VIVADO) -mode batch -nolog -nojournal -source generate_ip.tcl
 
+remove_ips:
+	@echo "Deleting IPs"
+	rm -rf ip ip_project
+
 help:
 	@echo "Usage: make [target]"
 	@echo "Targets:"

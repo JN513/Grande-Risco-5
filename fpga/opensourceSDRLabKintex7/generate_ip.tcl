@@ -1,7 +1,17 @@
+# Cria o projeto IP
 create_project -force ip_project ./ip_project -part xc7k325tffg676-2
 
+# ========================
+# MIG IP Configuration
+# ========================
+
+# Define caminho do arquivo .prj dinamicamente
+set mig_prj_file [file join [pwd] "mig_a.prj"]
+
+# Cria o IP "mig_7series_0"
 create_ip -name mig_7series -vendor xilinx.com -library ip -version 4.2 -module_name mig_7series_0 -dir ./ip
 
+# Aplica configurações do MIG
 set_property -dict [list \
   CONFIG.ARESETN.INSERT_VIP {0} \
   CONFIG.BOARD_MIG_PARAM {Custom} \
@@ -161,7 +171,29 @@ set_property -dict [list \
   CONFIG.SYS_CLK_I.INSERT_VIP {0} \
   CONFIG.S_AXI.INSERT_VIP {0} \
   CONFIG.S_AXI_CTRL.INSERT_VIP {0} \
-  CONFIG.XML_INPUT_FILE {/eda/projetos/Risco-5-family/Grande-Risco-5/fpga/opensourceSDRLabKintex7/mig_a.prj} \
+  CONFIG.XML_INPUT_FILE $mig_prj_file \
 ] [get_ips mig_7series_0]
 
+# Gera o IP MIG
 generate_target all [get_ips mig_7series_0]
+
+# ========================
+# CLK_WIZ IP Configuration
+# ========================
+
+# Cria o IP "clk_wiz_0"
+create_ip -name clk_wiz -vendor xilinx.com -library ip -version 6.0 -module_name clk_wiz_0 -dir ./ip
+
+# Aplica configurações do clock wizard
+set_property -dict [list \
+    CONFIG.PRIM_IN_FREQ {50.0} \
+    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {800} \
+    CONFIG.CLKOUT2_USED {true} \
+    CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {200} \
+    CONFIG.USE_PHASE_ALIGNMENT {true} \
+    CONFIG.RESET_TYPE {ACTIVE_LOW} \
+    CONFIG.USE_RESET {true} \
+] [get_ips clk_wiz_0]
+
+# Gera o IP CLK_WIZ
+generate_target all [get_ips clk_wiz_0]

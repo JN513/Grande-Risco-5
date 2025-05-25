@@ -6,3 +6,67 @@ report/
 vivado_*.backup.*
 ip_project
 
+*.fs
+impl/
+x.*
+build/
+rascunho.v
+fpga/digilent_arty/vivado_131673.backup.jou
+fpga/digilent_arty/vivado_131673.backup.log
+fpga/digilent_arty/vivado.jou
+fpga/digilent_arty/vivado.log
+fpga/digilent_arty/digilent_arty_timing_synth.rpt
+fpga/digilent_arty/digilent_arty_route.dcp
+fpga/digilent_arty/clockInfo.txt
+fpga/digilent_arty/digilent_arty_place.dcp
+env/
+fpga/digilent_arty/tight_setup_hold_pins.txt
+fpga/nexys4_ddr/clockInfo.txt
+fpga/nexys4_ddr/digilent_nexys4ddr_utilization_place.rpt
+fpga/nexys4_ddr/digilent_nexys4ddr_utilization_hierarchical_place.rpt
+fpga/nexys4_ddr/digilent_nexys4ddr_io.rpt
+fpga/nexys4_ddr/digilent_nexys4ddr_control_sets.rpt
+fpga/nexys4_ddr/digilent_nexys4ddr_clock_utilization.rpt
+fpga/nexys4_ddr/digilent_nexys4ddr_drc.rpt
+fpga/nexys4_ddr/digilent_nexys4ddr_power.rpt
+fpga/nexys4_ddr/digilent_nexys4ddr_route_status.rpt
+fpga/nexys4_ddr/digilent_nexys4ddr_timing.rpt
+obj_dir
+slpp_all
+fpga/nexys4_ddr/tight_setup_hold_pins.txt
+fpga/nexys4_ddr_yosys/vgcore.332162
+reports/
+ip_project
+# Vivado IP build artifacts
+*.bmj
+*_bmstub.v
+*_board.xdc
+*_ooc.xdc
+*.veo
+*.xml
+doc/
+mmcm_pll_drp_func_*.vh
+fpga/artyA7_100t/clockInfo.txt
+fpga/artyA7_100t/clockInfo.txt
+fpga/vc709/clockInfo.txt
+.Xil
+clockInfo.txt
+.vscode/settings.json
+firmware/utils/a.out
+fpga/opensourceSDRLabKintex7/openFPGALoader
+a.out
+# Arquivos temporários e gerados
+ip/mig_7series_0/_tmp/
+ip/mig_7series_0/xil_txt.*
+ip/mig_7series_0/mig_7series_0.bmj
+ip/mig_7series_0/mig_7series_0_bmstub.v
+
+# Diretórios e arquivos gerados automaticamente
+ip/mig_7series_0/mig_7series_0/example_design/
+ip/mig_7series_0/mig_7series_0/user_design/
+ip/mig_7series_0/mig_7series_0/docs/
+ip/mig_7series_0/mig_7series_0/datasheet.txt
+
+# Simulação
+ip/mig_7series_0/mig_7series_0/example_design/sim/
+fifo

@@ -1,0 +1,29 @@
+name: Async FIFO Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar Icarus Verilog (iverilog)
+        run: sudo apt update && sudo apt install -y iverilog
+
+      - name: Criar diretório de build
+        run: mkdir -p build
+
+      - name: Compilar o testbench
+        run: iverilog -o build/async_fifo_tb -s async_fifo_tb -g2012 -Irtl/core testbenchs/async_fifo_tb.sv rtl/peripheral/async_fifo.sv
+
+      - name: Executar o testbench
+        run: vvp build/async_fifo_tb
+
+      - name: Salvar VCD como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: fifo_waveform
+          path: build/async_fifo_tb.vcd

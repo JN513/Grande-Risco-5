@@ -5,7 +5,10 @@ module top (
     input  logic rxd,
     output logic txd,
 
-    output logic [7:0]led
+    input  logic [4:0] btn,
+    output logic [7:0] led,
+
+    inout  logic [33:0] gpio
 );
 
 

@@ -1,6 +1,6 @@
 module top (
-    input  logic GCLK,
-    input  logic BTNC,
+    input  logic clk,
+    input  logic rst,
     output logic [7:0]LED
 );
 
@@ -14,8 +14,8 @@ Grande_Risco_5_SOC #(
     .I_CACHE_SIZE     (128),
     .D_CACHE_SIZE     (128)
 ) SOC (
-    .clk   (GCLK),
-    .rst_n (!BTNC),
+    .clk   (clk),
+    .rst_n (!rst),
     .leds  (LED),
     .rx    (),
     .tx    (),

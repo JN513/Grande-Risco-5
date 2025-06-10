@@ -23,7 +23,16 @@ module Grande_Risco5 #(
     input  logic ack_i,
     input  logic [31:0] data_i,
 
-    input logic interruption
+    input  logic interruption,
+
+    // Jtag interface
+    input  logic        jtag_we_en_i,
+    input  logic [4:0]  jtag_addr_i,
+    input  logic [31:0] jtag_data_i,
+    output logic [31:0] jtag_data_o,
+    
+    input  logic jtag_halt_flag_i,
+    input  logic jtag_reset_flag_i 
 );
 
 logic instruction_response, flush_bus, instruction_request;
@@ -48,8 +57,6 @@ logic [31:0] d_cache_memory_write_data, d_cache_memory_read_data,
 
 logic [31:0] i_cache_memory_read_data, i_cache_memory_addr;
 
-logic core_clk;
-
 logic processor_data_we, cache_data_we;
 logic processor_cyc, cache_cyc;
 
@@ -61,7 +68,6 @@ logic [31:0] memory_read_data;
 logic [31:0] memory_write_data;
 logic [31:0] memory_addr;
 
-assign core_clk = clk & ~halt;
 
 Core #(
     .BOOT_ADDRESS            (BOOT_ADDRESS),
@@ -69,6 +75,7 @@ Core #(
     .CLK_FREQ                (CLK_FREQ)
 ) Core1 (
     .clk                     (core_clk),
+    .halt                    (halt),
     .rst_n                   (rst_n),
 
     .instr_flush_o           (flush_bus),
@@ -84,7 +91,16 @@ Core #(
     .data_write_o            (data_write_data),
     .data_read_i             (data_read_data),
 
-    .external_interruption_i (interruption)
+    .external_interruption_i (interruption),
+
+    // JTAG interface
+    .jtag_we_en_i            (jtag_we_en_i), // JTAG write enable
+    .jtag_addr_i             (jtag_addr_i),  // JTAG address
+    .jtag_data_i             (jtag_data_i),  // JTAG data input
+    .jtag_data_o             (jtag_data_o),   // JTAG data output
+
+    .jtag_halt_flag_i        (jtag_halt_flag_i),
+    .jtag_reset_flag_i       (jtag_reset_flag_i)
 );
 
 ICache #(

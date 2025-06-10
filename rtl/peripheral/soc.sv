@@ -61,21 +61,30 @@ Grande_Risco5 #(
     .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE),
     .CLK_FREQ               (CLOCK_FREQ)
 ) Processor (
-    .clk          (clk),
-    .rst_n        (rst_n),
-    .halt         (halt),
+    .clk               (clk),
+    .rst_n             (rst_n),
+    .halt              (halt),
 
-    .cyc_o        (master_cyc),
-    .stb_o        (master_stb),
-    .we_o         (master_we),
+    .cyc_o             (master_cyc),
+    .stb_o             (master_stb),
+    .we_o              (master_we),
 
-    .addr_o       (master_addr_o),
-    .data_o       (master_data_o),
+    .addr_o            (master_addr_o),
+    .data_o            (master_data_o),
 
-    .ack_i        (master_ack),
-    .data_i       (master_data),
+    .ack_i             (master_ack),
+    .data_i            (master_data),
 
-    .interruption (1'b0)
+    .interruption      (1'b0),
+
+    // JTAG interface
+    .jtag_we_en_i      (1'b0),  // JTAG write enable
+    .jtag_addr_i       (5'b0),  // JTAG address
+    .jtag_data_i       (32'b0), // JTAG data input
+    .jtag_data_o       (),      // JTAG data output
+
+    .jtag_halt_flag_i  (1'b0), // JTAG halt flag
+    .jtag_reset_flag_i (1'b0)  // JTAG reset flag
 );
 
 Memory #(

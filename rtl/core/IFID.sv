@@ -4,28 +4,28 @@ module IFID #(
     parameter BOOT_ADDRESS           = 32'h00000000,
     parameter BRANCH_PREDICTION_SIZE = 512
 ) (
-    input logic clk,
-    input logic rst_n,
+    input  logic clk,
+    input  logic rst_n,
 
-    input logic take_jalr_i,
-    input logic is_branch_i,
-    input logic is_jalr_i,
-    input logic takebranch_i,
+    input  logic take_jalr_i,
+    input  logic is_branch_i,
+    input  logic is_jalr_i,
+    input  logic takebranch_i,
 
-    input logic memory_stall_i,
-    input logic execute_stall_i,
-    input logic trap_flush_i,
+    input  logic memory_stall_i,
+    input  logic execute_stall_i,
+    input  logic trap_flush_i,
 
-    input logic [31:0] trap_pc_i,
-    input logic [31:0] BRANCH_ADDRESS_i,
-    input logic [31:0] NON_BRANCH_ADDRESS_i,
+    input  logic [31:0] trap_pc_i,
+    input  logic [31:0] BRANCH_ADDRESS_i,
+    input  logic [31:0] NON_BRANCH_ADDRESS_i,
 
-    input logic [31:0] IMMEDIATE_i,
-    input logic [31:0] IMMEDIATE_REG_i,
-    input logic [31:0] forward_out_a_i,
+    input  logic [31:0] IMMEDIATE_i,
+    input  logic [31:0] IMMEDIATE_REG_i,
+    input  logic [31:0] forward_out_a_i,
 
-    input logic [31:0] IDEX_PC_i,
-    input logic [31:0] EXMEM_PC_i,
+    input  logic [31:0] IDEX_PC_i,
+    input  logic [31:0] EXMEM_PC_i,
 
     output logic take_jal_o,
     output logic branch_flush_o,
@@ -41,10 +41,12 @@ module IFID #(
     output logic flush_bus_o,
     output logic instruction_request_o,
 
-    input logic instruction_response_i,
+    input  logic instruction_response_i,
 
-    input logic  [31:0] instruction_data_i,
-    output logic [31:0] instruction_addr_o
+    input  logic [31:0] instruction_data_i,
+    output logic [31:0] instruction_addr_o,
+
+    input  logic jtag_reset_flag_i
 );
 
 // Importando os opcodes do pacote
@@ -104,7 +106,7 @@ always_ff @(posedge clk ) begin // IF/ID
 
     IFID_is_compressed_instruction_o <= 1'b0;
 
-    if(!rst_n) begin
+    if(!rst_n || jtag_reset_flag_i) begin
         pc_is_unaligned     <= 1'b0;
         PC                  <= BOOT_ADDRESS;
         IFID_IR_o           <= NOP;

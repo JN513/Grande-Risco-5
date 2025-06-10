@@ -6,8 +6,9 @@ module Core #(
     parameter CLK_FREQ               = 100_000_000
 ) (
     // Control signal
-    input logic clk,
-    input logic rst_n,
+    input  logic clk,
+    input  logic halt,
+    input  logic rst_n,
 
     // Instruction BUS
     output logic instr_flush_o,
@@ -24,8 +25,21 @@ module Core #(
     output logic [31:0] data_addr_o,
     output logic [31:0] data_write_o,
 
-    input  logic external_interruption_i
+    input  logic external_interruption_i,
+
+    // Jtag interface
+    input  logic        jtag_we_en_i,
+    input  logic [4:0]  jtag_addr_i,
+    input  logic [31:0] jtag_data_i,
+    output logic [31:0] jtag_data_o,
+
+    input  logic jtag_halt_flag_i,
+    input  logic jtag_reset_flag_i  
 );
+
+logic halted, halted_clk;
+assign halted = halt || jtag_halt_flag_i;
+assign halted_clk = ~halted && clk;
 
 // Importando os opcodes do pacote
 import opcodes_pkg::*;
@@ -128,7 +142,9 @@ IFID #(
     .instruction_request_o            (instr_req_o),
     .instruction_response_i           (instr_rsp_i),
     .instruction_data_i               (instr_data_i),
-    .instruction_addr_o               (instr_addr_o)
+    .instruction_addr_o               (instr_addr_o),
+
+    .jtag_reset_flag_i                (jtag_reset_flag_i)
 );
 
 // Estágio ID/EX
@@ -252,7 +268,13 @@ Registers RegisterBank(
     .RD_ADDR_i  (MEMWB_RD_ADDR),
     .data_i     (MEMWB_RD),
     .RS1_data_o (register_data_1),
-    .RS2_data_o (register_data_2)
+    .RS2_data_o (register_data_2),
+
+    // JTAG interface
+    .jtag_we_en_i (jtag_we_en_i), // JTAG write enable
+    .jtag_addr_i  (jtag_addr_i),  // JTAG address
+    .jtag_data_i  (jtag_data_i),  // JTAG data input
+    .jtag_data_o  (jtag_data_o)   // JTAG data output
 );
 
 

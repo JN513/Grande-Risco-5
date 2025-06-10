@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module registers_tb ();
     
 logic [31:0] read_data_1, read_data_2;
@@ -9,14 +11,14 @@ integer i;
 always #1 clk = ~clk;
 
 Registers Registers(
-    .clk(clk),
-    .regWrite(reg_write),
-    .writeData(write_data),
-    .readData1(read_data_1),
-    .readData2(read_data_2),
-    .writeRegister(write_reg),
-    .readRegister1(read_reg_1),
-    .readRegister2(read_reg_2)
+    .clk        (clk),
+    .wr_en_i    (reg_write),
+    .data_i     (write_data),
+    .RS1_data_o (read_data_1),
+    .RS2_data_o (read_data_2),
+    .RD_ADDR_i  (write_reg),
+    .RS1_ADDR_i (read_reg_1),
+    .RS2_ADDR_i (read_reg_2)
 );
 
 initial begin

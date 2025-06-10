@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module gpio_tb ();
     
 logic clk, reset, read, write,

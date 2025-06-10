@@ -12,14 +12,14 @@ module mdu_tb;
 
     // Instantiate MDU
     MDU uut (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_i(valid_i),
-        .ready_o(ready_o),
-        .MDU_op_i(MDU_op_i),
-        .MDU_RS1_i(MDU_RS1_i),
-        .MDU_RS2_i(MDU_RS2_i),
-        .MDU_RD_o(MDU_RD_o)
+        .clk       (clk),
+        .rst_n     (rst_n),
+        .valid_i   (valid_i),
+        .ready_o   (ready_o),
+        .MDU_op_i  (MDU_op_i),
+        .MDU_RS1_i (MDU_RS1_i),
+        .MDU_RS2_i (MDU_RS2_i),
+        .MDU_RD_o  (MDU_RD_o)
     );
 
     // Clock generation

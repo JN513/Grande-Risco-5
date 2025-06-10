@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module bmu_tb ();
     
 logic clk, reset;

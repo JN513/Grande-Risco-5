@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module immediate_generator_tb ();
 
 logic clk, reset;

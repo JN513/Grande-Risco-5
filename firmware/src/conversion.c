@@ -63,7 +63,7 @@ char *itoa(int value, char *str, int base) {
         if (digit < 10)
             str[i] = '0' + digit;
         else
-            str[i] = 'a' + (digit - 10);
+            str[i] = 'A' + (digit - 10);
         
         i++;
     }

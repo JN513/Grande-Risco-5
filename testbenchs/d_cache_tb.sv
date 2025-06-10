@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module d_cache_tb ();
     
 logic clk, reset;

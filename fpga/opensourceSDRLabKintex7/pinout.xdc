@@ -347,7 +347,7 @@ set_property PACKAGE_PIN B14 [get_ports {gpio[33]}]
 #set_property PACKAGE_PIN B2 [get_ports {TXP_IN[1]}]
 #set_property PACKAGE_PIN B1 [get_ports {TXN_IN[1]}]
 #set_property PACKAGE_PIN D2 [get_ports {TXP_IN[0]}]
-#set_property PACKAGE_PIN D1 [get_ports {TXP_IN[0]}]
+#set_property PACKAGE_PIN D1 [get_ports {TXN_IN[0]}]
 
 #set_property PACKAGE_PIN H23 [get_ports {tx_dis[0]}]
 #set_property PACKAGE_PIN H24 [get_ports {tx_dis[1]}]

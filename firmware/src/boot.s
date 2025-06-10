@@ -1,7 +1,7 @@
 .globl _start
 .extern interruption_handling
 .extern isr_stack_end
-.set MEMORY_SIZE, 16384
+.set MEMORY_SIZE, 65536
 .set STACK_INIT, MEMORY_SIZE - 4
 
 _start:

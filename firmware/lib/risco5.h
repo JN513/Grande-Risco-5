@@ -3,7 +3,8 @@
 
 #define CSR_MHZFREQ 0xFC1 // CSR for CPU frequency in MHz
 #define NULL           0
-//#define MEM_SIZE       0x00008004
+//#define MEM_SIZE       0x00004000 // 16384
+//#define MEM_SIZE       0x00008000 // 32768
 #define MEM_SIZE       0x00010000 // 65536
 #define STACK_INIT     MEM_SIZE - 4
 #define FRAME_POINTER  STACK_INIT

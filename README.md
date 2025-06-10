@@ -14,7 +14,7 @@ The official language adopted by the project is Brazilian Portuguese; therefore,
 
 ## Processor CI
 
-[![Build Status](https://processorci.ic.unicamp.br/jenkins/buildStatus/icon?job=Grande-Risco-5/)](https://processorci.ic.unicamp.br/jenkins/blue/organizations/jenkins/Grande-Risco-5/activity)
+[![Build Status](https://processorci.lsc.ic.unicamp.br/jenkins/buildStatus/icon?job=Grande-Risco-5/)](https://processorci.lsc.ic.unicamp.br/jenkins/blue/organizations/jenkins/Grande-Risco-5/activity)
 
 ## Implementation
 

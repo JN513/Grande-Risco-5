@@ -344,3 +344,6 @@ set_property -dict {PACKAGE_PIN M11 IOSTANDARD LVCMOS18}  [get_ports FMC_hyper_r
 #set_property MARK_DEBUG true [get_nets pulp_chip_i/pad_reset_n]
 #set_property MARK_DEBUG true [get_nets pulp_chip_i/s_ref_clk]
 #set_property MARK_DEBUG true [get_nets pulp_chip_i/s_bootsel]
+
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+set_property BITSTREAM.CONFIG.UNUSEDPIN Pullup [current_design]

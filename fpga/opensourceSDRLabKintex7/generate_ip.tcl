@@ -6,7 +6,7 @@ create_project -force ip_project ./ip_project -part xc7k325tffg676-2
 # ========================
 
 # Define caminho do arquivo .prj dinamicamente
-set mig_prj_file [file join [pwd] "mig_a.prj"]
+set mig_prj_file [file join [pwd] "utils/mig_a.prj"]
 
 # Cria o IP "mig_7series_0"
 create_ip -name mig_7series -vendor xilinx.com -library ip -version 4.2 -module_name mig_7series_0 -dir ./ip

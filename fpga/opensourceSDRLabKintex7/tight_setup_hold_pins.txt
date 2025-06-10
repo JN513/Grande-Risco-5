@@ -1,0 +1,35 @@
++====================+====================+================================================================+
+| Launch Setup Clock | Launch Hold Clock  | Pin                                                            |
++====================+====================+================================================================+
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_3_3/RAMS64E_B/ADR1 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_3_3/RAMS64E_A/ADR1 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_1_1/RAMS64E_B/ADR0  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_1_1/RAMS64E_A/ADR0  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_3_3/RAMS64E_C/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_1_1/RAMS64E_A/ADR1  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_5_5/RAMS64E_A/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_1_1/RAMS64E_B/ADR1  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_5_5/RAMS64E_B/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_3_3/RAMS64E_D/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_3_3/RAMS64E_A/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_3_3/RAMS64E_C/ADR1 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_3_3/RAMS64E_B/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_3_3/RAMS64E_D/ADR1 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_256_511_8_8/RAMS64E_A/ADR0  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_1_1/RAMS64E_B/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_1_1/RAMS64E_A/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_256_511_8_8/RAMS64E_B/ADR0  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_5_5/RAMS64E_C/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_3_3/RAMS64E_A/ADR0  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_256_511_8_8/RAMS64E_A/ADR1  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_256_511_8_8/RAMS64E_B/ADR1  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_5_5/RAMS64E_D/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_1_1/RAMS64E_C/ADR0 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_5_5/RAMS64E_C/ADR0  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_3_3/RAMS64E_B/ADR0  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_1_1/RAMS64E_B/ADR1 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_5_5/RAMS64E_C/ADR1 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_768_1023_1_1/RAMS64E_A/ADR1 |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_5_5/RAMS64E_A/ADR0  |
+| clk_out3_clk_wiz_0 | clk_out3_clk_wiz_0 | SOC/Processor/DCache/cache_tag_reg_512_767_5_5/RAMS64E_C/ADR1  |
++--------------------+--------------------+----------------------------------------------------------------+

@@ -21,7 +21,7 @@ clk_wiz_0 clk_wiz_inst (
 
 
 Grande_Risco_5_SOC #(
-    .CLOCK_FREQ             (50_000_000),
+    .CLOCK_FREQ             (65_000_000),
     .BAUD_RATE              (115200),
     .MEMORY_SIZE            (4096),
     .MEMORY_FILE            ("../../verification_tests/memory/led_test2.hex"),

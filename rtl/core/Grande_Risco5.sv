@@ -74,7 +74,7 @@ Core #(
     .BRANCH_PREDICTION_SIZE  (BRANCH_PREDICTION_SIZE),
     .CLK_FREQ                (CLK_FREQ)
 ) Core1 (
-    .clk                     (core_clk),
+    .clk                     (clk),
     .halt                    (halt),
     .rst_n                   (rst_n),
 

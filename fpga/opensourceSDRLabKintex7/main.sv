@@ -1,5 +1,5 @@
 module top (
-    input  logic clk,
+    input  logic sys_clk,
     input  logic rst_n,
 
     input  logic rxd,
@@ -19,11 +19,11 @@ module top (
         .clk_out3 (user_clk),     // User clock - 100 MHz
         .resetn   (rst_n),        // Active low reset
         .locked   (locked),       // Locked signal
-        .clk_in1  (clk)       // System clock - 50 MHz
+        .clk_in1  (sys_clk)       // System clock - 50 MHz
     );
 
     Grande_Risco_5_SOC #(
-        .CLOCK_FREQ             (100_000_000),
+        .CLOCK_FREQ             (120_000_000),
         .BAUD_RATE              (115200),
         .MEMORY_SIZE            (65536),
         .MEMORY_FILE            ("../../firmware/build/program.hex"),

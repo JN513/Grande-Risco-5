@@ -2,7 +2,8 @@
 
 module Core #(
     parameter BOOT_ADDRESS           = 32'h00000000,
-    parameter BRANCH_PREDICTION_SIZE = 512
+    parameter BRANCH_PREDICTION_SIZE = 512,
+    parameter CLK_FREQ               = 100_000_000
 ) (
     // Control signal
     input logic clk,
@@ -92,7 +93,7 @@ logic [6:0] IFIDop, IDEXop;
 IFID #(
     .BOOT_ADDRESS           (BOOT_ADDRESS),
     .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
-) First_Stage (
+) IFID_Stage (
     .clk                              (clk),
     .rst_n                            (rst_n),
 
@@ -131,7 +132,7 @@ IFID #(
 );
 
 // Estágio ID/EX
-IDEX Second_Stage (
+IDEX IDEX_Stage (
     .clk                               (clk),
     .rst_n                             (rst_n),
 
@@ -182,7 +183,7 @@ IDEX Second_Stage (
 );
 
 // Estágio EX/MEM
-EXMEM Third_Stage (
+EXMEM EXMEM_Stage (
     .clk                   (clk),
     .rst_n                 (rst_n),
 
@@ -222,7 +223,7 @@ EXMEM Third_Stage (
 );
 
 // Estágio MEM/WB
-MEMWB Fourth_Stage (
+MEMWB MEMWB_Stage (
     .clk                    (clk),
     .rst_n                  (rst_n),
 
@@ -255,7 +256,9 @@ Registers RegisterBank(
 );
 
 
-CSR_Unit CSR(
+CSR_Unit #(
+    .CLK_FREQ                   (CLK_FREQ)
+) CSR(
     .clk                        (clk),
     .rst_n                      (rst_n),
 

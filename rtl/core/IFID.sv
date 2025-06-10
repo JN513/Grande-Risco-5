@@ -84,6 +84,10 @@ logic [31:0] JAL_PC, JALR_PC;
 assign is_different_branch_address    = PC != (IDEX_PC_i + IMMEDIATE_REG_i);
 assign is_different_no_branch_address = PC != (IDEX_PC_i + 'd4);
 
+logic is_no_compressed_instr;
+
+assign is_no_compressed_instr = &instruction_data_i[17:16];
+
 always_ff @(posedge clk ) begin // IF/ID
     instruction_request_o <= 1'b1;
     flush_bus_o           <= 1'b0;
@@ -121,8 +125,8 @@ always_ff @(posedge clk ) begin // IF/ID
             IFID_IR_o       <= NOP;
             PC              <= JAL_PC; // imediato
             IFID_PC_o       <= BOOT_ADDRESS;
-            pc_is_unaligned <= (JAL_PC[1] == 1'b1);
-            if(~instruction_response_i) begin
+            pc_is_unaligned <= JAL_PC[1];
+            if(!instruction_response_i) begin
                 flush_bus_o <= 1'b1;
             end
 
@@ -131,7 +135,7 @@ always_ff @(posedge clk ) begin // IF/ID
             IFID_IR_o       <= NOP;
             PC              <= JALR_PC; // imediato
             IFID_PC_o       <= BOOT_ADDRESS;
-            pc_is_unaligned <= (JALR_PC[1] == 1'b1);
+            pc_is_unaligned <= JALR_PC[1];
 
             if(!instruction_response_i) begin
                 flush_bus_o <= 1'b1;
@@ -153,7 +157,6 @@ always_ff @(posedge clk ) begin // IF/ID
 
             if((!instruction_response_i && !memory_stall_i )) begin //instruction_response_i == 1'b0
                 IFID_IR_o <= NOP;
-                //IFID_PC_o <= BOOT_ADDRESS;
             end else if (!memory_stall_i && !execute_stall_i && !flush_bus_o) begin
                 if(finish_unaligned_pc) begin
                     finish_unaligned_pc <= 1'b0;
@@ -167,16 +170,15 @@ always_ff @(posedge clk ) begin // IF/ID
                 end else if(pc_is_unaligned) begin
                     temp_instruction <= {16'h0, instruction_data_i[31:16]};
                     IFID_IR_o <= NOP;
-                    //IFID_PC_o <= BOOT_ADDRESS;
                     finish_unaligned_pc <= 1'b1;
                     temp_pc <= PC;
-
-                    if(instruction_data_i[17:16] != 2'b11) begin
-                        PC              <= PC + 'd2;
-                        pc_is_unaligned <= 1'b0;
-                    end else begin
+                    
+                    if(is_no_compressed_instr) begin
                         PC              <= PC + 'd4;
                         pc_is_unaligned <= 1'b1;
+                    end else begin
+                        PC              <= PC + 'd2;
+                        pc_is_unaligned <= 1'b0;
                     end
                 end else begin
                     IFID_IR_o                        <= instr_d_o;
@@ -185,12 +187,9 @@ always_ff @(posedge clk ) begin // IF/ID
                         PC                <= prediction_address;
                         pc_is_unaligned   <= prediction_address[1];
                         jump_is_predicted <= 1'b1;
-                    end else if(is_compressed_instruction) begin
-                        PC <= PC + 'd2;
-                        pc_is_unaligned <= 1'b1;
-                    end else begin
-                        PC <= PC + 'd4;
-                        pc_is_unaligned <= 1'b0;
+                    end else begin 
+                        PC <= PC + ('d4 >> is_compressed_instruction);
+                        pc_is_unaligned <= PC[1] ^ is_compressed_instruction;
                     end
 
                     IFID_PC_o <= PC;
@@ -215,7 +214,6 @@ IR_Decompression IR_Decompression (
 logic is_jump;
 
 always_comb begin : IS_JUMP_CHECK
-    is_jump = 1'b0;
     unique case(instr_d_o[6:0])
         JAL_OPCODE, JALR_OPCODE, BRANCH_OPCODE: is_jump = 1'b1;
         default: is_jump = 1'b0;

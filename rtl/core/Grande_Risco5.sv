@@ -4,7 +4,8 @@ module Grande_Risco5 #(
     parameter D_CACHE_SIZE           = 32'd32,
     parameter DATA_WIDTH             = 32'd32,
     parameter ADDR_WIDTH             = 32'd32,
-    parameter BRANCH_PREDICTION_SIZE = 512
+    parameter BRANCH_PREDICTION_SIZE = 512,
+    parameter CLK_FREQ               = 100_000_000
 ) (
     // Control signal
     input logic clk,
@@ -63,9 +64,10 @@ logic [31:0] memory_addr;
 assign core_clk = clk & ~halt;
 
 Core #(
-    .BOOT_ADDRESS           (BOOT_ADDRESS),
-    .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
-) N1 (
+    .BOOT_ADDRESS            (BOOT_ADDRESS),
+    .BRANCH_PREDICTION_SIZE  (BRANCH_PREDICTION_SIZE),
+    .CLK_FREQ                (CLK_FREQ)
+) Core1 (
     .clk                     (core_clk),
     .rst_n                   (rst_n),
 

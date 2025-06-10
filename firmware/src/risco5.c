@@ -85,22 +85,36 @@ char *strncpy(char *destination, const char *source, size_t n) {
     return destination;
 }
 
-
-uint32_t get_cycle_value()
-{
-    uint32_t cycle;
-
-    cycle = read_csr(cycle);
-    
-    return cycle;
+uint32_t get_cpu_freq_mhz(){
+    uint32_t freq = get_cpu_freq();
+    return freq / 1000000; // Converte de Hz para MHz
 }
 
-void busy_wait(uint32_t ms)
-{
-    uint32_t tmp;
-    uint32_t count;
+void delay_s(uint32_t s){
+    uint64_t tmp;
+    uint64_t count;
+
+    count = s * OS_TO_CYCLES;
+    tmp = get_cycle_value();
+
+    while (get_cycle_value() < (tmp + count));
+}
+
+void delay_ms(uint32_t ms){
+    uint64_t tmp;
+    uint64_t count;
 
     count = ms * MS_TO_CYCLES;
+    tmp = get_cycle_value();
+
+    while (get_cycle_value() < (tmp + count));
+}
+
+void delay_us(uint32_t us){
+    uint64_t tmp;
+    uint64_t count;
+
+    count = us * US_TO_CYCLES;
     tmp = get_cycle_value();
 
     while (get_cycle_value() < (tmp + count));

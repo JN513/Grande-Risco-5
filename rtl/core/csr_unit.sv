@@ -1,4 +1,6 @@
-module CSR_Unit (
+module CSR_Unit #(
+    parameter CLK_FREQ = 100_000_000 // Clock frequency
+) (
     input logic clk,
     input logic rst_n,
 
@@ -73,6 +75,9 @@ localparam MINSTRET             = 12'hB02; // Contador de instruções.
 localparam MCYCLEH              = 12'hB80; // Campo de extensão do registrador MCYCLE.
 localparam MINSTRETH            = 12'hB82; // Campo de extensão do registrador MINSTRET.
 
+// Custom CSRs
+localparam MHZFREQ              = 12'hFC1; // Frequência do clock do HZ.
+
 
 logic [31:0] MEPC_reg, MSTATUS_reg, MCAUSE_reg, MTVAL_reg, 
     MIP_reg, MIE_reg, MTVEC_reg, MSCRATCH_reg;
@@ -127,6 +132,9 @@ always_comb begin : READ_CSR
         MCAUSE:    csr_read_data = MCAUSE_reg;
         MTVAL:     csr_read_data = MTVAL_reg;
         MIP:       csr_read_data = MIP_reg;
+
+        // Custom CSRs
+        MHZFREQ:   csr_read_data = CLK_FREQ;
         default:   csr_read_data = 32'h00000000;
     endcase
 end

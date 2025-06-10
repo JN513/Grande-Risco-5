@@ -58,21 +58,22 @@ Grande_Risco5 #(
     .D_CACHE_SIZE           (D_CACHE_SIZE),
     .DATA_WIDTH             (DATA_WIDTH),
     .ADDR_WIDTH             (ADDR_WIDTH),
-    .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
+    .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE),
+    .CLK_FREQ               (CLOCK_FREQ)
 ) Processor (
-    .clk   (clk),
-    .rst_n (rst_n),
-    .halt  (halt),
+    .clk          (clk),
+    .rst_n        (rst_n),
+    .halt         (halt),
 
-    .cyc_o  (master_cyc),
-    .stb_o  (master_stb),
-    .we_o   (master_we),
+    .cyc_o        (master_cyc),
+    .stb_o        (master_stb),
+    .we_o         (master_we),
 
-    .addr_o (master_addr_o),
-    .data_o (master_data_o),
+    .addr_o       (master_addr_o),
+    .data_o       (master_data_o),
 
-    .ack_i  (master_ack),
-    .data_i (master_data),
+    .ack_i        (master_ack),
+    .data_i       (master_data),
 
     .interruption (1'b0)
 );

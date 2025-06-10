@@ -36,20 +36,15 @@ module DRAM_Controller #(
     output logic [0:0]             ddr3_cke,
     output logic [0:0]             ddr3_cs_n,
     output logic [3:0]             ddr3_dm,
-    output logic [0:0]             ddr3_odt,
-
-    output logic req_empty,
-    output logic resp_empty,
-    output logic calib_done,
-    output logic app_ready
+    output logic [0:0]             ddr3_odt
 );
 
     logic rst_n;
     assign rst_n = rst_n_i;
 
     logic ui_clk, ui_clk_sync_rst;
-    //logic calib_done;
-    assign app_ready = app_rdy;
+    logic calib_done;
+
 
     typedef struct packed {
         logic         we;
@@ -68,9 +63,6 @@ module DRAM_Controller #(
     resp_t resp_fifo_wdata, resp_fifo_rdata;
     logic  resp_fifo_full, resp_fifo_empty;
     logic  resp_fifo_wr_en, resp_fifo_rd_en;
-
-    assign req_empty  = req_fifo_empty;
-    assign resp_empty = resp_fifo_empty;
 
     // Async FIFOs
     async_fifo #(
@@ -144,7 +136,7 @@ module DRAM_Controller #(
 
             WB_ACK: begin
                 ack_o  = 1;
-                data_o = resp_fifo_rdata.data;
+                data_o = we_i ? 0 : resp_fifo_rdata.data;
                 if (!(cyc_i && stb_i)) wb_next = WB_IDLE;
             end
         endcase
@@ -153,6 +145,7 @@ module DRAM_Controller #(
     // FSM - MIG
     typedef enum logic [2:0] {
         MIG_IDLE,
+        MIG_READ_REQUEST,
         MIG_READ,
         MIG_WRITE,
         MIG_WAIT_RD
@@ -189,21 +182,24 @@ module DRAM_Controller #(
         case (mig_state)
             MIG_IDLE:
                 if (calib_done && !req_fifo_empty) begin
-                    mig_next = req_fifo_rdata.we ? MIG_WRITE : MIG_READ;
+                    mig_next = MIG_READ_REQUEST;
+                    req_fifo_rd_en = 1;
                 end
+
+            MIG_READ_REQUEST: begin
+                mig_next = req_fifo_rdata.we ? MIG_WRITE : MIG_READ;
+            end
 
             MIG_WRITE:
                 if (app_rdy && app_wdf_rdy) begin
                     app_en         = 1;
                     app_wdf_wren   = 1;
-                    req_fifo_rd_en = 1;
                     mig_next       = MIG_IDLE;
                 end
 
             MIG_READ:
                 if (app_rdy) begin
                     app_en         = 1;
-                    req_fifo_rd_en = 1;
                     mig_next       = MIG_WAIT_RD;
                 end
 
@@ -239,7 +235,7 @@ module DRAM_Controller #(
         .app_en              (app_en),
         .app_wdf_data        (app_wdf_data),
         .app_wdf_end         (app_wdf_end),
-        .app_wdf_mask        ({(WORD_SIZE/8){1'b0}}), // Corrigido para 16 bits
+        .app_wdf_mask        (32'd0),
         .app_wdf_wren        (app_wdf_wren),
         .app_rd_data         (app_rd_data),
         .app_rd_data_end     (app_rd_data_end),
@@ -259,7 +255,7 @@ module DRAM_Controller #(
         .clk_ref_i           (ddr3_ref_clk_i),
         .init_calib_complete (calib_done),
         .device_temp         (),
-        .sys_rst             (!rst_n_i)
+        .sys_rst             (rst_n_i)
     );    
     
 endmodule

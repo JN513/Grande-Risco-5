@@ -27,6 +27,7 @@ typedef short     int16_t;
 typedef char      int8_t;
 
 typedef unsigned int size_t;
+typedef unsigned int ee_size_t;
 
 void *memset (void *dest, int val, size_t len);
 
@@ -51,5 +52,7 @@ uint64_t get_cycle_value();
 void delay_s (uint32_t s);
 void delay_ms(uint32_t ms);
 void delay_us(uint32_t us);
+
+int ee_printf(const char *fmt, ...);
 
 #endif // __RISCO_5_H__

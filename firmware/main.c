@@ -42,7 +42,10 @@ int main() {
 
     delay_ms(100);
 
-    uart_write_int(0xABCD, 16);
+    uart_write_int(0x4C616973, 16);
+    uart_write_string(" is the magic number of this project.\n\n", 40);
+    uart_write_int(127, 10);
+    uart_write_string(" is the maximum value of a signed 8-bit integer.\n\n", 50);
     uart_write_string("\n\n", 2);
 
     delay_ms(100);
@@ -52,9 +55,9 @@ int main() {
     uart_write_string(msg3, 187);
 
     uart_write_string("CPU Frequency: ", 15);
-    uint32_t cpu_freq = get_cpu_freq_mhz();
+    uint32_t cpu_freq = get_cpu_freq();
     uart_write_int(cpu_freq, 10);
-    uart_write_string(" MHz\n\n", 5);
+    uart_write_string(" Hz\n\n", 5);
     uart_write_string("Starting LED Shift...\n", 23);
 
     led_shift();

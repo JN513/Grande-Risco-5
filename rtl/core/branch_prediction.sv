@@ -79,7 +79,7 @@ always_ff @(posedge clk) begin : BRANCH_PREDICTION_FSM
 end
 
 // Saída baseada na tabela de predição
-assign address_o = address_to_jump[index];
+assign address_o          = address_to_jump[index];
 assign prediction_taken_o = prediction[index][1] & is_jump;
 
 endmodule

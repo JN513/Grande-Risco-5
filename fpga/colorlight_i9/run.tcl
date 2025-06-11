@@ -24,14 +24,11 @@ yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rt
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/core/invalid_ir_check.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/leds.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/memory.sv
-yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/dram_controller.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/fifo.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/gpio.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/gpios.sv
-yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/i2c_master.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/peripheral_bus.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/pwm.sv
-yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/spi_master.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/timer.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/uart_rx.sv
 yosys read_systemverilog -defer -I../../rtl/core -i../../rtl/peripheral ../../rtl/peripheral/uart_tx.sv

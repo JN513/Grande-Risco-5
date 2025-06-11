@@ -63,17 +63,19 @@ logic prediction_taken;
 logic jump_is_predicted;
 
 logic is_different_branch_address, pc_is_unaligned, finish_unaligned_pc, is_different_no_branch_address;
-logic illegal_predicted_instruction;
+logic illegal_predicted_instruction, illegal_no_predicted_instruction;
 
 assign illegal_predicted_instruction = (is_different_no_branch_address & !takebranch_i & is_branch_i) && !execute_stall_i;
-assign branch_flush_o = (is_different_branch_address & takebranch_i) || illegal_predicted_instruction;
+assign illegal_no_predicted_instruction = (is_different_branch_address & takebranch_i);
+assign branch_flush_o = illegal_no_predicted_instruction || illegal_predicted_instruction;
 
 // Unaligned instruction
-logic [31:0] temp_instruction, temp_pc;
+logic [15:0] temp_instruction;
+logic [31:0] temp_pc;
 logic [31:0] unaligned_instruction;
 logic [31:0] prediction_address;
 
-assign unaligned_instruction = {instruction_data_i[15:0], temp_instruction[15:0]};
+assign unaligned_instruction = {instruction_data_i[15:0], temp_instruction};
 
 // Desconpressed instruction
 logic [31:0] instr_d_o, instr_c_i;
@@ -83,123 +85,83 @@ assign instr_c_i = (finish_unaligned_pc) ? unaligned_instruction : instruction_d
 
 logic [31:0] JAL_PC, JALR_PC;
 
-assign is_different_branch_address    = PC != (IDEX_PC_i + IMMEDIATE_REG_i);
-assign is_different_no_branch_address = PC != (IDEX_PC_i + 'd4);
+assign is_different_branch_address    = PC != BRANCH_ADDRESS_i;
+assign is_different_no_branch_address = PC != NON_BRANCH_ADDRESS_i;
 
 logic is_no_compressed_instr;
-
 assign is_no_compressed_instr = &instruction_data_i[17:16];
 
-always_ff @(posedge clk ) begin // IF/ID
-    instruction_request_o <= 1'b1;
-    flush_bus_o           <= 1'b0;
-    jump_is_predicted     <= 1'b0;
-
+always_ff @( posedge clk ) begin
+    JAL_PC     <= IFID_PC_o + IMMEDIATE_i;
+    JALR_PC    <= forward_out_a_i + IMMEDIATE_REG_i;
     is_jal_o   <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i);
-    take_jal_o <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i) && (PC != IFID_PC_o + IMMEDIATE_i) && (!branch_flush_o);
+    take_jal_o <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i) 
+                    && (PC != IFID_PC_o + IMMEDIATE_i) && (!branch_flush_o);
+end
 
-    JAL_PC  <= IFID_PC_o + IMMEDIATE_i;
-    JALR_PC <= forward_out_a_i + IMMEDIATE_REG_i;
+logic trap;
+assign trap = trap_flush_i || jtag_reset_flag_i || take_jal_o || take_jalr_i || branch_flush_o;
+assign pc_is_unaligned = PC[1];
 
-    //is_different_branch_address    <= PC != (IFID_PC_o + IMMEDIATE_i);
-    //is_different_no_branch_address <= PC != (IDEX_PC_i + 'd8);
-
+always_ff @(posedge clk ) begin // IF/ID
+    instruction_request_o            <= 1'b1;
+    flush_bus_o                      <= 1'b0;
+    jump_is_predicted                <= 1'b0;
     IFID_is_compressed_instruction_o <= 1'b0;
 
     if(!rst_n || jtag_reset_flag_i) begin
-        pc_is_unaligned     <= 1'b0;
         PC                  <= BOOT_ADDRESS;
         IFID_IR_o           <= NOP;
-        flush_bus_o         <= 1'b0;
         finish_unaligned_pc <= 1'b0;
     end else begin
-        if(flush_bus_o) begin
-            instruction_request_o <= 1'b1;
-        end
-        
-        if(trap_flush_i) begin
+        if(trap) begin
             IFID_IR_o           <= NOP;
-            PC                  <= trap_pc_i;
-            IFID_PC_o           <= BOOT_ADDRESS;
-            pc_is_unaligned     <= trap_pc_i[1];
             finish_unaligned_pc <= 1'b0;
-        end else if(take_jal_o) begin
-            IFID_IR_o       <= NOP;
-            PC              <= JAL_PC; // imediato
-            IFID_PC_o       <= BOOT_ADDRESS;
-            pc_is_unaligned <= JAL_PC[1];
-            if(!instruction_response_i) begin
-                flush_bus_o <= 1'b1;
+
+            if(!instruction_response_i) flush_bus_o <= 1'b1;
+
+            if(trap_flush_i) begin
+                PC <= trap_pc_i;
+            end else if (take_jalr_i) begin 
+                PC <= JALR_PC; // imediato
+            end else if(take_jal_o)begin
+                PC <= JAL_PC;
+            end else if(illegal_predicted_instruction) begin
+                PC <= NON_BRANCH_ADDRESS_i;
+            end else if(illegal_no_predicted_instruction) begin 
+                PC <= BRANCH_ADDRESS_i;
+            end else begin
+                PC <= BOOT_ADDRESS;
             end
+        end else if(!instruction_response_i && !memory_stall_i) begin
+            IFID_IR_o <= NOP;
+        end else if (!memory_stall_i && !execute_stall_i && !flush_bus_o) begin
+            if(pc_is_unaligned && !finish_unaligned_pc) begin
+                temp_instruction    <= instruction_data_i[31:16];
+                IFID_IR_o           <= NOP;
+                finish_unaligned_pc <= 1'b1;
+                temp_pc             <= PC;
+                
+                PC <= PC + {29'h0, is_no_compressed_instr, ~is_no_compressed_instr, 1'b0};
+            end else begin
+                IFID_IR_o                        <= instr_d_o;
+                IFID_is_compressed_instruction_o <= is_compressed_instruction;
 
-            finish_unaligned_pc <= 1'b0;
-        end else if (take_jalr_i) begin 
-            IFID_IR_o       <= NOP;
-            PC              <= JALR_PC; // imediato
-            IFID_PC_o       <= BOOT_ADDRESS;
-            pc_is_unaligned <= JALR_PC[1];
-
-            if(!instruction_response_i) begin
-                flush_bus_o <= 1'b1;
-            end
-
-            finish_unaligned_pc <= 1'b0;
-        end else if(branch_flush_o) begin
-            IFID_IR_o       <= NOP;
-            PC              <= (illegal_predicted_instruction) ? NON_BRANCH_ADDRESS_i : BRANCH_ADDRESS_i; // imediato
-            IFID_PC_o       <= BOOT_ADDRESS;
-            pc_is_unaligned <= (illegal_predicted_instruction) ? (NON_BRANCH_ADDRESS_i[1]) : (BRANCH_ADDRESS_i[1]);
-
-            if(!instruction_response_i) begin
-                flush_bus_o <= 1'b1;
-            end
-
-            finish_unaligned_pc <= 1'b0;
-        end else begin
-
-            if((!instruction_response_i && !memory_stall_i )) begin //instruction_response_i == 1'b0
-                IFID_IR_o <= NOP;
-            end else if (!memory_stall_i && !execute_stall_i && !flush_bus_o) begin
                 if(finish_unaligned_pc) begin
-                    finish_unaligned_pc <= 1'b0;
-                    IFID_IR_o <= instr_d_o;
                     IFID_PC_o <= temp_pc;
-
-                    if(illegal_compressed_instruction_o) begin
-                        IFID_IR_o <= NOP;
-                        IFID_PC_o <= BOOT_ADDRESS;
-                    end
-                end else if(pc_is_unaligned) begin
-                    temp_instruction <= {16'h0, instruction_data_i[31:16]};
-                    IFID_IR_o <= NOP;
-                    finish_unaligned_pc <= 1'b1;
-                    temp_pc <= PC;
-                    
-                    if(is_no_compressed_instr) begin
-                        PC              <= PC + 'd4;
-                        pc_is_unaligned <= 1'b1;
-                    end else begin
-                        PC              <= PC + 'd2;
-                        pc_is_unaligned <= 1'b0;
-                    end
+                    finish_unaligned_pc <= 1'b0;
+                end else if(prediction_taken) begin
+                    PC                <= prediction_address;
+                    IFID_PC_o         <= PC;
+                    jump_is_predicted <= 1'b1;
                 end else begin
-                    IFID_IR_o                        <= instr_d_o;
-                    IFID_is_compressed_instruction_o <= is_compressed_instruction;
-                    if(prediction_taken) begin
-                        PC                <= prediction_address;
-                        pc_is_unaligned   <= prediction_address[1];
-                        jump_is_predicted <= 1'b1;
-                    end else begin 
-                        PC <= PC + ('d4 >> is_compressed_instruction);
-                        pc_is_unaligned <= PC[1] ^ is_compressed_instruction;
-                    end
-
+                    PC <= PC + {29'h0, ~is_compressed_instruction, is_compressed_instruction, 1'b0}; // +4 for normal instructions, +2 for compressed);
                     IFID_PC_o <= PC;
-                    
-                    if(illegal_compressed_instruction_o) begin
-                        IFID_IR_o <= NOP;
-                        IFID_PC_o <= BOOT_ADDRESS;
-                    end
+                end
+                                
+                if(illegal_compressed_instruction_o) begin
+                    IFID_IR_o <= NOP;
+                    IFID_PC_o <= BOOT_ADDRESS;
                 end
             end
         end
@@ -225,26 +187,26 @@ end
 Branch_Prediction #(
     .BRANCH_PREDICTION_SIZE (BRANCH_PREDICTION_SIZE)
 ) Branch_Prediction (
-    .clk                   (clk),
-    .rst_n                 (rst_n),
+    .clk                    (clk),
+    .rst_n                  (rst_n),
 
-    .PC_i                  (PC),
-    .is_jump               (is_jump),
+    .PC_i                   (PC),
+    .is_jump                (is_jump),
 
-    .branch_address_i      (IDEX_PC_i),
-    .branch_taken_i        (takebranch_i),
-    .is_branch_i           (is_branch_i),
-    .address_to_branch_i   (BRANCH_ADDRESS_i),
+    .branch_address_i       (IDEX_PC_i),
+    .branch_taken_i         (takebranch_i),
+    .is_branch_i            (is_branch_i),
+    .address_to_branch_i    (BRANCH_ADDRESS_i),
 
-    .jal_address_i         (IDEX_PC_i),
-    .jalr_address_i        (EXMEM_PC_i),
-    .is_jal_i              (is_jal_o),
-    .is_jalr_i             (is_jalr_i),
-    .address_to_jal_i      (JAL_PC),
-    .address_to_jalr_i     (JALR_PC),
+    .jal_address_i          (IDEX_PC_i),
+    .jalr_address_i         (EXMEM_PC_i),
+    .is_jal_i               (is_jal_o),
+    .is_jalr_i              (is_jalr_i),
+    .address_to_jal_i       (JAL_PC),
+    .address_to_jalr_i      (JALR_PC),
 
-    .prediction_taken_o    (prediction_taken),
-    .address_o             (prediction_address)
+    .prediction_taken_o     (prediction_taken),
+    .address_o              (prediction_address)
 );
 
 Invalid_IR_Check Invalid_IR_Check (

@@ -79,11 +79,6 @@ always_ff @(posedge clk ) begin : IDEX_STAGE
 `ifdef ENABLE_MDU
     mdu_start <= 1'b0;
 `endif
-    //BRANCH_ADDRESS_o     <= IFIDPC_i + immediate_o;
-    //NON_BRANCH_ADDRESS_o <= IDEXPC_o + 'd4;
-    //is_branch_o          <= (IFIDop == BRANCH_OPCODE);
-    IDEX_is_compressed_instruction_o <= IFID_is_compressed_instruction_i;
-
     if(!rst_n || branch_flush_i || (take_jal_i && ~execute_stall_o)
         || (take_jalr_o && ~execute_stall_o) || trap_flush_i) begin
         IDEXPC_o <= 32'h0;
@@ -101,6 +96,12 @@ always_ff @(posedge clk ) begin : IDEX_STAGE
             IDEXA  <= register_data_1_i; 
             IDEXB  <= register_data_2_i;
             alu_op_o <= aluop_out;
+
+            IDEX_is_compressed_instruction_o <= IFID_is_compressed_instruction_i;
+            //BRANCH_ADDRESS_o     <= IFIDPC_i + immediate_o;
+            //NON_BRANCH_ADDRESS_o <= IDEXPC_o + 'd4;
+            //is_branch_o          <= (IFIDop == BRANCH_OPCODE);
+
             `ifdef ENABLE_MDU
             if(IFIDop == RTYPE_OPCODE && func7_lsb ) begin
                 mdu_start <= 1'b1;
@@ -108,6 +109,7 @@ always_ff @(posedge clk ) begin : IDEX_STAGE
             end else
                 mdu_operation_o <= 1'b0;
             `endif
+
         end else begin
             previous_instruction_is_lw <= (EXMEMop_i == LW_OPCODE);
             IDEXA <= forward_out_a_o;

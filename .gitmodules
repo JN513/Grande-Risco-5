@@ -13,3 +13,6 @@
 [submodule "rtl/external_peripheral/DRAM_Controller"]
 	path = rtl/external_peripheral/DRAM_Controller
 	url = https://github.com/Unicamp-Odhin/DRAM_Controller.git
+[submodule "rtl/external_peripheral/SPI-Slave"]
+	path = rtl/external_peripheral/SPI-Slave
+	url = https://github.com/Unicamp-Odhin/SPI-Slave

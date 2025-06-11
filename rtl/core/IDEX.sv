@@ -29,6 +29,9 @@ module IDEX (
     output logic [31:0] MDU_data_o,
     output logic [31:0] ALU_data_o,
 
+    input logic exmem_sw_opcode_i,
+    input logic memwb_sw_opcode_i,
+
     output logic take_jalr_o,
     output logic is_branch_o,
     output logic execute_stall_o,
@@ -179,6 +182,8 @@ Forwarding_Unit Forwarding_Unit(
     .ex_mem_rd_i        (EXMEMrd_i),
     .mem_wb_rd_i        (MEMWBrd_i),
     .prev_instr_is_lw_i (previous_instruction_is_lw),
+    .exmem_sw_opcode_i  (exmem_sw_opcode_i),
+    .memwb_sw_opcode_i  (memwb_sw_opcode_i),
     .fwd_rs1_o          (op_rs1),
     .fwd_rs2_o          (op_rs2)
 );
@@ -188,7 +193,7 @@ MUX ForwardAMUX(
     .A_i  (IDEXA),
     .B_i  (MEMWBValue_i),
     .C_i  (EXMEMALUOut_i),
-    .D_i  (0),
+    .D_i  (0), // TODO: verificar se é necessário trocar por FFFFFFFF
     .S_o  (forward_out_a_o)
 );
 
@@ -218,7 +223,7 @@ MDU Mdu(
 
 assign is_branch_o  = (IDEXop == BRANCH_OPCODE);
 assign zero_o       = zero;
-assign takebranch_o = (zero && is_branch_o);
+assign takebranch_o = (zero && is_branch_o && !execute_stall_o);
 assign IFIDop       = IFIDIR_i[6:0];
 assign IDEXop       = IDEXIR_o[6:0];
 assign IDEXrd       = IDEXIR_o[11:7];

@@ -96,6 +96,8 @@ logic IDEX_trap_flush;
 logic EXMEM_trap_flush;
 logic software_interruption;
 logic unaligned_access;
+logic exmem_sw_opcode;
+logic memwb_sw_opcode;
 
 `ifdef ENABLE_MDU
 logic mdu_operation;
@@ -186,6 +188,8 @@ IDEX IDEX_Stage (
     .takebranch_o                      (takebranch),
     .BRANCH_ADDRESS_o                  (BRANCH_ADDRESS),
     .NON_BRANCH_ADDRESS_o              (NON_BRANCH_ADDRESS),
+    .exmem_sw_opcode_i                 (exmem_sw_opcode),
+    .memwb_sw_opcode_i                 (memwb_sw_opcode),
 
     .IDEXIR_o                          (IDEX_IR),
     .IDEXPC_o                          (IDEX_PC),
@@ -228,6 +232,7 @@ EXMEM EXMEM_Stage (
     .EXMEMop_o             (EXMEMop),
     .EXMEMrd_o             (EXMEM_RD),
     .unaligned_access_o    (unaligned_access),
+    .exmem_sw_opcode_o     (exmem_sw_opcode),
 
     // Data BUS
     .data_memory_response  (data_mem_rsp_i),
@@ -252,6 +257,7 @@ MEMWB MEMWB_Stage (
     .unaligned_access_i     (unaligned_access),
 
     .memory_stall_i         (memory_stall),
+    .memwb_sw_opcode_o      (memwb_sw_opcode),
 
     .instruction_finished_o (instruction_finished),
     .reg_wr_en_o            (reg_wr_en),

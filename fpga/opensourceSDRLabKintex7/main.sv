@@ -28,7 +28,7 @@ module top (
         .MEMORY_SIZE            (65536),
         .MEMORY_FILE            ("../../firmware/build/program.hex"),
         .GPIO_WIDTH             (6),
-        .UART_BUFFER_SIZE       (32),
+        .UART_BUFFER_SIZE       (188),
         .I_CACHE_SIZE           (4096),
         .D_CACHE_SIZE           (4096),
         .BRANCH_PREDICTION_SIZE (512),

@@ -29,6 +29,7 @@ module EXMEM (
     output logic unaligned_access_o,
     output logic [6:0] EXMEMop_o,
     output logic [4:0] EXMEMrd_o,
+    output logic exmem_sw_opcode_o,
 
     // Data BUS
 
@@ -271,6 +272,7 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
 
             EXMEMIR_o <= IDEXIR_i;
             EXMEMPC_o <= IDEXPC_i;
+            exmem_sw_opcode_o <= (IDEXop == SW_OPCODE);
 
             Data_Address <= ALU_data_i;
 

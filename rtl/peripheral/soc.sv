@@ -1,17 +1,17 @@
 `include "config.vh"
 
 module Grande_Risco_5_SOC #(
-    parameter CLOCK_FREQ             = 50_000_000,
+    parameter CLOCK_FREQ             = 100_000_000,
     parameter BAUD_RATE              = 2_500_000,
     parameter BOOT_ADDRESS           = 32'h00000000,
-    parameter MEMORY_SIZE            = 4096,
+    parameter MEMORY_SIZE            = 65536, // 64KB
     parameter MEMORY_FILE            = "verification_tests/memory/generic.hex",
     parameter GPIO_WIDTH             = 5,
-    parameter I_CACHE_SIZE           = 256,
-    parameter D_CACHE_SIZE           = 256,
+    parameter I_CACHE_SIZE           = 4096,
+    parameter D_CACHE_SIZE           = 4096,
     parameter DATA_WIDTH             = 32,
     parameter ADDR_WIDTH             = 32,
-    parameter UART_BUFFER_SIZE       = 16,
+    parameter UART_BUFFER_SIZE       = 188,
     parameter BRANCH_PREDICTION_SIZE = 512,
     parameter VGA_WIDTH              = 640,
     parameter VGA_HEIGHT             = 480,
@@ -83,8 +83,8 @@ Grande_Risco5 #(
     .jtag_data_i       (32'b0), // JTAG data input
     .jtag_data_o       (),      // JTAG data output
 
-    .jtag_halt_flag_i  (1'b0), // JTAG halt flag
-    .jtag_reset_flag_i (1'b0)  // JTAG reset flag
+    .jtag_halt_flag_i  (1'b0),  // JTAG halt flag
+    .jtag_reset_flag_i (1'b0)   // JTAG reset flag
 );
 
 Memory #(

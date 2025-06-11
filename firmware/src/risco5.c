@@ -22,13 +22,23 @@ void *memcpy(void *out, const void *in, size_t length) {
     return out;
 }
 
-int strlen(const char *str){
+int strlen(const char *str)
+{
+    char *inicial = (char *)str;
+
+    while (*inicial != 0)
+        inicial++;
+
+    return (int)(inicial - str);
+}
+
+/*int strlen(const char *str){ // TODO: Checar compilador de riscv
     int i = 0;
 
     while(str[i] != '\0') i++;
 
     return i;
-}
+}*/
 
 char *strcpy(char *destination, const char *source) {
     char *dest_ptr = destination;

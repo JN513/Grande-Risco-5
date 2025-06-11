@@ -47,29 +47,15 @@ int main() {
 
     delay_ms(100);
 
-    //char msg3[] = "To my dear platonic passion: Even though you probably never know this, since I met you, your beautiful smile and all your perfection have encouraged me to be a better person every day.\n\n";
+    char msg3[] = "To my dear platonic passion: Even though you probably never know this, since I met you, your beautiful smile and all your perfection have encouraged me to be a better person every day.\n\n";
 
-    //uart_write_string(msg3, 187);
+    uart_write_string(msg3, 187);
 
-
-    char msg1[] = "To my dear platonic passion: Even ";
-    uart_write_string(msg1, 35);
-
-    char msg2[] = "though you probably never know ";
-    uart_write_string(msg2, 32);
-
-    char msg3[] = "this, since I met you, your ";
-    uart_write_string(msg3, 29);
-
-    char msg4[] = "beautiful smile and all your ";
-    uart_write_string(msg4, 30);
-
-    char msg5[] = "perfection have encouraged me to ";
-    uart_write_string(msg5, 34);
-
-    char msg6[] = "be a better person every day.\n\n";
-    uart_write_string(msg6, 32);
-
+    uart_write_string("CPU Frequency: ", 15);
+    uint32_t cpu_freq = get_cpu_freq_mhz();
+    uart_write_int(cpu_freq, 10);
+    uart_write_string(" MHz\n\n", 5);
+    uart_write_string("Starting LED Shift...\n", 23);
 
     led_shift();
 

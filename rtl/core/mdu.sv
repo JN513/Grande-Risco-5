@@ -49,13 +49,10 @@ localparam REMU   = 3'b111; // rd = rs1 % rs2
 logic mul_ready_o;
 logic [31:0] MUL_RD;
 
-
-`ifdef FPGA
-
 typedef enum logic [1:0] {
-    MUL_IDLE    = 2'b00,
-    MUL_OPERATE = 2'b01,
-    MUL_FINISH  = 2'b10
+    MUL_IDLE,
+    MUL_OPERATE,
+    MUL_FINISH
 } mul_state_t;
 
 mul_state_t state_mul;
@@ -68,12 +65,12 @@ always_ff @(posedge clk) begin : MUL_FSM_FPGA
     mul_ready_o <= 1'b0;
 
     if(!rst_n) begin
-        Data_X <= 0;
-        Data_Y <= 0;
-        MUL_RD <= 0;
+        Data_X    <= 0;
+        Data_Y    <= 0;
+        MUL_RD    <= 0;
         state_mul <= MUL_IDLE;
     end else begin
-        case (state_mul)
+        unique case (state_mul)
             MUL_IDLE: begin
                 if(valid_i & !MDU_op_i[2]) begin
                     state_mul <= MUL_OPERATE;
@@ -112,8 +109,8 @@ always_ff @(posedge clk) begin : MUL_FSM_FPGA
             end
 
             MUL_FINISH: begin
-                state_mul <= MUL_IDLE;
-                MUL_RD <= (|MDU_op_i) ? acumulador[63:32] : acumulador[31:0];
+                state_mul   <= MUL_IDLE;
+                MUL_RD      <= (|MDU_op_i[1:0]) ? acumulador[63:32] : acumulador[31:0];
                 mul_ready_o <= 1'b1;
             end
             default: state_mul <= MUL_IDLE;
@@ -121,105 +118,11 @@ always_ff @(posedge clk) begin : MUL_FSM_FPGA
     end
 end
 
-`else
-// State machine states
-
-typedef enum logic [2:0] {
-    MUL_IDLE   = 3'b000,
-    MUL_INIT   = 3'b001,
-    MUL_EXEC   = 3'b010,
-    MUL_FINISH = 3'b011,
-    MUL_ready_o   = 3'b100
-} mul_state_t;
-
-mul_state_t mul_state;
-logic [63:0] final_product, product_one, product_two, product_three, product_four;
-logic [63:0] multiplicand_1, multiplicand_2, multiplicand_3, multiplicand_4;
-logic [7:0] multiplier_1, multiplier_2, multiplier_3, multiplier_4;
-
-// State machine
-always_ff @(posedge clk) begin : MUL_FSM
-    mul_ready_o <= 1'b0;
-
-    if(!rst_n) begin
-        mul_state <= MUL_IDLE;
-        MUL_RD    <= 32'h0;
-    end else begin
-        case (mul_state)
-            MUL_IDLE: begin
-                mul_state <= MUL_IDLE;
-                if( valid_i == 1'b1 && !MDU_op_i[2]) begin
-                    mul_state <= MUL_INIT;
-                end
-            end
-            MUL_INIT: begin
-                multiplier_1 <= MDU_RS1_i[7:0];
-                multiplier_2 <= MDU_RS1_i[15:8];
-                multiplier_3 <= MDU_RS1_i[23:16];
-                multiplier_4 <= MDU_RS1_i[31:24];
-
-                product_one <= 64'b0;
-                product_two <= 64'b0;
-                product_three <= 64'b0;
-                product_four <= 64'b0;
-
-                if(MDU_op_i[1:0] == 2'b01) begin
-                    multiplicand_1 <= {{32{MDU_RS2_i[31]}}, MDU_RS2_i[31:0]};
-                    multiplicand_2 <= {{24{MDU_RS2_i[31]}}, MDU_RS2_i[31:0], 8'h0};
-                    multiplicand_3 <= {{16{MDU_RS2_i[31]}}, MDU_RS2_i[31:0], 16'h0};
-                    multiplicand_4 <= {{8{MDU_RS2_i[31]}}, MDU_RS2_i[31:0], 24'h0};
-                end else begin
-                    multiplicand_1 <= {32'h0, MDU_RS2_i[31:0]};
-                    multiplicand_2 <= {24'h0, MDU_RS2_i[31:0], 8'h0};
-                    multiplicand_3 <= {16'h0, MDU_RS2_i[31:0], 16'h0};
-                    multiplicand_4 <= {8'h0, MDU_RS2_i[31:0], 24'h0};
-                end
-
-                mul_state <= MUL_EXEC;
-            end
-
-            MUL_EXEC: begin
-                product_one <= (multiplier_1[0]) ? product_one + (multiplicand_1) : product_one;
-                product_two <= (multiplier_2[0]) ? product_two + (multiplicand_2) : product_two;
-                product_three <= (multiplier_3[0]) ? product_three + (multiplicand_3) : product_three;
-                product_four <= (multiplier_4[0]) ? product_four + (multiplicand_4) : product_four;
-
-                multiplicand_1 <= multiplicand_1 << 1'b1;
-                multiplicand_2 <= multiplicand_2 << 1'b1;
-                multiplicand_3 <= multiplicand_3 << 1'b1;
-                multiplicand_4 <= multiplicand_4 << 1'b1;
-
-                multiplier_1 <= multiplier_1 >> 1'b1;
-                multiplier_2 <= multiplier_2 >> 1'b1;
-                multiplier_3 <= multiplier_3 >> 1'b1;
-                multiplier_4 <= multiplier_4 >> 1'b1;
-
-                if((~|multiplier_1) && (~|multiplier_2) && (~|multiplier_3) && (~|multiplier_4)) begin
-                    mul_state <= MUL_FINISH;
-                end
-            end
-
-            MUL_FINISH: begin
-                final_product <= product_one + product_two + product_three + product_four;
-                mul_state <= MUL_ready_o;
-            end
-
-            MUL_ready_o: begin
-                MUL_RD <= (|MDU_op_i) ? final_product[63:32] : final_product[31:0];
-                mul_ready_o <= 1'b1;
-                mul_state <= MUL_IDLE;
-            end
-            default: mul_state <= MUL_IDLE;
-        endcase
-    end
-end
-
-`endif
 
 typedef enum logic [1:0] {
-    DIV_IDLE    = 2'b00,
-    DIV_OPERATE = 2'b01,
-    DIV_FINISH  = 2'b10
+    DIV_IDLE,
+    DIV_OPERATE,
+    DIV_FINISH
 } div_state_t;
 
 div_state_t state_div;
@@ -232,24 +135,24 @@ always_ff @(posedge clk) begin : DIV_FSM
     div_ready_o <= 1'b0;
     if(!rst_n) begin
         state_div <= DIV_IDLE;
-        quociente <= 32'h00000000;
+        quociente <= 32'h0;
     end else begin
-        case (state_div)
+        unique case (state_div)
             DIV_IDLE: begin
-                if(valid_i & MDU_op_i[2]) begin // se não for multiplicação
-                    dividendo <= (!MDU_op_i[0] & MDU_RS1_i[31]) ? -MDU_RS1_i : MDU_RS1_i;
-                    divisor <= {(!MDU_op_i[0] & MDU_RS2_i[31]) ? -MDU_RS2_i : MDU_RS2_i, 31'h00000000};
-                    negativo <= (!MDU_op_i[0] & !MDU_op_i[1] & (MDU_RS1_i[31] != MDU_RS2_i[31]) & 
-                                (|MDU_RS2_i)) | (MDU_op_i[0] & MDU_op_i[1] & MDU_RS1_i[31]);
+                if(valid_i && MDU_op_i[2]) begin // se não for multiplicação
+                    dividendo     <= (!MDU_op_i[0] & MDU_RS1_i[31]) ? -MDU_RS1_i : MDU_RS1_i;
+                    divisor       <= {(!MDU_op_i[0] & MDU_RS2_i[31]) ? -MDU_RS2_i : MDU_RS2_i, 31'h0};
                     quociente_msk <= 32'h80000000;
-                    quociente <= 32'h00000000;
-                    state_div <= DIV_OPERATE;
+                    quociente     <= 32'h0;
+                    state_div     <= DIV_OPERATE;
+                    negativo      <= (!MDU_op_i[0] & !MDU_op_i[1] & (MDU_RS1_i[31] != MDU_RS2_i[31]) & 
+                                    (|MDU_RS2_i)) | (MDU_op_i[0] & MDU_op_i[1] & MDU_RS1_i[31]);
                 end else begin
                     state_div <= DIV_IDLE;
                 end
             end
             DIV_OPERATE: begin
-                if(quociente_msk == 32'h00000001) begin
+                if(~|quociente_msk[31:1] && quociente_msk[0]) begin // quociente_msk == 32'h00000001
                     state_div <= DIV_FINISH;
                 end else begin
                     state_div <= DIV_OPERATE;
@@ -263,7 +166,7 @@ always_ff @(posedge clk) begin : DIV_FSM
                 /* verilator lint_on WIDTHEXPAND */
                 /* verilator lint_on WIDTHTRUNC */
 
-                divisor <= divisor >> 1;
+                divisor       <= divisor >> 1;
                 quociente_msk <= quociente_msk >> 1;
             end
 
@@ -281,8 +184,8 @@ always_ff @(posedge clk) begin : DIV_FSM
     end
 end
 
-assign ready_o = mul_ready_o | div_ready_o;
-assign MDU_RD_o = (MDU_op_i[2] == 1'b0) ? MUL_RD : DIV_RD;
+assign ready_o  = mul_ready_o | div_ready_o;
+assign MDU_RD_o = (MDU_op_i[2]) ? DIV_RD: MUL_RD;
 
 endmodule
 

@@ -23,7 +23,7 @@ module top (
     );
 
     Grande_Risco_5_SOC #(
-        .CLOCK_FREQ             (120_000_000),
+        .CLOCK_FREQ             (100_000_000),
         .BAUD_RATE              (115200),
         .MEMORY_SIZE            (65536),
         .MEMORY_FILE            ("../../firmware/build/program.hex"),

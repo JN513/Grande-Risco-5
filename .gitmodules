@@ -4,3 +4,12 @@
 [submodule "benchmarks/bringup-bench"]
 	path = benchmarks/bringup-bench
 	url = https://github.com/toddmaustin/bringup-bench.git
+[submodule "rtl/external_peripheral/SPI-Master"]
+	path = rtl/external_peripheral/SPI-Master
+	url = https://github.com/Unicamp-Odhin/SPI-Master.git
+[submodule "rtl/external_peripheral/I2C-Master"]
+	path = rtl/external_peripheral/I2C-Master
+	url = https://github.com/Unicamp-Odhin/I2C-Master.git
+[submodule "rtl/external_peripheral/DRAM_Controller"]
+	path = rtl/external_peripheral/DRAM_Controller
+	url = https://github.com/Unicamp-Odhin/DRAM_Controller.git

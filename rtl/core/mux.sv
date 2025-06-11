@@ -8,11 +8,11 @@ module MUX (
 );
 
 always_comb begin : MUX
-    case (op_i)
-        2'b00: S_o = A_i; 
-        2'b01: S_o = B_i; 
-        2'b10: S_o = C_i; 
-        2'b11: S_o = D_i; 
+    unique case (op_i)
+        2'b00:   S_o = A_i; 
+        2'b01:   S_o = B_i; 
+        2'b10:   S_o = C_i; 
+        2'b11:   S_o = D_i; 
         default: S_o = A_i;
     endcase
 end

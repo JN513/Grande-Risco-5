@@ -64,17 +64,17 @@ always_ff @(posedge clk) begin : BRANCH_PREDICTION_FSM
                 if (prediction[prediction_index] != NOT_TAKEN_STRONG)
                     prediction[prediction_index] <= prediction_type_t'(prediction[prediction_index] - 2'b01);
             end
-        end else if (is_jal_i) begin
-            address_to_jump[jal_index] <= address_to_jal_i;
-            
-            if (prediction[jal_index] != TAKEN_STRONG)
-                prediction[jal_index] <= prediction_type_t'(prediction[jal_index] + 2'b01);
         end else if (is_jalr_i) begin
             address_to_jump[jalr_index] <= address_to_jalr_i;
             
             if (prediction[jalr_index] != TAKEN_STRONG)
                 prediction[jalr_index] <= prediction_type_t'(prediction[jalr_index] + 2'b01);
-        end
+        end else if (is_jal_i) begin
+            address_to_jump[jal_index] <= address_to_jal_i;
+            
+            if (prediction[jal_index] != TAKEN_STRONG)
+                prediction[jal_index] <= prediction_type_t'(prediction[jal_index] + 2'b01);
+        end 
     end
 end
 

@@ -186,7 +186,7 @@ MUX ForwardAMUX(
     .A_i  (IDEXA),
     .B_i  (MEMWBValue_i),
     .C_i  (EXMEMALUOut_i),
-    .D_i  (32'b0),
+    .D_i  (0),
     .S_o  (forward_out_a_o)
 );
 
@@ -195,7 +195,7 @@ MUX ForwardBMUX(
     .A_i  (IDEXB),
     .B_i  (MEMWBValue_i),
     .C_i  (EXMEMALUOut_i),
-    .D_i  (32'b0),
+    .D_i  (0),
     .S_o  (forward_out_b_o)
 );
 

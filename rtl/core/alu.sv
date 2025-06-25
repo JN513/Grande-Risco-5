@@ -22,7 +22,7 @@ localparam XOR             = 4'b1000;
 localparam NOR             = 4'b1001;
 localparam EQUAL           = 4'b0011;
 
-// Define ALU_ZR_o como 1 se ALU_RD_o, for 0 (exceto para branches)
+// Define ALU_ZR_o como 1 se ALU_RD_o, for 0 (exceto para shifts)
 assign ALU_ZR_o = ~( |ALU_RD_o) && ALU_OP_i[3:2] != 2'b01;
 
 always_comb begin : ALU_LOGIC

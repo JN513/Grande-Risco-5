@@ -41,9 +41,16 @@ read_verilog ./ip/clk_wiz_0/clk_wiz_0_clk_wiz.v
 read_verilog ./ip/clk_wiz_0/clk_wiz_0.v
 read_xdc     ./ip/clk_wiz_0/clk_wiz_0.xdc
 
-read_xdc "pinout.xdc"
-set_property PROCESSING_ORDER EARLY [get_files pinout.xdc]
+read_verilog litedram_core.v
+#read_xdc     constraints/litedram_core.xdc
+read_xdc     constraints/pinout_ddr3.xdc
+
+read_verilog {/eda/litex/pythondata-cpu-vexriscv/pythondata_cpu_vexriscv/verilog/VexRiscv.v}
+
+read_xdc constraints/pinout.xdc
+set_property PROCESSING_ORDER EARLY [get_files constraints/pinout.xdc]
 set_property PROCESSING_ORDER EARLY [get_files ./ip/clk_wiz_0/clk_wiz_0.xdc]
+set_property PROCESSING_ORDER EARLY [get_files constraints/pinout_ddr3.xdc]
 
 # synth
 synth_design -top "top" -part "xc7k325tffg676-2"

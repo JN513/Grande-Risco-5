@@ -1,8 +1,8 @@
 # Sys clk pin
-create_clock -period 20.000 -name clk [get_ports sys_clk]
+create_clock -period 20.000 -name clk [get_ports board_clk]
 
-set_property IOSTANDARD LVCMOS33 [get_ports sys_clk]
-set_property PACKAGE_PIN G22 [get_ports sys_clk]
+set_property IOSTANDARD LVCMOS33 [get_ports board_clk]
+set_property PACKAGE_PIN G22 [get_ports board_clk]
 
 # Rst_n pin
 set_property IOSTANDARD LVCMOS33 [get_ports rst_n]

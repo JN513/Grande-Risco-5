@@ -33,6 +33,26 @@ module Grande_Risco_5_SOC #(
     output logic [VGA_COLOR_DEPTH - 1:0] VGA_B,
     output logic VGA_HS,
     output logic VGA_VS
+
+    `ifdef DRAM_ENABLE
+    ,
+    // DRAM interface
+    inout  logic [31:0] ddram_dq,
+    inout  logic [3:0]  ddram_dqs_n,
+    inout  logic [3:0]  ddram_dqs_p,
+    output logic [14:0] ddram_a,
+    output logic [2:0]  ddram_ba,
+    output logic        ddram_ras_n,
+    output logic        ddram_cas_n,
+    output logic        ddram_we_n,
+    output logic        ddram_reset_n,
+    output logic [0:0]  ddram_clk_p,
+    output logic [0:0]  ddram_clk_n,
+    output logic [0:0]  ddram_cke,
+    output logic [0:0]  ddram_cs_n,
+    output logic [3:0]  ddram_dm,
+    output logic [0:0]  ddram_odt
+    `endif
 );
 
 logic [31:0] master_addr_o, master_data_o;
@@ -50,6 +70,12 @@ assign peripheral_stb = (master_addr_o[31]) ? master_stb : 1'b0;
 assign memory_cyc     = (master_addr_o[31]) ? 1'b0 : master_cyc;
 assign memory_stb     = (master_addr_o[31]) ? 1'b0 : master_stb;
 
+`ifdef DRAM_ENABLE
+// Control signals
+logic ddram_init_done;
+logic ddram_init_error;
+logic dram_pll_locked;
+`endif
 
 
 Grande_Risco5 #(
@@ -63,7 +89,11 @@ Grande_Risco5 #(
 ) Processor (
     .clk               (clk),
     .rst_n             (rst_n),
+    `ifdef DRAM_ENABLE
+    .halt              (halt | ~ddram_init_done | ddram_init_error | ~dram_pll_locked),
+    `else
     .halt              (halt),
+    `endif
 
     .cyc_o             (master_cyc),
     .stb_o             (master_stb),
@@ -341,22 +371,58 @@ Timer #(
 `endif
 
 `ifdef DRAM_ENABLE
-DRAM_Controller #(
-    .CLK_FREQ (CLOCK_FREQ)
-) DRAM (
-    .clk    (clk),
-    .rst_n  (rst_n),
+    // User port signals
+    logic user_rst;
+    logic user_clk;
 
-    .cyc_i  (peripheral_8_cyc_o),
-    .stb_i  (peripheral_8_stb_o),
-    .we_i   (peripheral_8_we_o),
+    // User wishbone signals
+    logic user_port_wishbone_0_ack;
+    logic [24:0] user_port_wishbone_0_adr;
+    logic user_port_wishbone_0_cyc;
+    logic [255:0] user_port_wishbone_0_dat_r;
+    logic [255:0] user_port_wishbone_0_dat_w;
+    logic user_port_wishbone_0_err;
+    logic [31:0] user_port_wishbone_0_sel;
+    logic user_port_wishbone_0_stb;
+    logic user_port_wishbone_0_we;
 
-    .addr_i (master_addr_o),
-    .data_i (master_data_o),
-    .data_o (peripheral_8_data_i),
+    litedram_core u_litedram_core (
+        .clk                        (clk),                           // 1 bit
+        .rst                        (~rst_n),                        // 1 bit
+        
+        .ddram_dq                   (ddram_dq),                      // 32 bits
+        .ddram_dqs_n                (ddram_dqs_n),                   // 4 bits
+        .ddram_dqs_p                (ddram_dqs_p),                   // 4
+        .ddram_a                    (ddram_a),                       // 15 bits
+        .ddram_ba                   (ddram_ba),                      // 3 bits
+        .ddram_cas_n                (ddram_cas_n),                   // 1 bit
+        .ddram_cke                  (ddram_cke),                     // 1 bit
+        .ddram_clk_n                (ddram_clk_n),                   // 1 bit
+        .ddram_clk_p                (ddram_clk_p),                   // 1 bit
+        .ddram_cs_n                 (ddram_cs_n),                    // 1 bit
+        .ddram_dm                   (ddram_dm),                      // 4 bits
+        .ddram_odt                  (ddram_odt),                     // 1 bit
+        .ddram_ras_n                (ddram_ras_n),                   // 1 bit
+        .ddram_reset_n              (ddram_reset_n),                 // 1 bit
+        .ddram_we_n                 (ddram_we_n),                    // 1 bit
+        .init_done                  (ddram_init_done),               // 1 bit
+        .init_error                 (ddram_init_error),              // 1 bit
+        .pll_locked                 (dram_pll_locked),               // 1 bit
+        
+        .user_clk                   (user_clk),                      // 1 bit
+        .user_port_wishbone_0_ack   (user_port_wishbone_0_ack),      // 1 bit
+        .user_port_wishbone_0_adr   (user_port_wishbone_0_adr),      // 25 bits
+        .user_port_wishbone_0_cyc   (user_port_wishbone_0_cyc),      // 1 bit
+        .user_port_wishbone_0_dat_r (user_port_wishbone_0_dat_r),    // 256 bits
+        .user_port_wishbone_0_dat_w (user_port_wishbone_0_dat_w),    // 256 bits
+        .user_port_wishbone_0_err   (user_port_wishbone_0_err),      // 1 bit
+        .user_port_wishbone_0_sel   (user_port_wishbone_0_sel),      // 32 bits
+        .user_port_wishbone_0_stb   (user_port_wishbone_0_stb),      // 1 bit
+        .user_port_wishbone_0_we    (user_port_wishbone_0_we),       // 1 bit
+        .user_rst                   (user_rst),                      // 1 bit
 
-    .ack_o  (peripheral_8_ack_i)
-);
+        .uart_rx                    (0)
+    );
 `endif
 
 endmodule

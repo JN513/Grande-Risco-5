@@ -85,17 +85,25 @@ assign instr_c_i = (finish_unaligned_pc) ? unaligned_instruction : instruction_d
 
 logic [31:0] JAL_PC, JALR_PC;
 
-assign is_different_branch_address    = PC != BRANCH_ADDRESS_i;
-assign is_different_no_branch_address = PC != NON_BRANCH_ADDRESS_i;
+assign is_different_branch_address    = IFID_PC_o != BRANCH_ADDRESS_i;
+assign is_different_no_branch_address = IFID_PC_o != NON_BRANCH_ADDRESS_i;
 
 logic is_no_compressed_instr;
 assign is_no_compressed_instr = &instruction_data_i[17:16];
 
+//assign JALR_PC = forward_out_a_i + IMMEDIATE_REG_i;
+
+logic is_jal;
+logic take_jal;
+
+assign take_jal_o = take_jal;
+assign is_jal_o   = is_jal;
+
 always_ff @( posedge clk ) begin
-    JAL_PC     <= IFID_PC_o + IMMEDIATE_i;
-    JALR_PC    <= forward_out_a_i + IMMEDIATE_REG_i;
-    is_jal_o   <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i);
-    take_jal_o <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i) 
+    JAL_PC   <= IFID_PC_o + IMMEDIATE_i;
+    JALR_PC  <= forward_out_a_i + IMMEDIATE_REG_i;
+    is_jal   <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i);
+    take_jal <= (IFIDop == JAL_OPCODE) && (!execute_stall_i) && (!memory_stall_i) 
                     && (PC != IFID_PC_o + IMMEDIATE_i) && (!branch_flush_o);
 end
 

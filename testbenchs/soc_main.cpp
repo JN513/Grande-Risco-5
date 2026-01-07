@@ -3,7 +3,7 @@
 #include "VGrande_Risco_5_SOC.h"
 
 #define CLOCK_PERIOD 5 // 100 MHz -> 10 ns por ciclo
-#define SIMULATION_CYCLES 40000 / 1 // segundos de simulação
+#define SIMULATION_CYCLES 40000 * 20 // segundos de simulação
 
 int main(int argc, char **argv, char **env) {
     Verilated::commandArgs(argc, argv);

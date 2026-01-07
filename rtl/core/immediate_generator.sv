@@ -30,12 +30,7 @@ always_comb begin : imm_o_GENERATOR
         LW_OPCODE: // lw instr_i 
             imm_o = {{20{instr_i[31]}}, instr_i[31:20]};
         IMMEDIATE_OPCODE: // I type instr_i
-            case (instr_func3)
-                3'b001: imm_o = {{27{instr_i[24]}}, instr_i[24:20]};
-                3'b011: imm_o = {20'h00000, instr_i[31:20]};
-                3'b101: imm_o = {{27'h0000000}, instr_i[24:20]};
-                default: imm_o = {{20{instr_i[31]}}, instr_i[31:20]};
-            endcase
+            imm_o = {{20{instr_i[31]}}, instr_i[31:20]};
         JALR_OPCODE: // I type instr_i JALR
             imm_o = {{20{instr_i[31]}}, instr_i[31:20]};
         CSR_OPCODE: // I type instr_i  CSR

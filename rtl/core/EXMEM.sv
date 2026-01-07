@@ -5,6 +5,7 @@ module EXMEM (
     input logic rst_n,
 
     input logic trap_flush_i,
+    input logic take_jalr_i,
 
     input logic execute_stall_i,
     input logic [31:0] immediate_i,
@@ -89,7 +90,7 @@ always_ff @(posedge clk ) begin : EXMEM_STAGE
     memory_read        <= 1'b0;
     unaligned_access_o <= 1'b0;
 
-    if(!rst_n || trap_flush_i) begin
+    if(!rst_n || trap_flush_i || take_jalr_i) begin // todo: verificar se não precisa verificar o memory_stall_o junto ao take_jalr_i
         subword                      <= 1'b0;
         subword_store                <= 1'b0;
         unaligned_access_in_progress <= 1'b0;

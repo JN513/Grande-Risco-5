@@ -208,6 +208,7 @@ EXMEM EXMEM_Stage (
     .rst_n                 (rst_n),
 
     .trap_flush_i          (EXMEM_trap_flush),
+    .take_jalr_i           (take_jalr),
 
     .execute_stall_i       (execute_stall),
     .immediate_i           (immediate),

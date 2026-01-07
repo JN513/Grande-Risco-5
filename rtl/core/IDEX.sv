@@ -74,20 +74,25 @@ assign execute_stall_o = (&op_rs1 || (&op_rs2 && is_immediate_reg_not)
 `endif
 );
 
+logic is_jalr, take_jalr;
+assign is_jalr_o   = is_jalr; //&& (~execute_stall_o) && (~memory_stall_i);
+assign take_jalr_o = take_jalr; //&& (~execute_stall_o) && (~memory_stall_i);
+
+//assign is_jalr_o   = (IDEXop == JALR_OPCODE) && (~execute_stall_o);
+//assign take_jalr_o = (IDEXop == JALR_OPCODE) && (~execute_stall_o) && (IFIDPC_i != forward_out_a_o + IMMEDIATE_REG_i)
 
 always_ff @(posedge clk ) begin : IDEX_STAGE
     is_immediate_reg_not <= ~is_immediate_o;
-    is_jalr_o   <= (IDEXop == JALR_OPCODE) && (~execute_stall_o);
-    take_jalr_o <= (IDEXop == JALR_OPCODE) && (~execute_stall_o) && (IFIDPC_i != forward_out_a_o + IMMEDIATE_REG_i);
+    is_jalr   <= (IDEXop == JALR_OPCODE) && (~execute_stall_o) && (~memory_stall_i);
+    take_jalr <= (IDEXop == JALR_OPCODE) && (~execute_stall_o) && (~memory_stall_i) && (IFIDPC_i != forward_out_a_o + IMMEDIATE_REG_i);
 `ifdef ENABLE_MDU
     mdu_start <= 1'b0;
 `endif
-    if(!rst_n || branch_flush_i || (take_jal_i && ~execute_stall_o)
-        || (take_jalr_o && ~execute_stall_o) || trap_flush_i) begin
+    if(!rst_n || branch_flush_i || (take_jal_i && ~execute_stall_o && ~memory_stall_i) || (take_jalr_o && ~execute_stall_o) || trap_flush_i) begin
         IDEXPC_o <= 32'h0;
         IDEXIR_o <= NOP;
         previous_instruction_is_lw <= 1'b0;
-        take_jalr_o <= 0;
+        take_jalr <= 0;
 `ifdef ENABLE_MDU
         mdu_operation_o <= 1'b0;
 `endif

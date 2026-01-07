@@ -36,9 +36,9 @@ always_comb begin : ALU_LOGIC
         EQUAL: ALU_RD_o = (ALU_RS1_i == ALU_RS2_i) ? 32'h1 : 32'h0;
         
         // Comparações
-        SLT:             ALU_RD_o = (ALU_RS1_i < ALU_RS2_i) ? 32'h1 : 32'h0;
+        SLT:             ALU_RD_o = ($signed(ALU_RS1_i) < $signed(ALU_RS2_i)) ? 32'h1 : 32'h0;
         SLT_U:           ALU_RD_o = ($unsigned(ALU_RS1_i) < $unsigned(ALU_RS2_i)) ? 32'h1 : 32'h0;
-        GREATER_EQUAL:   ALU_RD_o = (ALU_RS1_i >= ALU_RS2_i) ? 32'h1 : 32'h0;
+        GREATER_EQUAL:   ALU_RD_o = ($signed(ALU_RS1_i) >= $signed(ALU_RS2_i)) ? 32'h1 : 32'h0;
         GREATER_EQUAL_U: ALU_RD_o = ($unsigned(ALU_RS1_i) >= $unsigned(ALU_RS2_i)) ? 32'h1 : 32'h0;
         
         // Shifts
